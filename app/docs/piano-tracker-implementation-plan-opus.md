@@ -126,23 +126,27 @@ com.yourname.pianotracker/
 │   │   ├── NotesInputFragment.kt
 │   │   └── SummaryFragment.kt
 │   ├── progress/
-│   │   ├── ProgressFragment.kt
-│   │   ├── ProgressViewModel.kt
+│   │   ├── ViewProgressFragment.kt
 │   │   ├── DashboardFragment.kt
+│   │   ├── DashboardViewModel.kt
+│   │   ├── TimelineFragment.kt
+│   │   ├── TimelineViewModel.kt
 │   │   ├── CalendarFragment.kt
+│   │   ├── CalendarViewModel.kt
 │   │   ├── PiecesFragment.kt
-│   │   └── TimelineFragment.kt
+│   │   └── PiecesViewModel.kt
 │   ├── favorites/
 │   │   ├── FavoritesFragment.kt
-│   │   └── FavoritesViewModel.kt
-│   └── sync/
-│       ├── SyncFragment.kt
-│       └── SyncViewModel.kt
+│   │   ├── FavoritesViewModel.kt
+│   │   └── FavoritesAdapter.kt
+│   └── importexport/
+│       ├── ImportExportFragment.kt
+│       └── ImportExportViewModel.kt
 └── utils/
     ├── CsvHandler.kt
     ├── StreakCalculator.kt
-    ├── DateUtils.kt
-    └── GoogleDriveHelper.kt
+    ├── DateUtils.kt (future)
+    └── GoogleDriveHelper.kt (future)
 ```
 
 ## Dependencies (build.gradle)
@@ -329,10 +333,14 @@ Main Menu
    - ✅ Visual indicators in UI
    - ✅ Enhanced favorites management screen
 
-4. **Phase 4 - Data Exchange** (Future)
-   - CSV export functionality
-   - CSV import functionality
-   - File picker integration
+4. **Phase 4 - Data Exchange** ✅ **COMPLETED**
+   - ✅ CSV export functionality with datetime timestamps
+   - ✅ CSV import functionality with comprehensive validation
+   - ✅ File picker integration using Storage Access Framework
+   - ✅ ImportExportFragment with progress indication
+   - ✅ CsvHandler utility with manual CSV processing
+   - ✅ Race condition fixes for proper stream management
+   - ✅ Favorites preservation during import operations
 
 5. **Phase 5 - Google Drive** (Future)
    - Google Sign-In

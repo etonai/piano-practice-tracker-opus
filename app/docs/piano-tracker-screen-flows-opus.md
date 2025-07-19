@@ -7,7 +7,7 @@
 - ✅ View Progress Module (1000-1400) - COMPLETED
 - ✅ Add Activity Flow (2000-2700) - COMPLETED  
 - ✅ Manage Favorites (3000) - COMPLETED
-- ⏳ Import/Export Data (4000) - PLANNED
+- ✅ Import/Export Data (4000) - COMPLETED
 
 ## 0000 - Main Menu
 ```
@@ -298,13 +298,14 @@ Note: Only pieces shown if Performance was selected
 └─────────────────────────────┘
 ```
 
-## 5000 - Import/Export Data
+## 4000 - Import/Export Data ✅ IMPLEMENTED
 ```
 ┌─────────────────────────────┐
-│  ← Import/Export           │
+│  ← Import/Export Data      │
 │                             │
 │  ┌───────────────────────┐  │
 │  │   Sync with Drive     │  │
+│  │   (Not Implemented)   │  │
 │  └───────────────────────┘  │
 │                             │
 │  ┌───────────────────────┐  │
@@ -315,10 +316,29 @@ Note: Only pieces shown if Performance was selected
 │  │   Import from CSV     │  │
 │  └───────────────────────┘  │
 │                             │
-│  Last sync: Nov 20, 2024    │
-│  10:30 AM                   │
+│  ⚠️ Warning: Importing CSV  │
+│  data will replace all      │
+│  existing data in the app.  │
+│                             │
+│  [Progress Bar when active] │
 └─────────────────────────────┘
 ```
+
+### CSV Export Flow:
+1. User taps "Export to CSV"
+2. Android file picker opens
+3. User selects save location and filename
+4. Export proceeds with progress indication
+5. Success/error message displayed
+
+### CSV Import Flow:
+1. User taps "Import from CSV"
+2. Warning message appears about data replacement
+3. Android file picker opens for CSV selection
+4. Confirmation dialog shows before import
+5. Import proceeds with validation and error reporting
+6. Favorites are preserved for matching piece names
+7. Success message shows number of imported activities
 
 ## Sync Dialog (On App Start)
 ```
