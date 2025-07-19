@@ -67,7 +67,7 @@ class SummaryFragment : Fragment() {
     
     private fun setupSummary() {
         binding.textPiece.text = "Piece: ${args.pieceName}"
-        binding.textType.text = "Type: ${args.activityType.name.lowercase().capitalize()}"
+        binding.textType.text = "Type: ${args.activityType.name.lowercase().replaceFirstChar { it.uppercase() }}"
         
         val levelText = when (args.activityType) {
             ActivityType.PRACTICE -> {

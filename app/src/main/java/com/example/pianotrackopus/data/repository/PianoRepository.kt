@@ -7,8 +7,6 @@ import com.example.pianotrackopus.data.entities.ItemType
 import com.example.pianotrackopus.data.entities.PieceOrTechnique
 import kotlinx.coroutines.flow.Flow
 import java.util.Calendar
-import javax.inject.Inject
-import javax.inject.Singleton
 
 class PianoRepository(
     private val pieceOrTechniqueDao: PieceOrTechniqueDao,
