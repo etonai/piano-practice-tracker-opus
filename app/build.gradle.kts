@@ -65,6 +65,11 @@ dependencies {
     // CSV handling
     implementation(libs.opencsv)
     
+    // ViewPager2
+    implementation(libs.androidx.viewpager2)
+    
+    // Calendar View - using built-in Android CalendarView instead
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

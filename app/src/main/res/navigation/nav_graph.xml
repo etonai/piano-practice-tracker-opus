@@ -8,21 +8,21 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.pianotrackopus.ui.main.MainFragment"
-        android:label="Piano Practice Tracker"
+        android:label="Piano Practice Tracker Opus"
         tools:layout="@layout/fragment_main">
-        
+
         <action
             android:id="@+id/action_mainFragment_to_progressFragment"
             app:destination="@id/progressFragment" />
-            
+
         <action
             android:id="@+id/action_mainFragment_to_addActivityFragment"
             app:destination="@id/addActivityFragment" />
-            
+
         <action
             android:id="@+id/action_mainFragment_to_favoritesFragment"
             app:destination="@id/favoritesFragment" />
-            
+
         <action
             android:id="@+id/action_mainFragment_to_syncFragment"
             app:destination="@id/syncFragment" />
@@ -30,9 +30,9 @@
     
     <fragment
         android:id="@+id/progressFragment"
-        android:name="com.example.pianotrackopus.ui.progress.ProgressFragment"
+        android:name="com.example.pianotrackopus.ui.progress.ViewProgressFragment"
         android:label="View Progress"
-        tools:layout="@layout/fragment_progress" />
+        tools:layout="@layout/fragment_view_progress" />
         
     <fragment
         android:id="@+id/addActivityFragment"

@@ -27,4 +27,7 @@ interface PieceOrTechniqueDao {
     
     @Query("DELETE FROM pieces_techniques")
     suspend fun deleteAll()
+    
+    @Query("SELECT * FROM pieces_techniques WHERE id = :id")
+    suspend fun getById(id: Long): PieceOrTechnique?
 }

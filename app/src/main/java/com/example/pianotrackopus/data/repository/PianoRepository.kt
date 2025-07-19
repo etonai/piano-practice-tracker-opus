@@ -5,7 +5,11 @@ import com.example.pianotrackopus.data.daos.PieceOrTechniqueDao
 import com.example.pianotrackopus.data.entities.Activity
 import com.example.pianotrackopus.data.entities.ItemType
 import com.example.pianotrackopus.data.entities.PieceOrTechnique
+import com.example.pianotrackopus.ui.progress.ActivityWithPiece
+import com.example.pianotrackopus.utils.StreakCalculator
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import java.util.Calendar
 
 class PianoRepository(
@@ -78,4 +82,25 @@ class PianoRepository(
     
     suspend fun getStreakCount(startTime: Long): Int = 
         activityDao.getStreakCount(startTime)
+    
+    fun getAllActivitiesWithPieces(): Flow<List<ActivityWithPiece>> {
+        return combine(
+            getAllActivities(),
+            getAllPiecesAndTechniques()
+        ) { activities, pieces ->
+            activities.mapNotNull { activity ->
+                val piece = pieces.find { it.id == activity.pieceOrTechniqueId }
+                piece?.let { ActivityWithPiece(activity, it) }
+            }
+        }
+    }
+    
+    suspend fun calculateCurrentStreak(): Int {
+        val activities = getAllActivities().first()
+        return StreakCalculator().calculateCurrentStreak(activities)
+    }
+    
+    suspend fun getPieceOrTechniqueById(id: Long): PieceOrTechnique? {
+        return pieceOrTechniqueDao.getById(id)
+    }
 }
