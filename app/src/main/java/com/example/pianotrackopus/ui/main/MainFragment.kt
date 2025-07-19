@@ -44,6 +44,15 @@ class MainFragment : Fragment() {
                 "Current Streak: 0 days"
             }
         }
+        
+        viewModel.favoritesCount.observe(viewLifecycleOwner) { count ->
+            val buttonText = if (count > 0) {
+                "Manage Favorites ($count)"
+            } else {
+                "Manage Favorites"
+            }
+            binding.buttonManageFavorites.text = buttonText
+        }
     }
     
     private fun setupClickListeners() {

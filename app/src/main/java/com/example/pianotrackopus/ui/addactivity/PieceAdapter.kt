@@ -65,7 +65,8 @@ class PieceAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(piece: PieceOrTechnique) {
             val icon = if (piece.type == ItemType.PIECE) "🎵" else "⚙️"
-            binding.textPieceName.text = "$icon ${piece.name}"
+            val favoriteIcon = if (piece.isFavorite) " ⭐" else ""
+            binding.textPieceName.text = "$icon ${piece.name}$favoriteIcon"
             binding.root.setOnClickListener { onItemClick(piece) }
         }
     }

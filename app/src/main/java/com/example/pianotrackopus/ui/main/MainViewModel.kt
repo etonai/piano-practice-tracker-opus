@@ -18,6 +18,12 @@ class MainViewModel(private val repository: PianoRepository) : ViewModel() {
             streakCalculator.calculateCurrentStreak(activities)
         }
         .asLiveData()
+    
+    val favoritesCount: LiveData<Int> = repository.getFavorites()
+        .map { favorites ->
+            favorites.size
+        }
+        .asLiveData()
 }
 
 class MainViewModelFactory(private val repository: PianoRepository) : ViewModelProvider.Factory {
