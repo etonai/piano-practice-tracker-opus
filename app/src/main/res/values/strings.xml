@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Piano Track Opus</string>
+    
+    <!-- Practice Levels -->
+    <string name="practice_level_1">Level 1 - Essentials</string>
+    <string name="practice_level_2">Level 2 - Incomplete</string>
+    <string name="practice_level_3">Level 3 - Complete with Review</string>
+    <string name="practice_level_4">Level 4 - Perfect Complete</string>
+    
+    <!-- Performance Levels -->
+    <string name="performance_level_1">Level 1 - Failed</string>
+    <string name="performance_level_2">Level 2 - Unsatisfactory</string>
+    <string name="performance_level_3">Level 3 - Satisfactory</string>
+    
+    <!-- Performance Types -->
+    <string name="performance_online">Online Performance</string>
+    <string name="performance_live">Live Performance</string>
+</resources>

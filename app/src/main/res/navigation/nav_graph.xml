@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.pianotrackopus.ui.main.MainFragment"
+        android:label="Piano Practice Tracker"
+        tools:layout="@layout/fragment_main">
+        
+        <action
+            android:id="@+id/action_mainFragment_to_progressFragment"
+            app:destination="@id/progressFragment" />
+            
+        <action
+            android:id="@+id/action_mainFragment_to_addActivityFragment"
+            app:destination="@id/addActivityFragment" />
+            
+        <action
+            android:id="@+id/action_mainFragment_to_favoritesFragment"
+            app:destination="@id/favoritesFragment" />
+            
+        <action
+            android:id="@+id/action_mainFragment_to_syncFragment"
+            app:destination="@id/syncFragment" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/progressFragment"
+        android:name="com.example.pianotrackopus.ui.progress.ProgressFragment"
+        android:label="View Progress"
+        tools:layout="@layout/fragment_progress" />
+        
+    <fragment
+        android:id="@+id/addActivityFragment"
+        android:name="com.example.pianotrackopus.ui.addactivity.AddActivityFragment"
+        android:label="Add Activity"
+        tools:layout="@layout/fragment_add_activity">
+        
+        <action
+            android:id="@+id/action_addActivityFragment_to_selectPieceFragment"
+            app:destination="@id/selectPieceFragment" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/selectPieceFragment"
+        android:name="com.example.pianotrackopus.ui.addactivity.SelectPieceFragment"
+        android:label="Select Piece"
+        tools:layout="@layout/fragment_select_piece">
+        
+        <argument
+            android:name="activityType"
+            app:argType="com.example.pianotrackopus.data.entities.ActivityType" />
+            
+        <action
+            android:id="@+id/action_selectPieceFragment_to_addNewPieceFragment"
+            app:destination="@id/addNewPieceFragment" />
+            
+        <action
+            android:id="@+id/action_selectPieceFragment_to_selectLevelFragment"
+            app:destination="@id/selectLevelFragment" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/addNewPieceFragment"
+        android:name="com.example.pianotrackopus.ui.addactivity.AddNewPieceFragment"
+        android:label="Add New"
+        tools:layout="@layout/fragment_add_new_piece">
+        
+        <argument
+            android:name="activityType"
+            app:argType="com.example.pianotrackopus.data.entities.ActivityType" />
+            
+        <action
+            android:id="@+id/action_addNewPieceFragment_to_selectLevelFragment"
+            app:destination="@id/selectLevelFragment" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/selectLevelFragment"
+        android:name="com.example.pianotrackopus.ui.addactivity.SelectLevelFragment"
+        android:label="Select Level"
+        tools:layout="@layout/fragment_select_level">
+        
+        <argument
+            android:name="activityType"
+            app:argType="com.example.pianotrackopus.data.entities.ActivityType" />
+        <argument
+            android:name="pieceId"
+            app:argType="long" />
+        <argument
+            android:name="pieceName"
+            app:argType="string" />
+        <argument
+            android:name="itemType"
+            app:argType="com.example.pianotrackopus.data.entities.ItemType" />
+            
+        <action
+            android:id="@+id/action_selectLevelFragment_to_timeInputFragment"
+            app:destination="@id/timeInputFragment" />
+            
+        <action
+            android:id="@+id/action_selectLevelFragment_to_notesInputFragment"
+            app:destination="@id/notesInputFragment" />
+            
+        <action
+            android:id="@+id/action_selectLevelFragment_to_summaryFragment"
+            app:destination="@id/summaryFragment" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/timeInputFragment"
+        android:name="com.example.pianotrackopus.ui.addactivity.TimeInputFragment"
+        android:label="Practice Time"
+        tools:layout="@layout/fragment_time_input">
+        
+        <argument
+            android:name="activityType"
+            app:argType="com.example.pianotrackopus.data.entities.ActivityType" />
+        <argument
+            android:name="pieceId"
+            app:argType="long" />
+        <argument
+            android:name="pieceName"
+            app:argType="string" />
+        <argument
+            android:name="level"
+            app:argType="integer" />
+        <argument
+            android:name="performanceType"
+            app:argType="string" />
+            
+        <action
+            android:id="@+id/action_timeInputFragment_to_summaryFragment"
+            app:destination="@id/summaryFragment" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/notesInputFragment"
+        android:name="com.example.pianotrackopus.ui.addactivity.NotesInputFragment"
+        android:label="Add Notes"
+        tools:layout="@layout/fragment_notes_input">
+        
+        <argument
+            android:name="activityType"
+            app:argType="com.example.pianotrackopus.data.entities.ActivityType" />
+        <argument
+            android:name="pieceId"
+            app:argType="long" />
+        <argument
+            android:name="pieceName"
+            app:argType="string" />
+        <argument
+            android:name="level"
+            app:argType="integer" />
+        <argument
+            android:name="performanceType"
+            app:argType="string" />
+            
+        <action
+            android:id="@+id/action_notesInputFragment_to_summaryFragment"
+            app:destination="@id/summaryFragment" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/summaryFragment"
+        android:name="com.example.pianotrackopus.ui.addactivity.SummaryFragment"
+        android:label="Summary"
+        tools:layout="@layout/fragment_summary">
+        
+        <argument
+            android:name="activityType"
+            app:argType="com.example.pianotrackopus.data.entities.ActivityType" />
+        <argument
+            android:name="pieceId"
+            app:argType="long" />
+        <argument
+            android:name="pieceName"
+            app:argType="string" />
+        <argument
+            android:name="level"
+            app:argType="integer" />
+        <argument
+            android:name="performanceType"
+            app:argType="string" />
+        <argument
+            android:name="minutes"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="notes"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.example.pianotrackopus.ui.favorites.FavoritesFragment"
+        android:label="Manage Favorites"
+        tools:layout="@layout/fragment_favorites" />
+        
+    <fragment
+        android:id="@+id/syncFragment"
+        android:name="com.example.pianotrackopus.ui.sync.SyncFragment"
+        android:label="Import/Export Data"
+        tools:layout="@layout/fragment_sync" />
+
+</navigation>
