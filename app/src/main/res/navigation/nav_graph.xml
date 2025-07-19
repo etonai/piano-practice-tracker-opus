@@ -204,8 +204,8 @@
         
     <fragment
         android:id="@+id/syncFragment"
-        android:name="com.example.pianotrackopus.ui.sync.SyncFragment"
+        android:name="com.example.pianotrackopus.ui.importexport.ImportExportFragment"
         android:label="Import/Export Data"
-        tools:layout="@layout/fragment_sync" />
+        tools:layout="@layout/fragment_import_export" />
 
 </navigation>

@@ -228,10 +228,10 @@ class StreakCalculator {
 
 ### 2. CSV Format
 ```
-Date,Length,ActivityType,Piece,Level,PerformanceType
-2024-11-21,-1,PRACTICE,Chopin Etude Op.10,3,practice
-2024-11-21,15,PRACTICE,Scales - C Major,2,practice
-2024-11-20,-1,PERFORMANCE,Bach Invention No.8,3,live
+DateTime,Length,ActivityType,Piece,Level,PerformanceType,Notes
+2024-11-21 14:30:00,-1,PRACTICE,Chopin Etude Op.10,3,practice,
+2024-11-21 10:15:00,15,PRACTICE,Scales - C Major,2,practice,
+2024-11-20 19:45:00,-1,PERFORMANCE,Bach Invention No.8,3,live,Great performance!
 ```
 
 ### 3. Calendar Color Scheme
@@ -324,10 +324,10 @@ Main Menu
    - ✅ Pieces tab - Individual piece statistics and analytics
    - ✅ Comprehensive ViewModels with reactive data flows
 
-3. **Phase 3 - Favorites Management** (Next Priority)
-   - Favorites toggle functionality
-   - Visual indicators in UI
-   - Enhanced favorites management screen
+3. **Phase 3 - Favorites Management** ✅ **COMPLETED**
+   - ✅ Favorites toggle functionality
+   - ✅ Visual indicators in UI
+   - ✅ Enhanced favorites management screen
 
 4. **Phase 4 - Data Exchange** (Future)
    - CSV export functionality
@@ -342,7 +342,7 @@ Main Menu
 
 ## Notes for Implementation
 
-1. Use `SimpleDateFormat("yyyy-MM-dd", Locale.US)` for CSV dates
+1. Use `SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)` for CSV datetime stamps
 2. Use `System.currentTimeMillis()` for timestamps
 3. Always use coroutines for database operations
 4. Use Flow for reactive UI updates

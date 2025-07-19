@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Import/Export Data"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/syncWithDriveButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Sync with Drive"
+        android:enabled="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
+
+    <Button
+        android:id="@+id/exportToCsvButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Export to CSV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/syncWithDriveButton" />
+
+    <Button
+        android:id="@+id/importFromCsvButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Import from CSV"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/exportToCsvButton" />
+
+    <TextView
+        android:id="@+id/lastSyncTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Last sync: Never"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/importFromCsvButton" />
+
+    <TextView
+        android:id="@+id/warningTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="⚠️ Warning: Importing CSV data will replace all existing data in the app."
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lastSyncTextView" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
