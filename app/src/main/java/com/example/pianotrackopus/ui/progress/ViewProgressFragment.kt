@@ -31,7 +31,7 @@ class ViewProgressFragment : Fragment() {
         
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
-                0 -> "Dashboard"
+                0 -> "Home"
                 1 -> "Timeline"
                 2 -> "Calendar"
                 3 -> "Pieces"

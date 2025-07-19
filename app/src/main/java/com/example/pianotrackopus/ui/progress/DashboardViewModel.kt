@@ -4,6 +4,7 @@ import androidx.lifecycle.*
 import com.example.pianotrackopus.data.entities.Activity
 import com.example.pianotrackopus.data.repository.PianoRepository
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import java.util.*
 
 class DashboardViewModel(private val repository: PianoRepository) : ViewModel() {
@@ -33,13 +34,27 @@ class DashboardViewModel(private val repository: PianoRepository) : ViewModel() 
         add(Calendar.DAY_OF_YEAR, -7)
     }.timeInMillis
     
-    val todayActivities: LiveData<List<Activity>> = 
-        repository.getActivitiesForDateRange(todayStart, todayEnd)
-            .asLiveData()
+    val todayActivities: LiveData<List<ActivityWithPiece>> = 
+        combine(
+            repository.getActivitiesForDateRange(todayStart, todayEnd),
+            repository.getAllPiecesAndTechniques()
+        ) { activities, pieces ->
+            activities.mapNotNull { activity ->
+                val piece = pieces.find { it.id == activity.pieceOrTechniqueId }
+                piece?.let { ActivityWithPiece(activity, it) }
+            }
+        }.asLiveData()
     
-    val yesterdayActivities: LiveData<List<Activity>> = 
-        repository.getActivitiesForDateRange(yesterdayStart, yesterdayEnd)
-            .asLiveData()
+    val yesterdayActivities: LiveData<List<ActivityWithPiece>> = 
+        combine(
+            repository.getActivitiesForDateRange(yesterdayStart, yesterdayEnd),
+            repository.getAllPiecesAndTechniques()
+        ) { activities, pieces ->
+            activities.mapNotNull { activity ->
+                val piece = pieces.find { it.id == activity.pieceOrTechniqueId }
+                piece?.let { ActivityWithPiece(activity, it) }
+            }
+        }.asLiveData()
     
     val weekSummary: LiveData<String> = 
         repository.getActivitiesForDateRange(weekStart, todayEnd)

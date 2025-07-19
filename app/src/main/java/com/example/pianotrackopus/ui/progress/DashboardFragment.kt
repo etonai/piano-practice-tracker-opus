@@ -39,10 +39,13 @@ class DashboardFragment : Fragment() {
             
             if (activities.isNotEmpty()) {
                 binding.todayActivitiesGroup.visibility = View.VISIBLE
-                val activitySummary = activities.joinToString("\n") { activity ->
+                val activitySummary = activities.joinToString("\n") { activityWithPiece ->
+                    val activity = activityWithPiece.activity
+                    val piece = activityWithPiece.pieceOrTechnique
                     val time = android.text.format.DateFormat.format("h:mm a", activity.timestamp)
                     val minutes = if (activity.minutes > 0) " (${activity.minutes} min)" else ""
-                    "• $time - ${activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }}$minutes"
+                    val type = activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }
+                    "• $time - ${piece.name} - $type$minutes"
                 }
                 binding.todayActivitiesList.text = activitySummary
             } else {
@@ -55,10 +58,13 @@ class DashboardFragment : Fragment() {
             
             if (activities.isNotEmpty()) {
                 binding.yesterdayActivitiesGroup.visibility = View.VISIBLE
-                val activitySummary = activities.joinToString("\n") { activity ->
+                val activitySummary = activities.joinToString("\n") { activityWithPiece ->
+                    val activity = activityWithPiece.activity
+                    val piece = activityWithPiece.pieceOrTechnique
                     val time = android.text.format.DateFormat.format("h:mm a", activity.timestamp)
                     val minutes = if (activity.minutes > 0) " (${activity.minutes} min)" else ""
-                    "• $time - ${activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }}$minutes"
+                    val type = activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }
+                    "• $time - ${piece.name} - $type$minutes"
                 }
                 binding.yesterdayActivitiesList.text = activitySummary
             } else {

@@ -80,3 +80,11 @@ The project uses:
 - No main Activity or UI components have been implemented yet
 - Standard Android testing framework is set up with example tests
 - The project follows modern Android development practices with Kotlin and AndroidX libraries
+
+## Git Workflow Rules
+
+**IMPORTANT**: Do not commit any changes to git until the user has:
+1. Confirmed that the implementation works correctly
+2. Explicitly given permission to commit the changes
+
+Wait for user confirmation before using `git commit` commands.

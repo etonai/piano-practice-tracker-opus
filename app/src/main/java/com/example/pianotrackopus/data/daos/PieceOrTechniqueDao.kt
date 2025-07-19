@@ -10,13 +10,13 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PieceOrTechniqueDao {
-    @Query("SELECT * FROM pieces_techniques ORDER BY name ASC")
+    @Query("SELECT * FROM pieces_techniques ORDER BY name COLLATE NOCASE ASC")
     fun getAllPiecesAndTechniques(): Flow<List<PieceOrTechnique>>
     
-    @Query("SELECT * FROM pieces_techniques WHERE isFavorite = 1 ORDER BY name ASC")
+    @Query("SELECT * FROM pieces_techniques WHERE isFavorite = 1 ORDER BY name COLLATE NOCASE ASC")
     fun getFavorites(): Flow<List<PieceOrTechnique>>
     
-    @Query("SELECT * FROM pieces_techniques WHERE type = :type ORDER BY name ASC")
+    @Query("SELECT * FROM pieces_techniques WHERE type = :type ORDER BY name COLLATE NOCASE ASC")
     fun getByType(type: ItemType): Flow<List<PieceOrTechnique>>
     
     @Insert

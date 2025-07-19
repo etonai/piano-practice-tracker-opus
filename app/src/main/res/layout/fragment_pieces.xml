@@ -13,7 +13,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:scrollbars="vertical"
+            android:nestedScrollingEnabled="true" />
 
         <TextView
             android:id="@+id/emptyView"
