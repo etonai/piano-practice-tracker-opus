@@ -51,7 +51,8 @@ class PianoRepository(
             set(Calendar.MILLISECOND, 0)
         }
         val startTime = calendar.timeInMillis
-        val endTime = calendar.apply { add(Calendar.DAY_OF_YEAR, 1) }.timeInMillis
+        calendar.add(Calendar.DAY_OF_YEAR, 1)
+        val endTime = calendar.timeInMillis
         return getActivitiesForDateRange(startTime, endTime)
     }
     
@@ -64,7 +65,8 @@ class PianoRepository(
             set(Calendar.MILLISECOND, 0)
         }
         val startTime = calendar.timeInMillis
-        val endTime = calendar.apply { add(Calendar.DAY_OF_YEAR, 1) }.timeInMillis
+        calendar.add(Calendar.DAY_OF_YEAR, 1)
+        val endTime = calendar.timeInMillis
         return getActivitiesForDateRange(startTime, endTime)
     }
     

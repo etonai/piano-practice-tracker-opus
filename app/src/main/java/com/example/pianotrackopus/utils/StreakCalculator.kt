@@ -16,11 +16,13 @@ class StreakCalculator {
         }
         
         var streak = 0
-        var currentDate = today.clone() as Calendar
+        val currentDate = today.clone() as Calendar
         
         while (true) {
             val dayStart = currentDate.timeInMillis
-            val dayEnd = currentDate.clone().apply { add(Calendar.DAY_OF_YEAR, 1) }.timeInMillis
+            val dayEndCalendar = currentDate.clone() as Calendar
+            dayEndCalendar.add(Calendar.DAY_OF_YEAR, 1)
+            val dayEnd = dayEndCalendar.timeInMillis
             
             val hasActivity = activities.any { 
                 it.timestamp >= dayStart && it.timestamp < dayEnd 

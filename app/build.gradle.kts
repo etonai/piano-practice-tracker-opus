@@ -62,16 +62,6 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     
-    // Calendar View
-    implementation(libs.material.calendarview)
-    
-    // Google Drive
-    implementation(libs.play.services.auth)
-    implementation(libs.google.api.client.android)
-    implementation(libs.google.api.services.drive) {
-        exclude(group = "org.apache.httpcomponents")
-    }
-    
     // CSV handling
     implementation(libs.opencsv)
     
