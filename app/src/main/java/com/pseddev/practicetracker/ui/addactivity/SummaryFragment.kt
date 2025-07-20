@@ -54,12 +54,16 @@ class SummaryFragment : Fragment() {
         }
         
         binding.buttonCancel.setOnClickListener {
-            findNavController().popBackStack(com.pseddev.practicetracker.R.id.mainFragment, false)
+            // Navigate back to the screen that started the add activity flow
+            // This will pop back to either progressFragment (Dashboard/Calendar) or mainFragment (Settings)
+            findNavController().popBackStack(com.pseddev.practicetracker.R.id.addActivityFragment, true)
         }
         
         viewModel.navigateToMain.observe(viewLifecycleOwner) { shouldNavigate ->
             if (shouldNavigate) {
-                findNavController().popBackStack(com.pseddev.practicetracker.R.id.mainFragment, false)
+                // Navigate back to the screen that started the add activity flow
+                // This will pop back to either progressFragment (Dashboard/Calendar) or mainFragment (Settings)
+                findNavController().popBackStack(com.pseddev.practicetracker.R.id.addActivityFragment, true)
                 viewModel.doneNavigating()
             }
         }

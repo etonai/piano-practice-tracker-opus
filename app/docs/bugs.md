@@ -309,9 +309,10 @@ Added suggestions section to Dashboard tab that displays practice recommendation
 
 ---
 
-### Bug #11: 🐛 Add Activity Dialog Navigation Issue from Dashboard/Calendar
-**Status:** Open  
+### Bug #11: ✅ Add Activity Dialog Navigation Issue from Dashboard/Calendar
+**Status:** Fixed  
 **Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-20  
 **Severity:** Medium  
 
 **Description:**  
@@ -334,10 +335,22 @@ Save and Cancel buttons don't navigate back to the originating screen, leaving t
 - App Version: 1.0.8
 - All Android devices
 
-**Additional Information:**  
-- The Save button does successfully save the activity data
-- Navigation works correctly when using add activity from Settings
-- Issue is specific to Dashboard and Calendar entry points
+**Implementation Details:**  
+Fixed add activity navigation to correctly return to the originating screen:
+- **Root Cause**: SummaryFragment was hard-coded to always navigate back to mainFragment (Settings)
+- **Solution**: Changed navigation to use `popBackStack(addActivityFragment, true)` which returns to the screen that launched the add activity flow
+- **Behavior**: Now works correctly for all entry points:
+  - From **Dashboard/Calendar**: Returns to progressFragment (Dashboard/Calendar tabs)
+  - From **Settings**: Returns to mainFragment (Settings screen)
+- **Fixed Actions**: Both Save and Cancel buttons now navigate back to the correct originating screen
+
+**Technical Details:**
+- **Before**: `popBackStack(mainFragment, false)` - always went to Settings
+- **After**: `popBackStack(addActivityFragment, true)` - pops the entire add activity flow and returns to launching screen
+- **Navigation Flow**: originating screen → addActivityFragment → ... → summaryFragment → back to originating screen
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/practicetracker/ui/addactivity/SummaryFragment.kt`
 
 ---
 
