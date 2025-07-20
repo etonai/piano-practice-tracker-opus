@@ -28,6 +28,7 @@ class ImportExportViewModel(
     
     private val driveHelper = GoogleDriveHelper(context)
     private val syncManager = SyncManager(context, repository, driveHelper)
+    private val sharedPrefs = context.getSharedPreferences("piano_tracker_export_prefs", Context.MODE_PRIVATE)
     
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -63,6 +64,8 @@ class ImportExportViewModel(
                 Log.d("ExportDebug", "repository.exportToCsv completed")
             }
             Log.d("ExportDebug", "Back on main dispatcher, setting success result")
+            // Update last export time
+            sharedPrefs.edit().putLong("last_export_time", System.currentTimeMillis()).apply()
             _exportResult.value = Event(Result.success("Export successful!"))
         } catch (e: Exception) {
             Log.e("ExportDebug", "Exception in ViewModel: ${e.javaClass.simpleName} - ${e.message}", e)
@@ -117,6 +120,10 @@ class ImportExportViewModel(
     
     fun getLastSyncTime(): Long {
         return syncManager.getLastSyncTime()
+    }
+    
+    fun getLastExportTime(): Long {
+        return sharedPrefs.getLong("last_export_time", 0L)
     }
     
     fun getSignInIntent(): Intent {

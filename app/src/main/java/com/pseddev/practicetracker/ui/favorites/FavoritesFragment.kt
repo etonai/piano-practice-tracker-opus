@@ -71,9 +71,6 @@ class FavoritesFragment : Fragment() {
                 adapter.submitList(items)
             }
             
-            // Update header counts
-            val favoriteCount = items.count { it.isFavorite }
-            binding.headerText.text = "Manage Favorites ($favoriteCount favorites)"
         }
     }
     

@@ -362,6 +362,87 @@ Timeline tab does not provide any way to delete activities from the timeline vie
 
 ---
 
+### Bug #13: ✅ Add Last Export Tracking to Import/Export Data Page
+**Status:** Fixed  
+**Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-20  
+**Severity:** Low  
+
+**Description:**  
+The Import/Export Data page should track and display when the last export was performed. This information should be shown at the bottom of the page, under the existing "Last sync" information, to help users keep track of their export history.
+
+**Steps to Reproduce:**  
+1. Open Settings
+2. Navigate to Import/Export Data page
+3. Look for last export information
+
+**Expected Behavior:**  
+The Import/Export Data page should display "Last export: [date/time]" information below the existing "Last sync" section to track when exports were last performed.
+
+**Actual Behavior:**  
+The page only shows "Last sync" information but does not track or display when the last export was done.
+
+**Environment:**  
+- App Version: 1.0.8
+- All Android devices
+
+**Implementation Details:**  
+Added last export tracking functionality:
+- **ViewModel**: Added SharedPreferences to track last export timestamp and `getLastExportTime()` method
+- **Export Process**: Updates timestamp when CSV export completes successfully  
+- **UI**: Added "Last export" TextView below "Last sync" information
+- **Format**: Matches existing sync time format (MMM dd, yyyy HH:mm) or shows "Never"
+- **Persistence**: Export time persists across app restarts using SharedPreferences
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/practicetracker/ui/importexport/ImportExportViewModel.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/importexport/ImportExportFragment.kt`
+- `app/src/main/res/layout/fragment_import_export.xml`
+
+---
+
+### Bug #14: ✅ Duplicate Titles on Settings, Manage Favorites, and Import/Export Data Pages
+**Status:** Fixed  
+**Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-20  
+**Severity:** Low  
+
+**Description:**  
+The Settings, Manage Favorites, and Import/Export Data pages display duplicate titles - one in the action bar/toolbar with a back arrow, and another title shown on the page content itself. This creates visual redundancy since these pages are now navigated to from other screens rather than being independent pages.
+
+**Steps to Reproduce:**  
+1. Navigate to Settings page
+2. Observe both the toolbar title and page content title
+3. Navigate to Manage Favorites page
+4. Observe both the toolbar title and page content title
+5. Navigate to Import/Export Data page
+6. Observe both the toolbar title and page content title
+
+**Expected Behavior:**  
+Each page should show the title only once - either in the toolbar/action bar OR on the page content, but not both.
+
+**Actual Behavior:**  
+Pages show duplicate titles: one in the toolbar with back arrow navigation and another as a heading on the page content.
+
+**Environment:**  
+- App Version: 1.0.8
+- All Android devices
+
+**Resolution:**  
+Removed duplicate title TextViews from all three pages and adjusted layout constraints and margins:
+- **Settings page**: Removed "Settings" title TextView and updated button positioning
+- **Manage Favorites page**: Removed "Manage Favorites" header TextView  
+- **Import/Export Data page**: Removed "Import/Export Data" title TextView and updated card positioning
+
+This eliminates visual redundancy while maintaining clean navigation with toolbar titles and back arrows.
+
+**Files Modified:**
+- `app/src/main/res/layout/fragment_main.xml`
+- `app/src/main/res/layout/fragment_favorites.xml`
+- `app/src/main/res/layout/fragment_import_export.xml`
+
+---
+
 ### Bug #5: ✅ Duplicate Piece Entries from CSV Import
 **Status:** Fixed  
 **Date Reported:** 2025-07-20  

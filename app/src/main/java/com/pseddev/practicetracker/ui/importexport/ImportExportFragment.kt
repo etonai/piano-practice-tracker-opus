@@ -110,7 +110,8 @@ class ImportExportFragment : Fragment() {
             binding.exportToCsvButton.isEnabled = !isLoading
             binding.importFromCsvButton.isEnabled = !isLoading
             binding.purgeDataButton.isEnabled = !isLoading
-            binding.syncWithDriveButton.isEnabled = !isLoading
+            // Keep Google Drive button disabled since functionality is disabled
+            binding.syncWithDriveButton.isEnabled = false
         }
         
         viewModel.exportResult.observe(viewLifecycleOwner) { event ->
@@ -118,6 +119,7 @@ class ImportExportFragment : Fragment() {
                 result.fold(
                     onSuccess = { message ->
                         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                        updateDriveUI() // Refresh UI to show updated export time
                     },
                     onFailure = { exception ->
                         Toast.makeText(
@@ -304,6 +306,16 @@ class ImportExportFragment : Fragment() {
             binding.driveAccountTextView.visibility = View.GONE
             binding.syncWithDriveButton.text = "Connect to Google Drive"
             binding.lastSyncTextView.text = "Last sync: Never"
+        }
+        
+        // Update last export time (independent of Google Drive status)
+        val lastExportTime = viewModel.getLastExportTime()
+        if (lastExportTime > 0) {
+            val date = Date(lastExportTime)
+            val formatter = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US)
+            binding.lastExportTextView.text = "Last export: ${formatter.format(date)}"
+        } else {
+            binding.lastExportTextView.text = "Last export: Never"
         }
     }
     
