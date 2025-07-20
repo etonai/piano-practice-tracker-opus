@@ -39,7 +39,7 @@ class PiecesViewModel(private val repository: PianoRepository) : ViewModel() {
                             lastActivityDate = pieceActivities.maxByOrNull { it.timestamp }?.timestamp
                         )
                     }
-                    .sortedByDescending { it.lastActivityDate ?: 0 }
+                    .sortedBy { it.piece.name.lowercase() }
             }
             .asLiveData()
     

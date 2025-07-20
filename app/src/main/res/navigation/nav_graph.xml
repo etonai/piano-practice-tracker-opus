@@ -37,6 +37,9 @@
         <action
             android:id="@+id/action_viewProgressFragment_to_addActivityFragment"
             app:destination="@id/addActivityFragment" />
+        <action
+            android:id="@+id/action_viewProgressFragment_to_addPieceFragment"
+            app:destination="@id/addPieceFragment" />
     </fragment>
         
     <fragment
@@ -200,6 +203,12 @@
             app:argType="string"
             android:defaultValue="" />
     </fragment>
+    
+    <fragment
+        android:id="@+id/addPieceFragment"
+        android:name="com.pseddev.practicetracker.ui.pieces.AddPieceFragment"
+        android:label="Add Piece"
+        tools:layout="@layout/fragment_add_piece" />
     
     <fragment
         android:id="@+id/favoritesFragment"

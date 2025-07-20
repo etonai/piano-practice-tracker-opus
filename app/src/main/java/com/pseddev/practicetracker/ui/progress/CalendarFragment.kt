@@ -9,6 +9,7 @@ import android.widget.CalendarView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.pseddev.practicetracker.PianoTrackerApplication
 import com.pseddev.practicetracker.R
 import com.pseddev.practicetracker.data.entities.ActivityType
@@ -37,6 +38,8 @@ class CalendarFragment : Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        setupClickListeners()
         
         binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             val calendar = Calendar.getInstance().apply {
@@ -100,6 +103,12 @@ class CalendarFragment : Fragment() {
                 activityCount >= 5 -> ContextCompat.getColor(requireContext(), R.color.calendar_practice_medium)
                 else -> ContextCompat.getColor(requireContext(), R.color.calendar_practice_light)
             }
+        }
+    }
+    
+    private fun setupClickListeners() {
+        binding.buttonAddActivity.setOnClickListener {
+            findNavController().navigate(R.id.action_viewProgressFragment_to_addActivityFragment)
         }
     }
     

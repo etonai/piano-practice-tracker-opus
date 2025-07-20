@@ -37,6 +37,8 @@ class PiecesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        setupClickListeners()
+        
         adapter = PiecesAdapter { pieceWithStats ->
             viewModel.selectPiece(pieceWithStats.piece.id)
         }
@@ -91,6 +93,12 @@ class PiecesFragment : Fragment() {
         binding.closeDetailsButton.setOnClickListener {
             binding.pieceDetailsCard.visibility = View.GONE
             viewModel.clearSelection()
+        }
+    }
+    
+    private fun setupClickListeners() {
+        binding.buttonAddPiece.setOnClickListener {
+            findNavController().navigate(R.id.action_viewProgressFragment_to_addPieceFragment)
         }
     }
     

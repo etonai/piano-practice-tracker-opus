@@ -29,12 +29,16 @@ class ViewProgressFragment : Fragment() {
         val pagerAdapter = ViewProgressPagerAdapter(this)
         binding.viewPager.adapter = pagerAdapter
         
+        // Improve nested scrolling for RecyclerViews inside ViewPager2
+        binding.viewPager.isUserInputEnabled = true
+        
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> "Home"
                 1 -> "Calendar"
-                2 -> "Timeline"
+                2 -> "Suggestions"
                 3 -> "Pieces"
+                4 -> "Timeline"
                 else -> ""
             }
         }.attach()
@@ -46,14 +50,15 @@ class ViewProgressFragment : Fragment() {
     }
     
     private inner class ViewProgressPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
-        override fun getItemCount(): Int = 4
+        override fun getItemCount(): Int = 5
         
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> DashboardFragment()
                 1 -> CalendarFragment()
-                2 -> TimelineFragment()
+                2 -> SuggestionsFragment()
                 3 -> PiecesFragment()
+                4 -> TimelineFragment()
                 else -> throw IllegalArgumentException("Invalid position: $position")
             }
         }
