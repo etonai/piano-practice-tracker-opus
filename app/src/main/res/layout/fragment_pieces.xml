@@ -52,14 +52,14 @@
                         style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Last Date" />
+                        android:text="Date" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipActivityCount"
                         style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Activities" />
+                        android:text="Activity" />
 
                 </com.google.android.material.chip.ChipGroup>
 
@@ -86,7 +86,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:padding="8dp"
+                android:paddingLeft="8dp"
+                android:paddingTop="8dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="108dp"
                 android:scrollbars="vertical"
                 android:nestedScrollingEnabled="true" />
 

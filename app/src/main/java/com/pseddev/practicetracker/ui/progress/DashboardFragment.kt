@@ -47,9 +47,10 @@ class DashboardFragment : Fragment() {
                     val activity = activityWithPiece.activity
                     val piece = activityWithPiece.pieceOrTechnique
                     val time = android.text.format.DateFormat.format("h:mm a", activity.timestamp)
+                    val level = "(${activity.level})"
                     val minutes = if (activity.minutes > 0) " (${activity.minutes} min)" else ""
                     val type = activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }
-                    "• $time - ${piece.name} - $type$minutes"
+                    "• $time - ${piece.name} - $type $level$minutes"
                 }
                 binding.todayActivitiesList.text = activitySummary
             } else {
@@ -66,9 +67,10 @@ class DashboardFragment : Fragment() {
                     val activity = activityWithPiece.activity
                     val piece = activityWithPiece.pieceOrTechnique
                     val time = android.text.format.DateFormat.format("h:mm a", activity.timestamp)
+                    val level = "(${activity.level})"
                     val minutes = if (activity.minutes > 0) " (${activity.minutes} min)" else ""
                     val type = activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }
-                    "• $time - ${piece.name} - $type$minutes"
+                    "• $time - ${piece.name} - $type $level$minutes"
                 }
                 binding.yesterdayActivitiesList.text = activitySummary
             } else {
@@ -87,6 +89,19 @@ class DashboardFragment : Fragment() {
         
         viewModel.weekSummary.observe(viewLifecycleOwner) { summary ->
             binding.weekSummaryText.text = summary
+        }
+        
+        viewModel.suggestions.observe(viewLifecycleOwner) { suggestions ->
+            if (suggestions.isNotEmpty()) {
+                binding.suggestionsCard.visibility = View.VISIBLE
+                val suggestionText = suggestions.joinToString("\n") { suggestion ->
+                    val favoriteIndicator = if (suggestion.piece.isFavorite) "⭐ " else ""
+                    "• $favoriteIndicator${suggestion.piece.name} (${suggestion.suggestionReason})"
+                }
+                binding.suggestionsList.text = suggestionText
+            } else {
+                binding.suggestionsCard.visibility = View.GONE
+            }
         }
     }
     

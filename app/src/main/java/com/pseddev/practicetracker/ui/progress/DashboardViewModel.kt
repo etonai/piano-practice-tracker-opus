@@ -2,6 +2,7 @@ package com.pseddev.practicetracker.ui.progress
 
 import androidx.lifecycle.*
 import com.pseddev.practicetracker.data.entities.Activity
+import com.pseddev.practicetracker.data.entities.ItemType
 import com.pseddev.practicetracker.data.repository.PianoRepository
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.combine
@@ -78,6 +79,74 @@ class DashboardViewModel(private val repository: PianoRepository) : ViewModel() 
                         append("\nTotal tracked time: $totalMinutes minutes")
                     }
                 }
+            }
+            .asLiveData()
+    
+    val suggestions: LiveData<List<SuggestionItem>> = 
+        repository.getAllPiecesAndTechniques()
+            .combine(repository.getAllActivities()) { pieces, activities ->
+                val now = System.currentTimeMillis()
+                val twoDaysAgo = now - (2 * 24 * 60 * 60 * 1000L)
+                val sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000L)
+                val thirtyOneDaysAgo = now - (31 * 24 * 60 * 60 * 1000L)
+                
+                val pieceActivities = activities.groupBy { it.pieceOrTechniqueId }
+                
+                val favoriteSuggestions = mutableListOf<SuggestionItem>()
+                val nonFavoriteSuggestions = mutableListOf<SuggestionItem>()
+                
+                pieces.filter { it.type == ItemType.PIECE }.forEach { piece ->
+                    val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
+                    val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
+                    val lastActivityDate = lastActivity?.timestamp
+                    
+                    val daysSince = if (lastActivityDate != null) {
+                        ((now - lastActivityDate) / (24 * 60 * 60 * 1000)).toInt()
+                    } else {
+                        Int.MAX_VALUE
+                    }
+                    
+                    if (piece.isFavorite) {
+                        // Favorites that haven't been practiced in 2+ days
+                        if (lastActivityDate == null || lastActivityDate < twoDaysAgo) {
+                            favoriteSuggestions.add(
+                                SuggestionItem(
+                                    piece = piece,
+                                    lastActivityDate = lastActivityDate,
+                                    daysSinceLastActivity = daysSince,
+                                    suggestionReason = if (lastActivityDate == null) "Never practiced" else "$daysSince days ago"
+                                )
+                            )
+                        }
+                    } else {
+                        // Non-favorites that haven't been practiced in 7+ days but have been practiced in last 31 days
+                        if (lastActivityDate != null && lastActivityDate < sevenDaysAgo && lastActivityDate >= thirtyOneDaysAgo) {
+                            nonFavoriteSuggestions.add(
+                                SuggestionItem(
+                                    piece = piece,
+                                    lastActivityDate = lastActivityDate,
+                                    daysSinceLastActivity = daysSince,
+                                    suggestionReason = "$daysSince days ago"
+                                )
+                            )
+                        }
+                    }
+                }
+                
+                // Get oldest favorites (highest daysSinceLastActivity)
+                val oldestFavorites = if (favoriteSuggestions.isNotEmpty()) {
+                    val maxDays = favoriteSuggestions.maxOf { it.daysSinceLastActivity }
+                    favoriteSuggestions.filter { it.daysSinceLastActivity == maxDays }
+                } else emptyList()
+                
+                // Get oldest non-favorites (highest daysSinceLastActivity)
+                val oldestNonFavorites = if (nonFavoriteSuggestions.isNotEmpty()) {
+                    val maxDays = nonFavoriteSuggestions.maxOf { it.daysSinceLastActivity }
+                    nonFavoriteSuggestions.filter { it.daysSinceLastActivity == maxDays }
+                } else emptyList()
+                
+                // Combine and sort favorites first, then non-favorites
+                oldestFavorites + oldestNonFavorites
             }
             .asLiveData()
     

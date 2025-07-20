@@ -4,9 +4,11 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -87,6 +89,7 @@ class CalendarFragment : Fragment() {
         val lastMonth = currentMonth.plusMonths(10)
         binding.calendarView.setup(firstMonth, lastMonth, com.kizitonwose.calendar.core.firstDayOfWeekFromLocale())
         binding.calendarView.scrollToMonth(currentMonth)
+        
     }
     
     private fun updateMonthlyActivities(summary: MonthlyActivitySummary) {

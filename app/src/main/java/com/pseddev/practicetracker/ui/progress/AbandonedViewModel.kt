@@ -24,7 +24,7 @@ class AbandonedViewModel(private val repository: PianoRepository) : ViewModel() 
     
     private val now = System.currentTimeMillis()
     private val thirtyOneDaysAgo = now - (31 * 24 * 60 * 60 * 1000L)
-    private val sortDirection = MutableStateFlow(AbandonedSortDirection.ASCENDING)
+    private val sortDirection = MutableStateFlow(AbandonedSortDirection.DESCENDING)
     
     val abandonedPieces: LiveData<List<AbandonedItem>> = 
         combine(

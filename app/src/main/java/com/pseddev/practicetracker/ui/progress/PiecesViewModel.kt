@@ -103,6 +103,12 @@ class PiecesViewModel(private val repository: PianoRepository) : ViewModel() {
     
     fun setSortType(type: SortType) {
         sortType.value = type
+        // Set appropriate default direction based on sort type
+        sortDirection.value = when (type) {
+            SortType.ALPHABETICAL -> SortDirection.ASCENDING  // A-Z makes sense
+            SortType.LAST_DATE -> SortDirection.DESCENDING    // Newest first makes sense
+            SortType.ACTIVITY_COUNT -> SortDirection.DESCENDING // Highest count first makes sense
+        }
     }
     
     fun toggleSortDirection() {
