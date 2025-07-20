@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<ScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -41,15 +45,6 @@
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- Add Activity Button -->
-        <Button
-            android:id="@+id/buttonAddActivity"
-            style="@style/RoundedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="Add Activity" />
 
         <!-- Today's Activities Card -->
         <com.google.android.material.card.MaterialCardView
@@ -176,3 +171,18 @@
     </LinearLayout>
 
 </ScrollView>
+
+<!-- Add Activity Floating Action Button -->
+<com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    android:id="@+id/buttonAddActivity"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom|end"
+    android:layout_margin="16dp"
+    android:text="Add Activity"
+    android:textColor="?attr/colorOnPrimary"
+    app:icon="@android:drawable/ic_input_add"
+    app:iconTint="?attr/colorOnPrimary"
+    app:backgroundTint="?attr/colorPrimary" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

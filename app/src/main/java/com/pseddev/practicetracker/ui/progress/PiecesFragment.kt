@@ -24,6 +24,7 @@ class PiecesFragment : Fragment() {
     }
     
     private lateinit var adapter: PiecesAdapter
+    private var shouldScrollToTop = false
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,6 +39,7 @@ class PiecesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         setupClickListeners()
+        setupSortingControls()
         
         adapter = PiecesAdapter { pieceWithStats ->
             viewModel.selectPiece(pieceWithStats.piece.id)
@@ -53,7 +55,13 @@ class PiecesFragment : Fragment() {
             } else {
                 binding.emptyView.visibility = View.GONE
                 binding.recyclerView.visibility = View.VISIBLE
-                adapter.submitList(pieces)
+                adapter.submitList(pieces) {
+                    // Scroll to top after the new data is submitted if a sort change happened
+                    if (shouldScrollToTop) {
+                        binding.recyclerView.scrollToPosition(0)
+                        shouldScrollToTop = false
+                    }
+                }
             }
         }
         
@@ -100,6 +108,37 @@ class PiecesFragment : Fragment() {
         binding.buttonAddPiece.setOnClickListener {
             findNavController().navigate(R.id.action_viewProgressFragment_to_addPieceFragment)
         }
+    }
+    
+    private fun setupSortingControls() {
+        // Set up chip selection listener
+        binding.sortChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.isNotEmpty()) {
+                val sortType = when (checkedIds[0]) {
+                    R.id.chipAlphabetical -> SortType.ALPHABETICAL
+                    R.id.chipLastDate -> SortType.LAST_DATE
+                    R.id.chipActivityCount -> SortType.ACTIVITY_COUNT
+                    else -> SortType.ALPHABETICAL
+                }
+                viewModel.setSortType(sortType)
+                shouldScrollToTop = true
+            }
+        }
+        
+        // Set up sort direction button
+        binding.buttonSortDirection.setOnClickListener {
+            viewModel.toggleSortDirection()
+            updateSortDirectionButton()
+            shouldScrollToTop = true
+        }
+        
+        // Initialize sort direction button
+        updateSortDirectionButton()
+    }
+    
+    private fun updateSortDirectionButton() {
+        val direction = viewModel.getCurrentSortDirection()
+        binding.buttonSortDirection.text = if (direction == SortDirection.ASCENDING) "↑" else "↓"
     }
     
     override fun onDestroyView() {

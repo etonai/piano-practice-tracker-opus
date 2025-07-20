@@ -276,7 +276,7 @@ class ImportExportFragment : Fragment() {
                 binding.lastSyncTextView.text = "Last sync: Never"
             }
         } else {
-            binding.driveStatusTextView.text = "Not connected to Google Drive"
+            binding.driveStatusTextView.text = "Google Drive functionality currently disabled"
             binding.driveAccountTextView.visibility = View.GONE
             binding.syncWithDriveButton.text = "Connect to Google Drive"
             binding.lastSyncTextView.text = "Last sync: Never"

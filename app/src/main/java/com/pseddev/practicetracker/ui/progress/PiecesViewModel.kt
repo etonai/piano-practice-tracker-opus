@@ -10,6 +10,17 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
+enum class SortType {
+    ALPHABETICAL,
+    LAST_DATE,
+    ACTIVITY_COUNT
+}
+
+enum class SortDirection {
+    ASCENDING,
+    DESCENDING
+}
+
 data class PieceWithStats(
     val piece: PieceOrTechnique,
     val activityCount: Int,
@@ -25,23 +36,42 @@ data class PieceDetails(
 class PiecesViewModel(private val repository: PianoRepository) : ViewModel() {
     
     private val selectedPieceId = MutableStateFlow<Long?>(null)
+    private val sortType = MutableStateFlow(SortType.ALPHABETICAL)
+    private val sortDirection = MutableStateFlow(SortDirection.ASCENDING)
     
     val piecesWithStats: LiveData<List<PieceWithStats>> = 
-        repository.getAllPiecesAndTechniques()
-            .combine(repository.getAllActivities()) { pieces, activities ->
-                pieces
-                    .filter { it.type == ItemType.PIECE }
-                    .map { piece ->
-                        val pieceActivities = activities.filter { it.pieceOrTechniqueId == piece.id }
-                        PieceWithStats(
-                            piece = piece,
-                            activityCount = pieceActivities.size,
-                            lastActivityDate = pieceActivities.maxByOrNull { it.timestamp }?.timestamp
-                        )
-                    }
-                    .sortedBy { it.piece.name.lowercase() }
+        combine(
+            repository.getAllPiecesAndTechniques(),
+            repository.getAllActivities(),
+            sortType,
+            sortDirection
+        ) { pieces, activities, currentSortType, currentSortDirection ->
+            val piecesWithStats = pieces
+                .filter { it.type == ItemType.PIECE }
+                .map { piece ->
+                    val pieceActivities = activities.filter { it.pieceOrTechniqueId == piece.id }
+                    PieceWithStats(
+                        piece = piece,
+                        activityCount = pieceActivities.size,
+                        lastActivityDate = pieceActivities.maxByOrNull { it.timestamp }?.timestamp
+                    )
+                }
+            
+            // Apply sorting
+            val sorted = when (currentSortType) {
+                SortType.ALPHABETICAL -> piecesWithStats.sortedBy { it.piece.name.lowercase() }
+                SortType.LAST_DATE -> piecesWithStats.sortedBy { it.lastActivityDate ?: 0L }
+                SortType.ACTIVITY_COUNT -> piecesWithStats.sortedBy { it.activityCount }
             }
-            .asLiveData()
+            
+            // Apply direction
+            if (currentSortDirection == SortDirection.DESCENDING) {
+                sorted.reversed()
+            } else {
+                sorted
+            }
+        }
+        .asLiveData()
     
     val selectedPieceDetails: LiveData<PieceDetails?> = 
         selectedPieceId.flatMapLatest { pieceId ->
@@ -70,6 +100,21 @@ class PiecesViewModel(private val repository: PianoRepository) : ViewModel() {
     fun clearSelection() {
         selectedPieceId.value = null
     }
+    
+    fun setSortType(type: SortType) {
+        sortType.value = type
+    }
+    
+    fun toggleSortDirection() {
+        sortDirection.value = if (sortDirection.value == SortDirection.ASCENDING) {
+            SortDirection.DESCENDING
+        } else {
+            SortDirection.ASCENDING
+        }
+    }
+    
+    fun getCurrentSortType(): SortType = sortType.value
+    fun getCurrentSortDirection(): SortDirection = sortDirection.value
 }
 
 class PiecesViewModelFactory(private val repository: PianoRepository) : ViewModelProvider.Factory {
