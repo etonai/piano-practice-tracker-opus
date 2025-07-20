@@ -354,9 +354,10 @@ Fixed add activity navigation to correctly return to the originating screen:
 
 ---
 
-### Bug #12: 🐛 Missing Delete Activity Feature in Timeline Tab
-**Status:** Open  
+### Bug #12: ✅ Missing Delete Activity Feature in Timeline Tab
+**Status:** Fixed  
 **Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-20  
 **Severity:** Medium  
 
 **Description:**  
@@ -377,10 +378,29 @@ Timeline tab does not provide any way to delete activities from the timeline vie
 - App Version: 1.0.8
 - All Android devices
 
-**Additional Information:**  
-- Delete action should remove the activity from the database permanently
-- Consider adding confirmation dialog to prevent accidental deletions
-- Should update the timeline view immediately after deletion
+**Implementation Details:**  
+Added delete functionality to Timeline tab with the following features:
+- **Delete Button**: Added delete icon button to each timeline activity item in the top-right header area
+- **Confirmation Dialog**: Shows confirmation dialog with activity details (piece name and date/time) before deletion
+- **Database Integration**: Implemented complete delete flow from UI → ViewModel → Repository → DAO → Database
+- **Real-time Updates**: Timeline automatically updates after deletion through LiveData observers
+- **User Experience**: Clean delete icon with proper touch targets and Material Design styling
+
+**Technical Implementation:**
+- **Database Layer**: Added `@Delete suspend fun delete(activity: Activity)` to ActivityDao
+- **Repository Layer**: Added `suspend fun deleteActivity(activity: Activity)` to PianoRepository  
+- **ViewModel Layer**: Added `deleteActivity(activityWithPiece: ActivityWithPiece)` to TimelineViewModel
+- **UI Layer**: Added delete button to timeline item layout with click handler in TimelineAdapter
+- **Confirmation Flow**: AlertDialog shows piece name and formatted date/time before confirming deletion
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/practicetracker/data/daos/ActivityDao.kt`
+- `app/src/main/java/com/pseddev/practicetracker/data/repository/PianoRepository.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/TimelineViewModel.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/TimelineAdapter.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/TimelineFragment.kt`
+- `app/src/main/res/layout/item_timeline_activity.xml`
+- `app/src/main/res/drawable/ic_delete.xml` (new)
 
 ---
 

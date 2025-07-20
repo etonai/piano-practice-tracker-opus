@@ -3,6 +3,7 @@ package com.pseddev.practicetracker.ui.progress
 import androidx.lifecycle.*
 import com.pseddev.practicetracker.data.repository.PianoRepository
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class TimelineViewModel(private val repository: PianoRepository) : ViewModel() {
     
@@ -12,6 +13,12 @@ class TimelineViewModel(private val repository: PianoRepository) : ViewModel() {
                 list.sortedByDescending { it.activity.timestamp }
             }
             .asLiveData()
+    
+    fun deleteActivity(activityWithPiece: ActivityWithPiece) {
+        viewModelScope.launch {
+            repository.deleteActivity(activityWithPiece.activity)
+        }
+    }
 }
 
 class TimelineViewModelFactory(private val repository: PianoRepository) : ViewModelProvider.Factory {

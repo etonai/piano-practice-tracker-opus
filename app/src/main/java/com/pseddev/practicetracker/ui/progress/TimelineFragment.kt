@@ -1,5 +1,6 @@
 package com.pseddev.practicetracker.ui.progress
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,8 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pseddev.practicetracker.PianoTrackerApplication
 import com.pseddev.practicetracker.databinding.FragmentTimelineBinding
+import java.text.SimpleDateFormat
+import java.util.*
 
 class TimelineFragment : Fragment() {
     
@@ -35,7 +38,9 @@ class TimelineFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        adapter = TimelineAdapter()
+        adapter = TimelineAdapter { activityWithPiece ->
+            showDeleteConfirmationDialog(activityWithPiece)
+        }
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
         
@@ -52,6 +57,21 @@ class TimelineFragment : Fragment() {
                 adapter.submitList(activities)
             }
         }
+    }
+    
+    private fun showDeleteConfirmationDialog(activityWithPiece: ActivityWithPiece) {
+        val dateFormat = SimpleDateFormat("MMM d, yyyy h:mm a", Locale.US)
+        val dateString = dateFormat.format(Date(activityWithPiece.activity.timestamp))
+        val pieceName = activityWithPiece.pieceOrTechnique.name
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Activity")
+            .setMessage("Are you sure you want to delete this activity?\n\n$pieceName\n$dateString")
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteActivity(activityWithPiece)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
     
     override fun onDestroyView() {

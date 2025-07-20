@@ -1,6 +1,7 @@
 package com.pseddev.practicetracker.data.daos
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -23,6 +24,9 @@ interface ActivityDao {
     
     @Update
     suspend fun update(activity: Activity)
+    
+    @Delete
+    suspend fun delete(activity: Activity)
     
     @Query("DELETE FROM activities")
     suspend fun deleteAll()

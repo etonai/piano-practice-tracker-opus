@@ -10,7 +10,9 @@ import com.pseddev.practicetracker.databinding.ItemTimelineActivityBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
-class TimelineAdapter : ListAdapter<ActivityWithPiece, TimelineAdapter.ViewHolder>(DiffCallback()) {
+class TimelineAdapter(
+    private val onDeleteClick: (ActivityWithPiece) -> Unit
+) : ListAdapter<ActivityWithPiece, TimelineAdapter.ViewHolder>(DiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemTimelineActivityBinding.inflate(
@@ -20,7 +22,7 @@ class TimelineAdapter : ListAdapter<ActivityWithPiece, TimelineAdapter.ViewHolde
     }
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), onDeleteClick)
     }
     
     class ViewHolder(private val binding: ItemTimelineActivityBinding) : 
@@ -29,7 +31,7 @@ class TimelineAdapter : ListAdapter<ActivityWithPiece, TimelineAdapter.ViewHolde
         private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
         private val timeFormat = SimpleDateFormat("h:mm a", Locale.US)
         
-        fun bind(item: ActivityWithPiece) {
+        fun bind(item: ActivityWithPiece, onDeleteClick: (ActivityWithPiece) -> Unit) {
             val activity = item.activity
             val piece = item.pieceOrTechnique
             
@@ -71,6 +73,10 @@ class TimelineAdapter : ListAdapter<ActivityWithPiece, TimelineAdapter.ViewHolde
                 binding.notesText.text = activity.notes
             } else {
                 binding.notesText.text = ""
+            }
+            
+            binding.deleteButton.setOnClickListener {
+                onDeleteClick(item)
             }
         }
     }

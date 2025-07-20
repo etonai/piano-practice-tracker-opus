@@ -81,6 +81,9 @@ class PianoRepository(
     suspend fun insertActivity(activity: Activity) = 
         activityDao.insert(activity)
     
+    suspend fun deleteActivity(activity: Activity) = 
+        activityDao.delete(activity)
+    
     suspend fun deleteAllActivities() = 
         activityDao.deleteAll()
     
