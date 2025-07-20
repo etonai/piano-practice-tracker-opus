@@ -1,0 +1,132 @@
+package com.pseddev.practicetracker.ui.addactivity
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.pseddev.practicetracker.PianoTrackerApplication
+import com.pseddev.practicetracker.data.entities.ActivityType
+import com.pseddev.practicetracker.data.entities.ItemType
+import com.pseddev.practicetracker.databinding.FragmentSelectLevelBinding
+
+class SelectLevelFragment : Fragment() {
+    
+    private var _binding: FragmentSelectLevelBinding? = null
+    private val binding get() = _binding!!
+    
+    private val args: SelectLevelFragmentArgs by navArgs()
+    
+    private val viewModel: AddActivityViewModel by activityViewModels {
+        AddActivityViewModelFactory(
+            (requireActivity().application as PianoTrackerApplication).repository
+        )
+    }
+    
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentSelectLevelBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+    
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
+        binding.textPieceName.text = args.pieceName
+        
+        setupLevelOptions()
+        
+        binding.buttonContinue.setOnClickListener {
+            val selectedLevel = when {
+                binding.radioLevel1.isChecked -> 1
+                binding.radioLevel2.isChecked -> 2
+                binding.radioLevel3.isChecked -> 3
+                binding.radioLevel4.isChecked -> 4
+                else -> return@setOnClickListener
+            }
+            
+            val performanceType = if (args.activityType == ActivityType.PERFORMANCE) {
+                when {
+                    binding.radioPerformanceOnline.isChecked -> "online"
+                    binding.radioPerformanceLive.isChecked -> "live"
+                    else -> "practice"
+                }
+            } else {
+                "practice"
+            }
+            
+            // Determine next navigation
+            when {
+                // Time input for Practice Level 2 or any Technique
+                args.activityType == ActivityType.PRACTICE && 
+                (selectedLevel == 2 || args.itemType == ItemType.TECHNIQUE) -> {
+                    val action = SelectLevelFragmentDirections
+                        .actionSelectLevelFragmentToTimeInputFragment(
+                            activityType = args.activityType,
+                            pieceId = args.pieceId,
+                            pieceName = args.pieceName,
+                            level = selectedLevel,
+                            performanceType = performanceType
+                        )
+                    findNavController().navigate(action)
+                }
+                // Notes input for Performance
+                args.activityType == ActivityType.PERFORMANCE -> {
+                    val action = SelectLevelFragmentDirections
+                        .actionSelectLevelFragmentToNotesInputFragment(
+                            activityType = args.activityType,
+                            pieceId = args.pieceId,
+                            pieceName = args.pieceName,
+                            level = selectedLevel,
+                            performanceType = performanceType
+                        )
+                    findNavController().navigate(action)
+                }
+                // Direct to summary
+                else -> {
+                    val action = SelectLevelFragmentDirections
+                        .actionSelectLevelFragmentToSummaryFragment(
+                            activityType = args.activityType,
+                            pieceId = args.pieceId,
+                            pieceName = args.pieceName,
+                            level = selectedLevel,
+                            performanceType = performanceType
+                        )
+                    findNavController().navigate(action)
+                }
+            }
+        }
+    }
+    
+    private fun setupLevelOptions() {
+        if (args.activityType == ActivityType.PRACTICE) {
+            binding.textLevelLabel.text = "Practice Level:"
+            binding.radioLevel1.text = "Level 1 - Essentials"
+            binding.radioLevel2.text = "Level 2 - Incomplete"
+            binding.radioLevel3.text = "Level 3 - Complete with Review"
+            binding.radioLevel4.apply {
+                text = "Level 4 - Perfect Complete"
+                visibility = View.VISIBLE
+            }
+            binding.performanceTypeGroup.visibility = View.GONE
+        } else {
+            binding.textLevelLabel.text = "Performance Level:"
+            binding.radioLevel1.text = "Level 1 - Failed"
+            binding.radioLevel2.text = "Level 2 - Unsatisfactory"
+            binding.radioLevel3.text = "Level 3 - Satisfactory"
+            binding.radioLevel4.visibility = View.GONE
+            binding.performanceTypeGroup.visibility = View.VISIBLE
+        }
+    }
+    
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

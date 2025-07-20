@@ -1,6 +1,7 @@
 [versions]
 agp = "8.11.1"
 kotlin = "2.0.21"
+ksp = "2.0.21-1.0.25"
 coreKtx = "1.12.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -14,6 +15,12 @@ lifecycle = "2.7.0"
 coroutines = "1.7.3"
 opencsv = "5.8"
 viewpager2 = "1.0.0"
+playServicesAuth = "21.0.0"
+googleApiClient = "2.2.0"
+googleApiClientAndroid = "1.23.0"
+googleHttpClientAndroid = "1.23.0"
+googleApiServicesDrive = "v3-rev20231128-2.0.0"
+gson = "2.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,8 +40,14 @@ androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecy
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 opencsv = { group = "com.opencsv", name = "opencsv", version.ref = "opencsv" }
 androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+google-api-client-android = { group = "com.google.api-client", name = "google-api-client-android", version.ref = "googleApiClientAndroid" }
+google-http-client-android = { group = "com.google.http-client", name = "google-http-client-android", version.ref = "googleHttpClientAndroid" }
+google-api-services-drive = { group = "com.google.apis", name = "google-api-services-drive", version.ref = "googleApiServicesDrive" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
