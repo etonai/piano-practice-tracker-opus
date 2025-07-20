@@ -174,9 +174,10 @@ Implemented smart defaults for sorting based on sort type:
 
 ---
 
-### Bug #7: 🐛 Calendar Day Circles Too Small
-**Status:** Open  
+### Bug #7: ✅ Calendar Day Circles Too Small
+**Status:** Fixed  
 **Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-20  
 **Severity:** Low  
 
 **Description:**  
@@ -196,8 +197,16 @@ Calendar day circles are too small, making them harder to see and tap accurately
 - App Version: 1.0.8
 - All Android devices
 
-**Additional Information:**  
-The circles are currently sized at 32dp in the calendar_day_layout.xml. They should be increased for better usability.
+**Implementation Details:**  
+Increased calendar day circle size for better visibility and touch interaction:
+- **Size Change**: Increased from 32dp x 32dp to 40dp x 40dp (25% larger)
+- **Container Adjustment**: Increased calendar day container height from 48dp to 52dp to accommodate larger circles
+- **Touch Target**: Larger circles provide better touch targets for easier interaction
+- **Visual Impact**: More prominent day numbers for improved readability
+- **Layout**: Maintains proper spacing and prevents overlap between adjacent days
+
+**Files Modified:**
+- `app/src/main/res/layout/calendar_day_layout.xml`
 
 ---
 
@@ -440,6 +449,140 @@ This eliminates visual redundancy while maintaining clean navigation with toolba
 - `app/src/main/res/layout/fragment_main.xml`
 - `app/src/main/res/layout/fragment_favorites.xml`
 - `app/src/main/res/layout/fragment_import_export.xml`
+
+---
+
+### Bug #15: 🔄 Calendar Day Selection Circle Too Small
+**Status:** In Verification  
+**Date Reported:** 2025-07-20  
+**Severity:** Low  
+
+**Description:**  
+When selecting a day in the calendar, a small purple circle appears around the selected day. The circle is too small and should be increased by 3x for better visibility and user feedback.
+
+**Steps to Reproduce:**  
+1. Open the Calendar tab
+2. Tap on any day in the calendar
+3. Observe the purple selection circle around the day
+
+**Expected Behavior:**  
+The purple selection circle should be 3x larger than its current size for better visibility and clear indication of the selected day.
+
+**Actual Behavior:**  
+The purple selection circle is too small and barely visible, making it difficult to see which day is currently selected.
+
+**Environment:**  
+- App Version: 1.0.8
+- All Android devices
+
+**Implementation Details:**  
+Increased the calendar day selection circle size by 3x:
+- **Location**: CalendarFragment.kt line 145 in the day selection logic
+- **Change**: Modified `setStroke(3, ...)` to `setStroke(9, ...)` to triple the stroke width
+- **Effect**: Purple selection circle is now 9dp instead of 3dp for better visibility
+- **Color**: Maintains the same purple_500 color for consistency
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/CalendarFragment.kt`
+
+---
+
+### Bug #16: ✅ Calendar Activity Section Missing Date in Title
+**Status:** Fixed  
+**Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-20  
+**Severity:** Low  
+
+**Description:**  
+On the Calendar page, when displaying activities for a selected day, the section title shows information like "1 activities (Practice)" or "No activities on this date" but does not include the actual date. The title should include the selected date for better user context and clarity.
+
+**Steps to Reproduce:**  
+1. Open the Calendar tab
+2. Tap on any day in the calendar
+3. Observe the activity section title below the calendar
+
+**Expected Behavior:**  
+The title should include the selected date and use proper grammar, for example:
+- "January 15: 1 activity (Practice)"
+- "January 15: 3 activities (Mixed)"
+- "January 15: No activities on this date"
+- Or similar format that clearly shows the selected date with correct singular/plural grammar
+
+**Actual Behavior:**  
+The title only shows activity information without the date:
+- "1 activities (Practice)"
+- "No activities on this date"
+
+**Environment:**  
+- App Version: 1.0.8
+- All Android devices
+
+**Implementation Details:**  
+Enhanced the calendar activity section title with date information and proper grammar:
+- **Date Format**: Smart formatting - "Today", "Yesterday", or "Month Day" (e.g., "January 15")
+- **Grammar Fix**: Proper singular/plural - "1 activity" vs "2 activities"
+- **Title Examples**: 
+  - "Today: 1 activity (Practice)"
+  - "Yesterday: 3 activities (Mixed)"
+  - "January 15: No activities on this date"
+- **Location**: CalendarFragment.kt `updateSelectedDateView()` function
+- **Logic**: Added date formatting and conditional grammar based on activity count
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/CalendarFragment.kt`
+
+---
+
+### Bug #17: ✅ Calendar Month Navigation Issues with Selected Date
+**Status:** Fixed  
+**Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-20  
+**Severity:** Medium  
+
+**Description:**  
+When switching between months in the calendar while having a day selected, multiple issues occur: the activity title shows the previously selected date from the old month, the activities displayed appear to be from the first day of the new month, and no day appears visually selected in the new month's calendar view.
+
+**Steps to Reproduce:**  
+1. Open the Calendar tab
+2. Select a day (e.g., July 14)
+3. Navigate to a different month using Previous/Next month buttons (e.g., move to June)
+4. Observe the activity section title and calendar selection state
+
+**Expected Behavior:**  
+When navigating to a new month:
+- Either clear the selection and show no activities, OR
+- Select the same day number in the new month if it exists (e.g., June 14), OR  
+- Select the first day of the new month and update the title accordingly
+- The calendar should visually show which day is selected
+- The activity title should match the actually selected date
+
+**Actual Behavior:**  
+- Activity title still shows the old month's date (e.g., "July 14: ...")
+- Activities displayed appear to be from a different date (e.g., June 1)
+- No day appears visually selected in the calendar
+- Inconsistency between displayed date and actual data
+
+**Environment:**  
+- App Version: 1.0.8
+- All Android devices
+
+**Implementation Details:**  
+Fixed calendar month navigation to maintain consistent date selection:
+- **Smart Day Selection**: When switching months, attempts to select the same day number in the new month (e.g., July 14 → June 14)
+- **Edge Case Handling**: If the day doesn't exist in the new month (e.g., Feb 30), selects the last day of the month
+- **State Synchronization**: Updates both `selectedDate` variable and ViewModel selection to keep them in sync
+- **Visual Update**: Calls `notifyCalendarChanged()` to refresh the calendar display and show the new selection
+- **Fallback**: If no previous selection exists, defaults to the first day of the month
+
+**Logic Flow**:
+1. User switches month (Previous/Next buttons)
+2. System attempts to maintain same day number in new month
+3. Updates `selectedDate` variable and ViewModel state
+4. Refreshes calendar view to show visual selection
+5. Activity title and data now match the correctly selected date
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/CalendarFragment.kt`
 
 ---
 

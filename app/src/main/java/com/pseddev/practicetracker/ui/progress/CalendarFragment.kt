@@ -142,7 +142,7 @@ class CalendarFragment : Fragment() {
                     // Add border to selected date
                     val selectedDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.calendar_day_background)?.mutate() as? GradientDrawable
                     selectedDrawable?.setColor(color)
-                    selectedDrawable?.setStroke(3, ContextCompat.getColor(requireContext(), R.color.purple_500))
+                    selectedDrawable?.setStroke(9, ContextCompat.getColor(requireContext(), R.color.purple_500))
                     textView.background = selectedDrawable
                 } else {
                     textView.alpha = 0.8f
@@ -160,13 +160,28 @@ class CalendarFragment : Fragment() {
         drawable?.setTint(color)
         binding.activityColorIndicator.background = drawable
         
+        // Format the selected date
+        val dateText = selectedDate?.let { date ->
+            val today = LocalDate.now()
+            val yesterday = today.minusDays(1)
+            when (date) {
+                today -> "Today"
+                yesterday -> "Yesterday"
+                else -> {
+                    val monthName = date.month.name.lowercase().replaceFirstChar { it.uppercase() }
+                    "$monthName ${date.dayOfMonth}"
+                }
+            }
+        } ?: "Selected Date"
+        
         if (activities.isEmpty()) {
-            binding.selectedDateText.text = "No activities on this date"
+            binding.selectedDateText.text = "$dateText: No activities on this date"
             binding.selectedDateActivities.text = ""
             binding.activityColorIndicator.visibility = View.GONE
         } else {
             val activityTypeText = getActivityTypeDescription(activities)
-            binding.selectedDateText.text = "${activities.size} activities ($activityTypeText)"
+            val activityWord = if (activities.size == 1) "activity" else "activities"
+            binding.selectedDateText.text = "$dateText: ${activities.size} $activityWord ($activityTypeText)"
             binding.activityColorIndicator.visibility = View.VISIBLE
             
             val summary = activities.joinToString("\n") { item ->
@@ -263,10 +278,27 @@ class CalendarFragment : Fragment() {
     }
     
     private fun updateMonthData() {
-        // Update the view model to load data for the new month
-        val firstDayOfMonth = currentDisplayMonth.atDay(1)
-        val millis = firstDayOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        // When switching months, try to select the same day number if it exists in the new month
+        val dayToSelect = selectedDate?.let { currentSelected ->
+            val dayOfMonth = currentSelected.dayOfMonth
+            val newMonth = currentDisplayMonth
+            
+            // Check if the same day number exists in the new month
+            if (dayOfMonth <= newMonth.lengthOfMonth()) {
+                newMonth.atDay(dayOfMonth)
+            } else {
+                // If the day doesn't exist (e.g., Feb 30), select the last day of the month
+                newMonth.atEndOfMonth()
+            }
+        } ?: currentDisplayMonth.atDay(1) // Default to first day if no previous selection
+        
+        // Update the selected date and view model
+        selectedDate = dayToSelect
+        val millis = dayToSelect.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
         viewModel.selectDate(millis)
+        
+        // Refresh the calendar view to show the new selection
+        binding.calendarView.notifyCalendarChanged()
     }
     
     override fun onDestroyView() {
