@@ -7,9 +7,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.pseddev.practicetracker.BuildConfig
 import com.pseddev.practicetracker.PianoTrackerApplication
 import com.pseddev.practicetracker.R
 import com.pseddev.practicetracker.databinding.FragmentMainBinding
+import com.pseddev.practicetracker.ui.progress.DashboardViewModel
+import com.pseddev.practicetracker.ui.progress.DashboardViewModelFactory
 
 class MainFragment : Fragment() {
     
@@ -18,6 +21,10 @@ class MainFragment : Fragment() {
     
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory((requireActivity().application as PianoTrackerApplication).repository)
+    }
+    
+    private val dashboardViewModel: DashboardViewModel by viewModels {
+        DashboardViewModelFactory((requireActivity().application as PianoTrackerApplication).repository)
     }
     
     override fun onCreateView(
@@ -33,6 +40,7 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         setupObservers()
+        setupTodayActivities()
         setupClickListeners()
     }
     
@@ -52,6 +60,30 @@ class MainFragment : Fragment() {
                 "Manage Favorites"
             }
             binding.buttonManageFavorites.text = buttonText
+        }
+        
+        // Set version text
+        binding.textVersion.text = "Version ${BuildConfig.VERSION_NAME}"
+    }
+    
+    private fun setupTodayActivities() {
+        dashboardViewModel.todayActivities.observe(viewLifecycleOwner) { activities ->
+            binding.todayCountText.text = "${activities.size} activities"
+            
+            if (activities.isNotEmpty()) {
+                binding.todayActivitiesGroup.visibility = View.VISIBLE
+                val activitySummary = activities.joinToString("\n") { activityWithPiece ->
+                    val activity = activityWithPiece.activity
+                    val piece = activityWithPiece.pieceOrTechnique
+                    val time = android.text.format.DateFormat.format("h:mm a", activity.timestamp)
+                    val minutes = if (activity.minutes > 0) " (${activity.minutes} min)" else ""
+                    val type = activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }
+                    "• $time - ${piece.name} - $type$minutes"
+                }
+                binding.todayActivitiesList.text = activitySummary
+            } else {
+                binding.todayActivitiesGroup.visibility = View.GONE
+            }
         }
     }
     

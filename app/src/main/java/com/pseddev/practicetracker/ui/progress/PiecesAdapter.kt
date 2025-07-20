@@ -41,6 +41,13 @@ class PiecesAdapter(
                 binding.lastActivityText.text = "No activities yet"
             }
             
+            // Show/hide favorite icon
+            if (item.piece.isFavorite) {
+                binding.favoriteIcon.visibility = android.view.View.VISIBLE
+            } else {
+                binding.favoriteIcon.visibility = android.view.View.GONE
+            }
+            
             binding.root.setOnClickListener {
                 onPieceClick(item)
             }

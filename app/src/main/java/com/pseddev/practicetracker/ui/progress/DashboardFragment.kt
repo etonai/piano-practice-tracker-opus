@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.pseddev.practicetracker.PianoTrackerApplication
+import com.pseddev.practicetracker.R
 import com.pseddev.practicetracker.databinding.FragmentDashboardBinding
 import kotlinx.coroutines.launch
 
@@ -33,6 +35,8 @@ class DashboardFragment : Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        setupClickListeners()
         
         viewModel.todayActivities.observe(viewLifecycleOwner) { activities ->
             binding.todayCountText.text = "${activities.size} activities"
@@ -79,6 +83,12 @@ class DashboardFragment : Fragment() {
         
         viewModel.weekSummary.observe(viewLifecycleOwner) { summary ->
             binding.weekSummaryText.text = summary
+        }
+    }
+    
+    private fun setupClickListeners() {
+        binding.buttonAddActivity.setOnClickListener {
+            findNavController().navigate(R.id.action_viewProgressFragment_to_addActivityFragment)
         }
     }
     

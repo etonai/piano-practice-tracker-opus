@@ -70,7 +70,7 @@ class PiecesFragment : Fragment() {
         val practiceCount = details.activities.count { it.activityType == com.pseddev.practicetracker.data.entities.ActivityType.PRACTICE }
         val performanceCount = details.activities.count { it.activityType == com.pseddev.practicetracker.data.entities.ActivityType.PERFORMANCE }
         
-        binding.practiceCountText.text = "Practice sessions: $practiceCount"
+        binding.practiceCountText.text = "Practice activities: $practiceCount"
         binding.performanceCountText.text = "Performances: $performanceCount"
         
         val totalMinutes = details.activities.filter { it.minutes > 0 }.sumOf { it.minutes }

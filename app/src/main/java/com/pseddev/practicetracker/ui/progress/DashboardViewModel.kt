@@ -63,10 +63,17 @@ class DashboardViewModel(private val repository: PianoRepository) : ViewModel() 
                 val performanceCount = activities.count { it.activityType == com.pseddev.practicetracker.data.entities.ActivityType.PERFORMANCE }
                 val totalMinutes = activities.filter { it.minutes > 0 }.sumOf { it.minutes }
                 
+                // Calculate number of active days
+                val activeDays = activities.groupBy { activity ->
+                    val cal = Calendar.getInstance().apply { timeInMillis = activity.timestamp }
+                    cal.get(Calendar.DAY_OF_YEAR)
+                }.size
+                
                 buildString {
                     append("This week: ")
-                    append("$practiceCount practice session${if (practiceCount != 1) "s" else ""}, ")
+                    append("$practiceCount practice activit${if (practiceCount != 1) "ies" else "y"}, ")
                     append("$performanceCount performance${if (performanceCount != 1) "s" else ""}")
+                    append(" across $activeDays day${if (activeDays != 1) "s" else ""}")
                     if (totalMinutes > 0) {
                         append("\nTotal tracked time: $totalMinutes minutes")
                     }

@@ -32,8 +32,8 @@ class ViewProgressFragment : Fragment() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> "Home"
-                1 -> "Timeline"
-                2 -> "Calendar"
+                1 -> "Calendar"
+                2 -> "Timeline"
                 3 -> "Pieces"
                 else -> ""
             }
@@ -51,8 +51,8 @@ class ViewProgressFragment : Fragment() {
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> DashboardFragment()
-                1 -> TimelineFragment()
-                2 -> CalendarFragment()
+                1 -> CalendarFragment()
+                2 -> TimelineFragment()
                 3 -> PiecesFragment()
                 else -> throw IllegalArgumentException("Invalid position: $position")
             }

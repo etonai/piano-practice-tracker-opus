@@ -32,7 +32,12 @@
         android:id="@+id/progressFragment"
         android:name="com.pseddev.practicetracker.ui.progress.ViewProgressFragment"
         android:label="View Progress"
-        tools:layout="@layout/fragment_view_progress" />
+        tools:layout="@layout/fragment_view_progress">
+        
+        <action
+            android:id="@+id/action_viewProgressFragment_to_addActivityFragment"
+            app:destination="@id/addActivityFragment" />
+    </fragment>
         
     <fragment
         android:id="@+id/addActivityFragment"

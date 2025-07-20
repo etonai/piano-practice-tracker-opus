@@ -42,6 +42,15 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Add Activity Button -->
+        <Button
+            android:id="@+id/buttonAddActivity"
+            style="@style/RoundedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="Add Activity" />
+
         <!-- Today's Activities Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
