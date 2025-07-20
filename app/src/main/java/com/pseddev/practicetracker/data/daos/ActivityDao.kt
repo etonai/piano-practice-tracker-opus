@@ -3,6 +3,7 @@ package com.pseddev.practicetracker.data.daos
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.pseddev.practicetracker.data.entities.Activity
 import kotlinx.coroutines.flow.Flow
 
@@ -19,6 +20,9 @@ interface ActivityDao {
     
     @Insert
     suspend fun insert(activity: Activity)
+    
+    @Update
+    suspend fun update(activity: Activity)
     
     @Query("DELETE FROM activities")
     suspend fun deleteAll()

@@ -103,6 +103,7 @@ class CalendarFragment : Fragment() {
     inner class DayViewContainer(view: View) : ViewContainer(view) {
         val textView: TextView = view.findViewById(R.id.calendarDayText)
         
+        
         fun bind(day: CalendarDay) {
             textView.text = day.date.dayOfMonth.toString()
             

@@ -38,6 +38,9 @@ class ImportExportViewModel(
     private val _importResult = MutableLiveData<Event<Result<CsvHandler.ImportResult>>>()
     val importResult: LiveData<Event<Result<CsvHandler.ImportResult>>> = _importResult
     
+    private val _purgeResult = MutableLiveData<Event<Result<String>>>()
+    val purgeResult: LiveData<Event<Result<String>>> = _purgeResult
+    
     private val _syncResult = MutableLiveData<Event<SyncOperationResult>>()
     val syncResult: LiveData<Event<SyncOperationResult>> = _syncResult
     
@@ -85,6 +88,24 @@ class ImportExportViewModel(
             }
         }
     }
+    
+    fun purgeAllData() {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    repository.deleteAllActivities()
+                    repository.deleteAllPiecesAndTechniques()
+                }
+                _purgeResult.value = Event(Result.success("All data has been purged successfully."))
+            } catch (e: Exception) {
+                _purgeResult.value = Event(Result.failure(e))
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    
     
     fun isSignedIn(): Boolean {
         return GoogleSignIn.getLastSignedInAccount(context) != null

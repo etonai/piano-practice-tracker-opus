@@ -15,7 +15,10 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="0dp"
         android:background="?attr/colorSurface">
 
         <com.google.android.material.button.MaterialButton

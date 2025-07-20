@@ -11,6 +11,7 @@ import com.pseddev.practicetracker.data.entities.ActivityType
 import com.pseddev.practicetracker.data.entities.ItemType
 import com.pseddev.practicetracker.data.entities.PieceOrTechnique
 import com.pseddev.practicetracker.data.repository.PianoRepository
+import com.pseddev.practicetracker.utils.TextNormalizer
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -35,7 +36,7 @@ class AddActivityViewModel(private val repository: PianoRepository) : ViewModel(
         viewModelScope.launch {
             val id = repository.insertPieceOrTechnique(
                 PieceOrTechnique(
-                    name = name,
+                    name = TextNormalizer.normalizePieceName(name),
                     type = type,
                     isFavorite = false
                 )
@@ -61,7 +62,7 @@ class AddActivityViewModel(private val repository: PianoRepository) : ViewModel(
                     level = level,
                     performanceType = performanceType,
                     minutes = minutes,
-                    notes = notes
+                    notes = TextNormalizer.normalizeUserInput(notes)
                 )
             )
             _navigateToMain.value = true

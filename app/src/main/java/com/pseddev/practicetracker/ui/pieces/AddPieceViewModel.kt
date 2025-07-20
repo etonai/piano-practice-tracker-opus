@@ -4,6 +4,7 @@ import androidx.lifecycle.*
 import com.pseddev.practicetracker.data.entities.ItemType
 import com.pseddev.practicetracker.data.entities.PieceOrTechnique
 import com.pseddev.practicetracker.data.repository.PianoRepository
+import com.pseddev.practicetracker.utils.TextNormalizer
 import kotlinx.coroutines.launch
 
 sealed class AddPieceResult {
@@ -20,7 +21,7 @@ class AddPieceViewModel(private val repository: PianoRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 val piece = PieceOrTechnique(
-                    name = name.trim(),
+                    name = TextNormalizer.normalizePieceName(name),
                     type = type,
                     isFavorite = isFavorite
                 )

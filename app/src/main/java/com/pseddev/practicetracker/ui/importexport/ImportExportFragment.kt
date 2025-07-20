@@ -98,6 +98,10 @@ class ImportExportFragment : Fragment() {
                 startGoogleSignIn()
             }
         }
+        
+        binding.purgeDataButton.setOnClickListener {
+            showPurgeConfirmation()
+        }
     }
     
     private fun observeViewModel() {
@@ -105,6 +109,7 @@ class ImportExportFragment : Fragment() {
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
             binding.exportToCsvButton.isEnabled = !isLoading
             binding.importFromCsvButton.isEnabled = !isLoading
+            binding.purgeDataButton.isEnabled = !isLoading
             binding.syncWithDriveButton.isEnabled = !isLoading
         }
         
@@ -147,6 +152,25 @@ class ImportExportFragment : Fragment() {
                     }
                 )
                 binding.warningTextView.visibility = View.GONE
+            }
+        }
+        
+        viewModel.purgeResult.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { result ->
+                result.fold(
+                    onSuccess = { message ->
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                        // Navigate back to main screen
+                        findNavController().navigateUp()
+                    },
+                    onFailure = { exception ->
+                        Toast.makeText(
+                            context,
+                            "Purge failed: ${exception.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                )
             }
         }
         
@@ -351,6 +375,28 @@ class ImportExportFragment : Fragment() {
             .setPositiveButton("Disconnect") { _, _ ->
                 viewModel.disconnectDrive()
                 updateDriveUI()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun showPurgeConfirmation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("⚠️ Purge All Data")
+            .setMessage("This will permanently delete ALL practice activities and pieces from the app. This action cannot be undone.\n\nAre you absolutely sure you want to continue?")
+            .setPositiveButton("YES, PURGE ALL") { _, _ ->
+                showSecondPurgeConfirmation()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun showSecondPurgeConfirmation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("⚠️ Final Confirmation")
+            .setMessage("This is your final warning. All data will be permanently lost.\n\nDo you want to proceed with purging all data?")
+            .setPositiveButton("PURGE NOW") { _, _ ->
+                viewModel.purgeAllData()
             }
             .setNegativeButton("Cancel", null)
             .show()

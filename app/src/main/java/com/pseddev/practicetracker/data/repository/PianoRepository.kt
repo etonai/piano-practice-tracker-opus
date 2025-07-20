@@ -131,21 +131,23 @@ class PianoRepository(
     suspend fun importFromCsv(reader: Reader): CsvHandler.ImportResult {
         val result = CsvHandler.importActivitiesFromCsv(reader)
         
-        if (result.errors.isEmpty()) {
-            // Save current favorites before clearing data
-            val existingPieces = getAllPiecesAndTechniques().first()
-            val favoritesByName = existingPieces
-                .filter { it.isFavorite }
-                .associate { it.name to it.isFavorite }
-            
-            // Clear existing data
-            deleteAllActivities()
-            deleteAllPiecesAndTechniques()
-            
+        // Save current favorites before clearing data (do this regardless of errors)
+        val existingPieces = getAllPiecesAndTechniques().first()
+        val favoritesByName = existingPieces
+            .filter { it.isFavorite }
+            .associate { it.name to it.isFavorite }
+        
+        // Always clear existing data to prevent duplicates, even if there are errors
+        deleteAllActivities()
+        deleteAllPiecesAndTechniques()
+        
+        // Only proceed with import if we have activities to import
+        if (result.activities.isNotEmpty()) {
             // Create piece/technique map
             val pieceMap = mutableMapOf<String, Long>()
             
             // Insert unique pieces/techniques
+            Log.d("ImportRepo", "Creating pieces from ${result.uniquePieceNames.size} unique names: ${result.uniquePieceNames}")
             result.uniquePieceNames.forEach { pieceName ->
                 // Determine if it's a piece or technique based on common patterns
                 val itemType = when {
@@ -167,6 +169,7 @@ class PianoRepository(
                 
                 val id = insertPieceOrTechnique(piece)
                 pieceMap[pieceName] = id
+                Log.d("ImportRepo", "Created piece: '$pieceName' with ID $id")
             }
             
             // Insert activities
@@ -189,4 +192,5 @@ class PianoRepository(
         
         return result
     }
+    
 }

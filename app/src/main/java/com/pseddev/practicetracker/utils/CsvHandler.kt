@@ -5,6 +5,7 @@ import com.pseddev.practicetracker.data.entities.Activity
 import com.pseddev.practicetracker.data.entities.ActivityType
 import com.pseddev.practicetracker.data.entities.ItemType
 import com.pseddev.practicetracker.data.entities.PieceOrTechnique
+import com.pseddev.practicetracker.utils.TextNormalizer
 import com.opencsv.CSVReader
 import com.opencsv.CSVWriter
 import java.io.Reader
@@ -65,10 +66,10 @@ class CsvHandler {
                             datetime,
                             activity.minutes.toString(),
                             activity.activityType.toString(),
-                            piece.name,
+                            TextNormalizer.normalizePieceName(piece.name),
                             activity.level.toString(),
                             activity.performanceType,
-                            activity.notes
+                            TextNormalizer.normalizeUserInput(activity.notes)
                         )
                         bufferedWriter.write(row.joinToString(",") { escapeCSVField(it) })
                         bufferedWriter.write("\n")
@@ -153,8 +154,14 @@ class CsvHandler {
                             continue
                         }
                         
-                        // Parse piece name
-                        val pieceName = row[3].trim()
+                        // Parse piece name and normalize it
+                        val originalName = row[3]
+                        val pieceName = TextNormalizer.normalizePieceName(originalName)
+                        
+                        Log.d("CsvImport", "Line $lineNumber: Original='$originalName', Normalized='$pieceName'")
+                        Log.d("CsvImport", "Line $lineNumber: Original bytes: ${originalName.toByteArray().joinToString { it.toString() }}")
+                        Log.d("CsvImport", "Line $lineNumber: Normalized bytes: ${pieceName.toByteArray().joinToString { it.toString() }}")
+                            
                         if (pieceName.isEmpty()) {
                             errors.add("Line $lineNumber: Empty piece name")
                             lineNumber++
@@ -189,9 +196,25 @@ class CsvHandler {
                         }
                         
                         val performanceType = row[5]
-                        val notes = if (row.size > 6) row[6] else ""
+                        val notes = if (row.size > 6) TextNormalizer.normalizeUserInput(row[6]) else ""
                         
-                        uniquePieces.add(pieceName)
+                        // Explicitly check for duplicates to work around Set issues
+                        val alreadyExists = uniquePieces.any { existing ->
+                            val isEqual = existing == pieceName
+                            Log.d("CsvImport", "Comparing existing '$existing' == new '$pieceName': $isEqual")
+                            if (!isEqual) {
+                                Log.d("CsvImport", "Existing bytes: ${existing.toByteArray().joinToString { it.toString() }}")
+                                Log.d("CsvImport", "New bytes: ${pieceName.toByteArray().joinToString { it.toString() }}")
+                            }
+                            isEqual
+                        }
+                        
+                        if (!alreadyExists) {
+                            uniquePieces.add(pieceName)
+                            Log.d("CsvImport", "Added new piece '$pieceName' to set")
+                        } else {
+                            Log.d("CsvImport", "Piece '$pieceName' already exists, skipping")
+                        }
                         
                         importedActivities.add(
                             ImportedActivity(
@@ -215,6 +238,9 @@ class CsvHandler {
             } finally {
                 csvReader.close()
             }
+            
+            Log.d("CsvImport", "Final results: ${importedActivities.size} activities, ${uniquePieces.size} unique pieces")
+            Log.d("CsvImport", "Unique pieces: ${uniquePieces.toList()}")
             
             return ImportResult(importedActivities, uniquePieces, errors)
         }
