@@ -18,9 +18,9 @@ data class SuggestionItem(
 class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel() {
     
     private val now = System.currentTimeMillis()
-    private val twoDaysAgo = now - (2 * 24 * 60 * 60 * 1000)
-    private val sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000)
-    private val thirtyOneDaysAgo = now - (31 * 24 * 60 * 60 * 1000)
+    private val twoDaysAgo = now - (2 * 24 * 60 * 60 * 1000L)
+    private val sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000L)
+    private val thirtyOneDaysAgo = now - (31 * 24 * 60 * 60 * 1000L)
     
     val suggestions: LiveData<List<SuggestionItem>> = 
         repository.getAllPiecesAndTechniques()
@@ -39,6 +39,7 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
                     } else {
                         Int.MAX_VALUE
                     }
+                    
                     
                     if (piece.isFavorite) {
                         // Favorites that haven't been practiced in 2+ days

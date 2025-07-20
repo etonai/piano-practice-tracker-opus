@@ -15,8 +15,27 @@ class StreakCalculator {
             set(Calendar.MILLISECOND, 0)
         }
         
+        // Check if there was activity today
+        val todayStart = today.timeInMillis
+        val todayEndCalendar = today.clone() as Calendar
+        todayEndCalendar.add(Calendar.DAY_OF_YEAR, 1)
+        val todayEnd = todayEndCalendar.timeInMillis
+        
+        val hasActivityToday = activities.any { 
+            it.timestamp >= todayStart && it.timestamp < todayEnd 
+        }
+        
+        // Start from today if there's activity today, otherwise start from yesterday
+        val startDate = if (hasActivityToday) {
+            today.clone() as Calendar
+        } else {
+            val yesterday = today.clone() as Calendar
+            yesterday.add(Calendar.DAY_OF_YEAR, -1)
+            yesterday
+        }
+        
         var streak = 0
-        val currentDate = today.clone() as Calendar
+        val currentDate = startDate.clone() as Calendar
         
         while (true) {
             val dayStart = currentDate.timeInMillis
@@ -31,9 +50,6 @@ class StreakCalculator {
             if (hasActivity) {
                 streak++
                 currentDate.add(Calendar.DAY_OF_YEAR, -1)
-            } else if (currentDate.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) - 1) {
-                // Yesterday had no activity, check if we're still in grace period (today)
-                break
             } else {
                 break
             }

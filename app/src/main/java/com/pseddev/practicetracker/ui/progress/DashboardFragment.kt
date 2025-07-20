@@ -78,7 +78,11 @@ class DashboardFragment : Fragment() {
         
         viewLifecycleOwner.lifecycleScope.launch {
             val streak = viewModel.calculateStreak()
-            binding.currentStreakText.text = "$streak day${if (streak != 1) "s" else ""}"
+            binding.currentStreakText.text = if (streak >= 6) {
+                "$streak day${if (streak != 1) "s" else ""} 🔥"
+            } else {
+                "$streak day${if (streak != 1) "s" else ""}"
+            }
         }
         
         viewModel.weekSummary.observe(viewLifecycleOwner) { summary ->

@@ -38,14 +38,6 @@ class MainFragment : Fragment() {
     }
     
     private fun setupObservers() {
-        viewModel.currentStreak.observe(viewLifecycleOwner) { streak ->
-            binding.textCurrentStreak.text = if (streak > 0) {
-                "Current Streak: $streak days 🔥"
-            } else {
-                "Current Streak: 0 days"
-            }
-        }
-        
         viewModel.favoritesCount.observe(viewLifecycleOwner) { count ->
             val buttonText = if (count > 0) {
                 "Manage Favorites ($count)"
@@ -60,10 +52,6 @@ class MainFragment : Fragment() {
     }
     
     private fun setupClickListeners() {
-        binding.buttonViewProgress.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_progressFragment)
-        }
-        
         binding.buttonAddActivity.setOnClickListener {
             findNavController().navigate(R.id.action_mainFragment_to_addActivityFragment)
         }

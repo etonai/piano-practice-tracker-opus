@@ -14,7 +14,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.1"
+        versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -89,6 +89,9 @@ dependencies {
     
     // JSON serialization
     implementation(libs.gson)
+    
+    // Modern calendar view with date coloring support
+    implementation("com.github.kizitonwose:CalendarView:2.4.1")
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

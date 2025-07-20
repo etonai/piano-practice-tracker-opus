@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/mainFragment">
+    app:startDestination="@id/progressFragment">
 
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.pseddev.practicetracker.ui.main.MainFragment"
-        android:label="Piano Practice Tracker Opus"
+        android:label="Settings"
         tools:layout="@layout/fragment_main">
 
         <action
@@ -27,19 +27,22 @@
             android:id="@+id/action_mainFragment_to_syncFragment"
             app:destination="@id/syncFragment" />
     </fragment>
-    
+
     <fragment
         android:id="@+id/progressFragment"
         android:name="com.pseddev.practicetracker.ui.progress.ViewProgressFragment"
-        android:label="View Progress"
+        android:label="Music Practice Tracker"
         tools:layout="@layout/fragment_view_progress">
-        
+
         <action
             android:id="@+id/action_viewProgressFragment_to_addActivityFragment"
             app:destination="@id/addActivityFragment" />
         <action
             android:id="@+id/action_viewProgressFragment_to_addPieceFragment"
             app:destination="@id/addPieceFragment" />
+        <action
+            android:id="@+id/action_progressFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
     </fragment>
         
     <fragment

@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Piano Track Opus"
+rootProject.name = "Music Practice Tracker"
 include(":app")
