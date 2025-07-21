@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.pseddev.practicetracker.ui.main.MainFragment"
+        android:name="com.pseddev.playstreak.ui.main.MainFragment"
         android:label="Settings"
         tools:layout="@layout/fragment_main">
 
@@ -30,7 +30,7 @@
 
     <fragment
         android:id="@+id/progressFragment"
-        android:name="com.pseddev.practicetracker.ui.progress.ViewProgressFragment"
+        android:name="com.pseddev.playstreak.ui.progress.ViewProgressFragment"
         android:label="PlayStreak 🎵"
         tools:layout="@layout/fragment_view_progress">
 
@@ -50,7 +50,7 @@
         
     <fragment
         android:id="@+id/addActivityFragment"
-        android:name="com.pseddev.practicetracker.ui.addactivity.AddActivityFragment"
+        android:name="com.pseddev.playstreak.ui.addactivity.AddActivityFragment"
         android:label="Add Activity"
         tools:layout="@layout/fragment_add_activity">
         
@@ -65,13 +65,13 @@
     
     <fragment
         android:id="@+id/selectPieceFragment"
-        android:name="com.pseddev.practicetracker.ui.addactivity.SelectPieceFragment"
+        android:name="com.pseddev.playstreak.ui.addactivity.SelectPieceFragment"
         android:label="Select Piece"
         tools:layout="@layout/fragment_select_piece">
         
         <argument
             android:name="activityType"
-            app:argType="com.pseddev.practicetracker.data.entities.ActivityType" />
+            app:argType="com.pseddev.playstreak.data.entities.ActivityType" />
             
         <action
             android:id="@+id/action_selectPieceFragment_to_addNewPieceFragment"
@@ -84,13 +84,13 @@
     
     <fragment
         android:id="@+id/addNewPieceFragment"
-        android:name="com.pseddev.practicetracker.ui.addactivity.AddNewPieceFragment"
+        android:name="com.pseddev.playstreak.ui.addactivity.AddNewPieceFragment"
         android:label="Add New"
         tools:layout="@layout/fragment_add_new_piece">
         
         <argument
             android:name="activityType"
-            app:argType="com.pseddev.practicetracker.data.entities.ActivityType" />
+            app:argType="com.pseddev.playstreak.data.entities.ActivityType" />
             
         <action
             android:id="@+id/action_addNewPieceFragment_to_selectLevelFragment"
@@ -99,13 +99,13 @@
     
     <fragment
         android:id="@+id/selectLevelFragment"
-        android:name="com.pseddev.practicetracker.ui.addactivity.SelectLevelFragment"
+        android:name="com.pseddev.playstreak.ui.addactivity.SelectLevelFragment"
         android:label="Select Level"
         tools:layout="@layout/fragment_select_level">
         
         <argument
             android:name="activityType"
-            app:argType="com.pseddev.practicetracker.data.entities.ActivityType" />
+            app:argType="com.pseddev.playstreak.data.entities.ActivityType" />
         <argument
             android:name="pieceId"
             app:argType="long" />
@@ -114,7 +114,7 @@
             app:argType="string" />
         <argument
             android:name="itemType"
-            app:argType="com.pseddev.practicetracker.data.entities.ItemType" />
+            app:argType="com.pseddev.playstreak.data.entities.ItemType" />
             
         <action
             android:id="@+id/action_selectLevelFragment_to_timeInputFragment"
@@ -131,13 +131,13 @@
     
     <fragment
         android:id="@+id/timeInputFragment"
-        android:name="com.pseddev.practicetracker.ui.addactivity.TimeInputFragment"
+        android:name="com.pseddev.playstreak.ui.addactivity.TimeInputFragment"
         android:label="Practice Time"
         tools:layout="@layout/fragment_time_input">
         
         <argument
             android:name="activityType"
-            app:argType="com.pseddev.practicetracker.data.entities.ActivityType" />
+            app:argType="com.pseddev.playstreak.data.entities.ActivityType" />
         <argument
             android:name="pieceId"
             app:argType="long" />
@@ -158,13 +158,13 @@
     
     <fragment
         android:id="@+id/notesInputFragment"
-        android:name="com.pseddev.practicetracker.ui.addactivity.NotesInputFragment"
+        android:name="com.pseddev.playstreak.ui.addactivity.NotesInputFragment"
         android:label="Add Notes"
         tools:layout="@layout/fragment_notes_input">
         
         <argument
             android:name="activityType"
-            app:argType="com.pseddev.practicetracker.data.entities.ActivityType" />
+            app:argType="com.pseddev.playstreak.data.entities.ActivityType" />
         <argument
             android:name="pieceId"
             app:argType="long" />
@@ -185,13 +185,13 @@
     
     <fragment
         android:id="@+id/summaryFragment"
-        android:name="com.pseddev.practicetracker.ui.addactivity.SummaryFragment"
+        android:name="com.pseddev.playstreak.ui.addactivity.SummaryFragment"
         android:label="Summary"
         tools:layout="@layout/fragment_summary">
         
         <argument
             android:name="activityType"
-            app:argType="com.pseddev.practicetracker.data.entities.ActivityType" />
+            app:argType="com.pseddev.playstreak.data.entities.ActivityType" />
         <argument
             android:name="pieceId"
             app:argType="long" />
@@ -216,25 +216,25 @@
     
     <fragment
         android:id="@+id/addPieceFragment"
-        android:name="com.pseddev.practicetracker.ui.pieces.AddPieceFragment"
+        android:name="com.pseddev.playstreak.ui.pieces.AddPieceFragment"
         android:label="Add Piece"
         tools:layout="@layout/fragment_add_piece" />
     
     <fragment
         android:id="@+id/favoritesFragment"
-        android:name="com.pseddev.practicetracker.ui.favorites.FavoritesFragment"
+        android:name="com.pseddev.playstreak.ui.favorites.FavoritesFragment"
         android:label="Manage Favorites"
         tools:layout="@layout/fragment_favorites" />
         
     <fragment
         android:id="@+id/syncFragment"
-        android:name="com.pseddev.practicetracker.ui.importexport.ImportExportFragment"
+        android:name="com.pseddev.playstreak.ui.importexport.ImportExportFragment"
         android:label="Import/Export Data"
         tools:layout="@layout/fragment_import_export" />
         
     <dialog
         android:id="@+id/syncDialogFragment"
-        android:name="com.pseddev.practicetracker.ui.sync.SyncDialogFragment"
+        android:name="com.pseddev.playstreak.ui.sync.SyncDialogFragment"
         android:label="Sync Dialog">
         
         <action

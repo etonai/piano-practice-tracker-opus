@@ -6,15 +6,15 @@ plugins {
 }
 
 android {
-    namespace = "com.pseddev.practicetracker"
+    namespace = "com.pseddev.playstreak"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.pseddev.practicetracker"
+        applicationId = "com.pseddev.playstreak"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.7.7"
+        versionName = "1.0.8.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
