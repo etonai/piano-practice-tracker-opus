@@ -16,4 +16,7 @@
     <color name="calendar_performance_light">#B3FFB3</color>
     <color name="calendar_performance_medium">#66FF66</color>
     <color name="calendar_performance_dark">#00CC00</color>
+    
+    <!-- Calendar Selection Ring -->
+    <color name="calendar_selection_ring">#FFCC99FF</color>
 </resources>

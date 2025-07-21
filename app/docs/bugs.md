@@ -10,8 +10,8 @@ This document tracks known bugs, their status, and resolutions for the Piano Tra
 
 ## Known Bugs
 
-### Bug #1: 🐛 Calendar Month Swiping Should Be Disabled
-**Status:** Open  
+### Bug #1: 🔄 Calendar Month Swiping Should Be Disabled
+**Status:** In Progress  
 **Date Reported:** 2025-07-20  
 **Severity:** Medium  
 
@@ -33,16 +33,37 @@ Calendar responds to swipe gestures and changes months.
 - App Version: 1.0.8
 - All Android devices
 
-**Additional Information:**  
+**Implementation Details:**  
+Disabled calendar month swiping while preserving day selection functionality:
+- **Touch Event Handling**: Added custom `OnTouchListener` to intercept horizontal swipe gestures
+- **Swipe Detection**: Tracks horizontal movement from initial touch position
+- **Threshold**: Blocks horizontal swipes greater than 30 pixels to prevent accidental month changes
+- **Day Selection Preserved**: Allows small movements and vertical touches for normal day selection
+- **Button Navigation**: Previous/Next month buttons remain fully functional
+
+**Technical Implementation:**
+- **Method**: `disableCalendarSwiping()` in CalendarFragment
+- **Logic**: Intercepts `ACTION_MOVE` events and consumes horizontal swipes beyond threshold
+- **Touch Flow**: `ACTION_DOWN` stores initial X position, `ACTION_MOVE` checks horizontal distance
+- **Selective Blocking**: Only blocks significant horizontal movements (>30px) while allowing day taps
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/CalendarFragment.kt`
+
+**Previous Attempts:**  
 - Attempted fix: `android:nestedScrollingEnabled="false"` in XML layout
 - Attempted fix: Touch event interception - **REVERTED** (blocked day selection)
 - Current status: Day selection restored, but month swiping may still work
+- **Update 2025-07-20**: Confirmed that when a day is selected in the calendar, users can still swipe left/right to change months. This swiping should be completely disabled - only Previous/Next buttons should control month navigation.
+- **Implementation Attempt**: Added custom touch handler with 30px threshold - **PARTIAL SUCCESS** (reduces but doesn't completely eliminate month swiping. User reports occasional successful swipes still occur inconsistently)
+- **Next Steps**: User will test further to identify repeatable reproduction case for the remaining swipe behavior
 
 ---
 
-### Bug #2: 🐛 Calendar Has Too Much Spacing Between Numbers
-**Status:** Open  
+### Bug #2: ❌ Calendar Has Too Much Spacing Between Numbers
+**Status:** Closed  
 **Date Reported:** 2025-07-20  
+**Date Closed:** 2025-07-20  
 **Severity:** Low  
 
 **Description:**  
@@ -62,8 +83,8 @@ Calendar has large gaps between day numbers making it appear spread out.
 - App Version: 1.0.8
 - All Android devices
 
-**Additional Information:**  
-Previous attempts to reduce spacing were reverted due to readability issues with numbers being too small or clipped. Need to find balance between compact spacing and readability.
+**Closure Reason:**  
+Closed without implementing - current calendar spacing is acceptable for readability and touch targets. Previous attempts to reduce spacing caused readability issues. The current layout provides good balance between visual density and usability.
 
 ---
 
@@ -485,9 +506,10 @@ This eliminates visual redundancy while maintaining clean navigation with toolba
 
 ---
 
-### Bug #15: 🔄 Calendar Day Selection Circle Too Small
-**Status:** In Verification  
+### Bug #15: ❌ Calendar Day Selection Circle Too Small
+**Status:** Closed  
 **Date Reported:** 2025-07-20  
+**Date Closed:** 2025-07-20  
 **Severity:** Low  
 
 **Description:**  
@@ -508,15 +530,8 @@ The purple selection circle is too small and barely visible, making it difficult
 - App Version: 1.0.8
 - All Android devices
 
-**Implementation Details:**  
-Increased the calendar day selection circle size by 3x:
-- **Location**: CalendarFragment.kt line 145 in the day selection logic
-- **Change**: Modified `setStroke(3, ...)` to `setStroke(9, ...)` to triple the stroke width
-- **Effect**: Purple selection circle is now 9dp instead of 3dp for better visibility
-- **Color**: Maintains the same purple_500 color for consistency
-
-**Files Modified:**
-- `app/src/main/java/com/pseddev/practicetracker/ui/progress/CalendarFragment.kt`
+**Closure Reason:**  
+Closed as duplicate/superseded by Bug #18. The selection ring visibility has been addressed through the color change to light bright purple in Bug #18, which provides better visibility than just increasing the stroke width. The current 9dp stroke width (implemented in previous fixes) combined with the new light bright purple color provides optimal visibility.
 
 ---
 
@@ -644,6 +659,48 @@ CSV contained different Unicode apostrophe characters:
 - `app/src/main/java/com/pseddev/practicetracker/utils/CsvHandler.kt`
 - `app/src/main/java/com/pseddev/practicetracker/ui/addactivity/AddActivityViewModel.kt`
 - `app/src/main/java/com/pseddev/practicetracker/ui/pieces/AddPieceViewModel.kt`
+
+---
+
+### Bug #18: ✅ Calendar Selection Ring Color Too Dark
+**Status:** Fixed  
+**Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-20  
+**Severity:** Low  
+
+**Description:**  
+The calendar selection ring around the selected date should be changed to a light bright shade of purple for better visual appeal and consistency with the app's design theme.
+
+**Steps to Reproduce:**  
+1. Open the Calendar tab
+2. Tap on any day in the calendar
+3. Observe the color of the selection ring around the selected day
+
+**Expected Behavior:**  
+The selection ring should be a light bright shade of purple that provides good visibility while being visually appealing.
+
+**Actual Behavior:**  
+The current selection ring color may not match the desired light bright purple shade.
+
+**Environment:**  
+- App Version: 1.0.8
+- All Android devices
+
+**Implementation Details:**  
+Updated calendar selection ring to use a light bright purple color:
+- **Color**: Changed from dark purple (`#FF6200EE`) to light bright purple (`#FFCC99FF`)
+- **Visibility**: Light purple provides better contrast against calendar backgrounds
+- **Consistency**: Maintains 9dp stroke width from previous Bug #15 fix
+- **User Experience**: More visually appealing and easier to see selection state
+
+**Technical Implementation:**
+- **Color Resource**: Added `calendar_selection_ring` color (#FFCC99FF) to colors.xml
+- **Calendar Selection**: Updated CalendarFragment to use new color resource instead of purple_500
+- **Stroke Application**: Maintains existing 9dp stroke width with new light bright purple color
+
+**Files Modified:**
+- `app/src/main/res/values/colors.xml`
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/CalendarFragment.kt`
 
 ---
 

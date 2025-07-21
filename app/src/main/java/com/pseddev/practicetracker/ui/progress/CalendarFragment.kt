@@ -90,6 +90,34 @@ class CalendarFragment : Fragment() {
         binding.calendarView.setup(firstMonth, lastMonth, com.kizitonwose.calendar.core.firstDayOfWeekFromLocale())
         binding.calendarView.scrollToMonth(currentMonth)
         
+        // Disable month swiping by intercepting horizontal scroll gestures
+        disableCalendarSwiping()
+    }
+    
+    private fun disableCalendarSwiping() {
+        var initialX = 0f
+        
+        binding.calendarView.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // Store the initial touch position for swipe detection
+                    initialX = event.x
+                    false // Allow the touch to proceed for day selection
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val deltaX = kotlin.math.abs(event.x - initialX)
+                    
+                    // Block horizontal swipes greater than 30 pixels to prevent month changes
+                    // Allow smaller movements for day selection and natural touch behavior
+                    if (deltaX > 30) {
+                        true // Consume horizontal swipes to prevent month navigation
+                    } else {
+                        false // Allow day selection and small movements
+                    }
+                }
+                else -> false // Allow all other touch events (UP, CANCEL, etc.)
+            }
+        }
     }
     
     private fun updateMonthlyActivities(summary: MonthlyActivitySummary) {
@@ -142,7 +170,7 @@ class CalendarFragment : Fragment() {
                     // Add border to selected date
                     val selectedDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.calendar_day_background)?.mutate() as? GradientDrawable
                     selectedDrawable?.setColor(color)
-                    selectedDrawable?.setStroke(9, ContextCompat.getColor(requireContext(), R.color.purple_500))
+                    selectedDrawable?.setStroke(9, ContextCompat.getColor(requireContext(), R.color.calendar_selection_ring))
                     textView.background = selectedDrawable
                 } else {
                     textView.alpha = 0.8f
