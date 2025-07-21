@@ -20,6 +20,12 @@ class AddActivityViewModel(private val repository: PianoRepository) : ViewModel(
     private val _navigateToMain = MutableLiveData<Boolean>()
     val navigateToMain: LiveData<Boolean> = _navigateToMain
     
+    private val _editMode = MutableLiveData<Boolean>(false)
+    val editMode: LiveData<Boolean> = _editMode
+    
+    private val _editActivity = MutableLiveData<Activity?>()
+    val editActivity: LiveData<Activity?> = _editActivity
+    
     fun getPiecesAndTechniques(activityType: ActivityType): LiveData<List<PieceOrTechnique>> {
         return if (activityType == ActivityType.PERFORMANCE) {
             repository.getPieces().asLiveData()
@@ -53,10 +59,54 @@ class AddActivityViewModel(private val repository: PianoRepository) : ViewModel(
         minutes: Int,
         notes: String
     ) {
+        saveActivity(pieceId, activityType, level, performanceType, minutes, notes, System.currentTimeMillis())
+    }
+    
+    fun saveActivity(
+        pieceId: Long,
+        activityType: ActivityType,
+        level: Int,
+        performanceType: String,
+        minutes: Int,
+        notes: String,
+        timestamp: Long
+    ) {
         viewModelScope.launch {
             repository.insertActivity(
                 Activity(
-                    timestamp = System.currentTimeMillis(),
+                    timestamp = timestamp,
+                    pieceOrTechniqueId = pieceId,
+                    activityType = activityType,
+                    level = level,
+                    performanceType = performanceType,
+                    minutes = minutes,
+                    notes = TextNormalizer.normalizeUserInput(notes)
+                )
+            )
+            _navigateToMain.value = true
+        }
+    }
+    
+    fun setEditMode(activity: Activity) {
+        _editMode.value = true
+        _editActivity.value = activity
+    }
+    
+    fun updateActivity(
+        activityId: Long,
+        pieceId: Long,
+        activityType: ActivityType,
+        level: Int,
+        performanceType: String,
+        minutes: Int,
+        notes: String,
+        timestamp: Long
+    ) {
+        viewModelScope.launch {
+            repository.updateActivity(
+                Activity(
+                    id = activityId,
+                    timestamp = timestamp,
                     pieceOrTechniqueId = pieceId,
                     activityType = activityType,
                     level = level,
@@ -71,6 +121,11 @@ class AddActivityViewModel(private val repository: PianoRepository) : ViewModel(
     
     fun doneNavigating() {
         _navigateToMain.value = false
+    }
+    
+    fun clearEditMode() {
+        _editMode.value = false
+        _editActivity.value = null
     }
 }
 

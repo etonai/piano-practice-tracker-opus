@@ -51,16 +51,20 @@ class SelectPieceFragment : Fragment() {
         }
     }
     
+    private fun navigateToSelectLevel(pieceId: Long, pieceName: String, itemType: ItemType) {
+        val action = SelectPieceFragmentDirections
+            .actionSelectPieceFragmentToSelectLevelFragment(
+                activityType = args.activityType,
+                pieceId = pieceId,
+                pieceName = pieceName,
+                itemType = itemType
+            )
+        findNavController().navigate(action)
+    }
+    
     private fun setupRecyclerView() {
         adapter = PieceAdapter { piece ->
-            val action = SelectPieceFragmentDirections
-                .actionSelectPieceFragmentToSelectLevelFragment(
-                    activityType = args.activityType,
-                    pieceId = piece.id,
-                    pieceName = piece.name,
-                    itemType = piece.type
-                )
-            findNavController().navigate(action)
+            navigateToSelectLevel(piece.id, piece.name, piece.type)
         }
         
         binding.recyclerViewPieces.apply {

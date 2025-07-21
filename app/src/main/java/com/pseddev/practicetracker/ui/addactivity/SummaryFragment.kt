@@ -1,9 +1,12 @@
 package com.pseddev.practicetracker.ui.addactivity
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -12,6 +15,7 @@ import com.pseddev.practicetracker.PianoTrackerApplication
 import com.pseddev.practicetracker.data.entities.ActivityType
 import com.pseddev.practicetracker.databinding.FragmentSummaryBinding
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -28,6 +32,8 @@ class SummaryFragment : Fragment() {
         )
     }
     
+    private var currentTimestamp: Long = System.currentTimeMillis()
+    
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -40,30 +46,78 @@ class SummaryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        // Initialize timestamp - use edit activity timestamp if in edit mode, otherwise current time
+        val editActivity = viewModel.editActivity.value
+        val isEditMode = com.pseddev.practicetracker.ui.progress.EditActivityStorage.isEditMode()
+        currentTimestamp = if (editActivity != null && isEditMode) {
+            editActivity.timestamp
+        } else {
+            System.currentTimeMillis()
+        }
+        
+        // Handle back navigation in edit mode
+        if (editActivity != null) {
+            val callback = object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    // In edit mode, go back to Timeline (progressFragment)
+                    findNavController().popBackStack(com.pseddev.practicetracker.R.id.progressFragment, false)
+                }
+            }
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+        }
+        
         setupSummary()
+        setupDateTimeEditing()
         
         binding.buttonSave.setOnClickListener {
-            viewModel.saveActivity(
-                pieceId = args.pieceId,
-                activityType = args.activityType,
-                level = args.level,
-                performanceType = args.performanceType,
-                minutes = args.minutes,
-                notes = args.notes
-            )
+            val editActivity = viewModel.editActivity.value
+            if (editActivity != null) {
+                // Edit mode - update existing activity
+                viewModel.updateActivity(
+                    activityId = editActivity.id,
+                    pieceId = args.pieceId,
+                    activityType = args.activityType,
+                    level = args.level,
+                    performanceType = args.performanceType,
+                    minutes = args.minutes,
+                    notes = args.notes,
+                    timestamp = currentTimestamp  // Use potentially modified timestamp
+                )
+            } else {
+                // Add mode - save new activity
+                viewModel.saveActivity(
+                    pieceId = args.pieceId,
+                    activityType = args.activityType,
+                    level = args.level,
+                    performanceType = args.performanceType,
+                    minutes = args.minutes,
+                    notes = args.notes,
+                    timestamp = currentTimestamp
+                )
+            }
         }
         
         binding.buttonCancel.setOnClickListener {
-            // Navigate back to the screen that started the add activity flow
-            // This will pop back to either progressFragment (Dashboard/Calendar) or mainFragment (Settings)
-            findNavController().popBackStack(com.pseddev.practicetracker.R.id.addActivityFragment, true)
+            val editActivity = viewModel.editActivity.value
+            if (editActivity != null) {
+                // In edit mode, go back to Timeline (progressFragment)
+                findNavController().popBackStack(com.pseddev.practicetracker.R.id.progressFragment, false)
+            } else {
+                // In add mode, navigate back to the screen that started the add activity flow
+                findNavController().popBackStack(com.pseddev.practicetracker.R.id.addActivityFragment, true)
+            }
         }
         
         viewModel.navigateToMain.observe(viewLifecycleOwner) { shouldNavigate ->
             if (shouldNavigate) {
-                // Navigate back to the screen that started the add activity flow
-                // This will pop back to either progressFragment (Dashboard/Calendar) or mainFragment (Settings)
-                findNavController().popBackStack(com.pseddev.practicetracker.R.id.addActivityFragment, true)
+                val editActivity = viewModel.editActivity.value
+                if (editActivity != null) {
+                    // In edit mode, go back to Timeline (progressFragment)
+                    findNavController().popBackStack(com.pseddev.practicetracker.R.id.progressFragment, false)
+                } else {
+                    // In add mode, navigate back to the screen that started the add activity flow
+                    findNavController().popBackStack(com.pseddev.practicetracker.R.id.addActivityFragment, true)
+                }
                 viewModel.doneNavigating()
             }
         }
@@ -106,7 +160,20 @@ class SummaryFragment : Fragment() {
         }
         
         val dateFormat = SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.US)
-        binding.textDate.text = "Date: ${dateFormat.format(Date())}"
+        val editActivity = viewModel.editActivity.value
+        if (editActivity != null) {
+            // Edit mode - show edit buttons and current timestamp
+            binding.textDate.text = "Date: ${dateFormat.format(Date(currentTimestamp))}"
+            binding.buttonSave.text = "Update"
+            binding.buttonEditDate.visibility = View.VISIBLE
+            binding.buttonEditTime.visibility = View.VISIBLE
+        } else {
+            // Add mode - show current date, no edit buttons
+            binding.textDate.text = "Date: ${dateFormat.format(Date(currentTimestamp))}"
+            binding.buttonSave.text = "Save"
+            binding.buttonEditDate.visibility = View.GONE
+            binding.buttonEditTime.visibility = View.GONE
+        }
         
         if (args.notes.isNotEmpty()) {
             binding.textNotes.text = "Notes: ${args.notes}"
@@ -114,6 +181,72 @@ class SummaryFragment : Fragment() {
         } else {
             binding.textNotes.visibility = View.GONE
         }
+    }
+    
+    private fun setupDateTimeEditing() {
+        binding.buttonEditDate.setOnClickListener {
+            showDatePicker()
+        }
+        
+        binding.buttonEditTime.setOnClickListener {
+            showTimePicker()
+        }
+    }
+    
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = currentTimestamp
+        
+        val datePicker = DatePickerDialog(
+            requireContext(),
+            { _, year, month, dayOfMonth ->
+                // Update the date part of currentTimestamp
+                val newCalendar = Calendar.getInstance()
+                newCalendar.timeInMillis = currentTimestamp
+                newCalendar.set(Calendar.YEAR, year)
+                newCalendar.set(Calendar.MONTH, month)
+                newCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                
+                currentTimestamp = newCalendar.timeInMillis
+                updateDateDisplay()
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        
+        datePicker.show()
+    }
+    
+    private fun showTimePicker() {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = currentTimestamp
+        
+        val timePicker = TimePickerDialog(
+            requireContext(),
+            { _, hourOfDay, minute ->
+                // Update the time part of currentTimestamp
+                val newCalendar = Calendar.getInstance()
+                newCalendar.timeInMillis = currentTimestamp
+                newCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                newCalendar.set(Calendar.MINUTE, minute)
+                newCalendar.set(Calendar.SECOND, 0)
+                newCalendar.set(Calendar.MILLISECOND, 0)
+                
+                currentTimestamp = newCalendar.timeInMillis
+                updateDateDisplay()
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            false // Use 12-hour format
+        )
+        
+        timePicker.show()
+    }
+    
+    private fun updateDateDisplay() {
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.US)
+        binding.textDate.text = "Date: ${dateFormat.format(Date(currentTimestamp))}"
     }
     
     override fun onDestroyView() {

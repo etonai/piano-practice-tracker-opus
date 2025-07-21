@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pseddev.practicetracker.PianoTrackerApplication
 import com.pseddev.practicetracker.databinding.FragmentTimelineBinding
@@ -38,9 +39,14 @@ class TimelineFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        adapter = TimelineAdapter { activityWithPiece ->
-            showDeleteConfirmationDialog(activityWithPiece)
-        }
+        adapter = TimelineAdapter(
+            onDeleteClick = { activityWithPiece ->
+                showDeleteConfirmationDialog(activityWithPiece)
+            },
+            onEditClick = { activityWithPiece ->
+                editActivity(activityWithPiece)
+            }
+        )
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
         
@@ -57,6 +63,24 @@ class TimelineFragment : Fragment() {
                 adapter.submitList(activities)
             }
         }
+    }
+    
+    private fun editActivity(activityWithPiece: ActivityWithPiece) {
+        // Store the activity data for edit mode
+        EditActivityStorage.setEditActivity(
+            activityWithPiece.activity, 
+            activityWithPiece.pieceOrTechnique.name,
+            activityWithPiece.pieceOrTechnique.type
+        )
+        
+        // Navigate directly to select level fragment for editing
+        val action = ViewProgressFragmentDirections.actionViewProgressFragmentToSelectLevelFragment(
+            activityType = activityWithPiece.activity.activityType,
+            pieceId = activityWithPiece.activity.pieceOrTechniqueId,
+            pieceName = activityWithPiece.pieceOrTechnique.name,
+            itemType = activityWithPiece.pieceOrTechnique.type
+        )
+        findNavController().navigate(action)
     }
     
     private fun showDeleteConfirmationDialog(activityWithPiece: ActivityWithPiece) {

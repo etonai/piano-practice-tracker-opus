@@ -5,9 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.pseddev.practicetracker.PianoTrackerApplication
 import com.pseddev.practicetracker.databinding.FragmentTimeInputBinding
 
 class TimeInputFragment : Fragment() {
@@ -16,6 +19,12 @@ class TimeInputFragment : Fragment() {
     private val binding get() = _binding!!
     
     private val args: TimeInputFragmentArgs by navArgs()
+    
+    private val viewModel: AddActivityViewModel by activityViewModels {
+        AddActivityViewModelFactory(
+            (requireActivity().application as PianoTrackerApplication).repository
+        )
+    }
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,6 +37,24 @@ class TimeInputFragment : Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Handle back navigation in edit mode
+        val editActivity = viewModel.editActivity.value
+        if (editActivity != null) {
+            val callback = object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    findNavController().popBackStack(com.pseddev.practicetracker.R.id.addActivityFragment, true)
+                }
+            }
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+        }
+        
+        // Pre-populate time input in edit mode
+        viewModel.editActivity.observe(viewLifecycleOwner) { editActivity ->
+            if (editActivity != null && editActivity.minutes > 0) {
+                binding.editTextMinutes.setText(editActivity.minutes.toString())
+            }
+        }
         
         binding.buttonContinue.setOnClickListener {
             val minutesText = binding.editTextMinutes.text.toString()

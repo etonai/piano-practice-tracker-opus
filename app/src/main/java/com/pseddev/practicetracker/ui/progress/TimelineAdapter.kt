@@ -11,7 +11,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class TimelineAdapter(
-    private val onDeleteClick: (ActivityWithPiece) -> Unit
+    private val onDeleteClick: (ActivityWithPiece) -> Unit,
+    private val onEditClick: (ActivityWithPiece) -> Unit
 ) : ListAdapter<ActivityWithPiece, TimelineAdapter.ViewHolder>(DiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -22,7 +23,7 @@ class TimelineAdapter(
     }
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position), onDeleteClick)
+        holder.bind(getItem(position), onDeleteClick, onEditClick)
     }
     
     class ViewHolder(private val binding: ItemTimelineActivityBinding) : 
@@ -31,7 +32,7 @@ class TimelineAdapter(
         private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
         private val timeFormat = SimpleDateFormat("h:mm a", Locale.US)
         
-        fun bind(item: ActivityWithPiece, onDeleteClick: (ActivityWithPiece) -> Unit) {
+        fun bind(item: ActivityWithPiece, onDeleteClick: (ActivityWithPiece) -> Unit, onEditClick: (ActivityWithPiece) -> Unit) {
             val activity = item.activity
             val piece = item.pieceOrTechnique
             
@@ -77,6 +78,10 @@ class TimelineAdapter(
             
             binding.deleteButton.setOnClickListener {
                 onDeleteClick(item)
+            }
+            
+            binding.editButton.setOnClickListener {
+                onEditClick(item)
             }
         }
     }

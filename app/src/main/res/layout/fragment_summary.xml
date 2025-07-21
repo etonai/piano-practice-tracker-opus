@@ -62,12 +62,40 @@
             android:textSize="16sp"
             android:layout_marginBottom="8dp" />
 
-        <TextView
-            android:id="@+id/textDate"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/textDate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/buttonEditDate"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Edit Date"
+                android:textSize="12sp"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <Button
+                android:id="@+id/buttonEditTime"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Edit Time"
+                android:textSize="12sp"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/textNotes"

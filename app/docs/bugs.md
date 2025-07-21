@@ -882,9 +882,10 @@ Completed comprehensive rebranding from "Music Practice Tracker" to "PlayStreak"
 
 ---
 
-### Bug #22: 🐛 Add Edit Functionality for Timeline Entries
-**Status:** Open  
+### Bug #22: ✅ Add Edit Functionality for Timeline Entries
+**Status:** Fixed  
 **Date Reported:** 2025-07-21  
+**Date Fixed:** 2025-07-21  
 **Severity:** Medium  
 
 **Description:**  
@@ -917,12 +918,104 @@ Timeline entries can only be deleted, not edited. Users cannot modify the date, 
 - Should maintain data integrity and validation (e.g., can't set future dates)
 - Edit action could be triggered by long press or dedicated edit button alongside the existing delete button
 
+**Implementation Details:**
+Completed comprehensive edit functionality for timeline entries:
+- **Edit Button**: Added edit icon button next to delete button in timeline items
+- **Navigation Flow**: Edit button navigates to add activity flow with pre-populated data
+- **Data Storage**: Created EditActivityStorage for passing activity data between fragments
+- **Database Support**: Added updateActivity method to repository and DAO layers
+- **Edit Mode Detection**: Modified AddActivityViewModel to track edit mode state
+- **Pre-population**: All add activity fragments now pre-populate fields in edit mode:
+  - AddActivityFragment: Skips activity type selection and navigates directly to piece selection
+  - SelectPieceFragment: Automatically navigates to level selection with existing piece
+  - SelectLevelFragment: Pre-selects level and performance type from existing activity
+  - TimeInputFragment: Pre-fills minutes field with existing duration
+  - NotesInputFragment: Pre-fills notes field with existing notes
+  - SummaryFragment: Shows original timestamp, updates button text to "Update", uses updateActivity instead of saveActivity
+- **Timestamp Preservation**: Edit mode preserves original activity timestamp
+- **Timeline Refresh**: Updated activities automatically refresh in timeline through LiveData
+- **Date/Time Editing**: Added dedicated "Edit Date" and "Edit Time" buttons in edit mode
+- **Date/Time Pickers**: Native Android DatePickerDialog and TimePickerDialog for intuitive editing
+- **Real-time Updates**: Date display updates immediately when date/time is changed
+- **Smart Back Navigation**: In edit mode, back button skips intermediate screens and returns directly to Timeline
+
+**Technical Implementation:**
+- **Database Layer**: Added `suspend fun update(activity: Activity)` to ActivityDao (already existed)
+- **Repository Layer**: Added `suspend fun updateActivity(activity: Activity)` to PianoRepository
+- **ViewModel Layer**: Added edit mode support to AddActivityViewModel with `setEditMode()` and `updateActivity()` methods
+- **UI Layer**: Enhanced timeline item layout with edit button and modified all add activity fragments for edit mode
+- **Data Flow**: EditActivityStorage → AddActivityViewModel → Repository → Database → LiveData → Timeline refresh
+- **Date/Time Management**: Custom timestamp tracking with Calendar-based date/time manipulation
+- **Enhanced ViewModel**: Added overloaded saveActivity method with custom timestamp support
+- **Back Navigation**: OnBackPressedCallback implementation in all edit mode fragments to bypass skipped screens
+
+**Files Modified:**
+- `app/src/main/res/layout/item_timeline_activity.xml`
+- `app/src/main/res/drawable/ic_edit.xml` (new)
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/TimelineAdapter.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/TimelineFragment.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/EditActivityStorage.kt` (new)
+- `app/src/main/java/com/pseddev/practicetracker/data/repository/PianoRepository.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/addactivity/AddActivityViewModel.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/addactivity/AddActivityFragment.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/addactivity/SelectPieceFragment.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/addactivity/SelectLevelFragment.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/addactivity/TimeInputFragment.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/addactivity/NotesInputFragment.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/addactivity/SummaryFragment.kt`
+
+---
+
+### Bug #23: 🐛 Update Package Structure and Code References to PlayStreak
+**Status:** Open  
+**Date Reported:** 2025-07-21  
+**Severity:** Medium  
+
+**Description:**  
+The app package structure and internal code references should be updated to use "playstreak" instead of "practicetracker" to align with the new branding. This includes updating the main package name from `com.pseddev.practicetracker` to `com.pseddev.playstreak` and reviewing other places in the code where "playstreak" would make more sense than "practicetracker".
+
+**Steps to Reproduce:**  
+1. Review current package structure in the codebase
+2. Look for references to "practicetracker" in package names, class names, and variable names
+3. Identify areas where "playstreak" would be more appropriate
+
+**Expected Behavior:**  
+All package names, class names, and relevant code references should use "playstreak" terminology to maintain consistency with the new app branding.
+
+**Actual Behavior:**  
+The codebase currently uses "practicetracker" throughout the package structure and various code references.
+
+**Environment:**  
+- App Version: 1.0.7.7
+- All Android devices
+
+**Areas to Review and Update:**  
+- **Package Structure**: `com.pseddev.practicetracker` → `com.pseddev.playstreak`
+- **Application Class**: `PianoTrackerApplication` → potential rename
+- **Database Names**: Any references to "piano_tracker" or "practice_tracker" 
+- **File Names**: CSV export files, backup files, etc.
+- **Class Names**: Classes that reference "tracker" or "piano"
+- **Variable Names**: Variables that could better reflect "playstreak" terminology
+- **String Resources**: Internal string references (not user-facing)
+- **Gradle Configuration**: Application ID and related configurations
+
 **Implementation Considerations:**
-- Reuse existing add activity fragments for edit mode
-- Pass activity data to edit fragments for pre-population
-- Update database operations to support activity modification
-- Ensure timeline refreshes after successful edits
-- Consider user experience for accessing edit functionality
+- This is a significant refactoring that will affect many files
+- Need to ensure all imports are updated correctly
+- Database migration may be needed if database names change
+- Consider backward compatibility for existing installations
+- Update build configuration (applicationId, etc.)
+- Review impact on existing user data and settings
+
+**Priority Notes:**
+- Should be done before major release to avoid migration issues
+- Consider doing this as part of a version bump
+- May want to coordinate with other structural changes
+
+**Additional Information:**  
+- This change aligns with the recent app rebranding from "Music Practice Tracker" to "PlayStreak"
+- Will provide better consistency between user-facing branding and internal code structure
+- Should improve code maintainability and developer understanding
 
 ---
 

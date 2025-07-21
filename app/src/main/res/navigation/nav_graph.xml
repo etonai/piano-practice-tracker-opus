@@ -41,6 +41,9 @@
             android:id="@+id/action_viewProgressFragment_to_addPieceFragment"
             app:destination="@id/addPieceFragment" />
         <action
+            android:id="@+id/action_viewProgressFragment_to_selectLevelFragment"
+            app:destination="@id/selectLevelFragment" />
+        <action
             android:id="@+id/action_progressFragment_to_mainFragment"
             app:destination="@id/mainFragment" />
     </fragment>
@@ -54,6 +57,10 @@
         <action
             android:id="@+id/action_addActivityFragment_to_selectPieceFragment"
             app:destination="@id/selectPieceFragment" />
+            
+        <action
+            android:id="@+id/action_addActivityFragment_to_selectLevelFragment"
+            app:destination="@id/selectLevelFragment" />
     </fragment>
     
     <fragment

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -41,6 +42,34 @@ class SelectLevelFragment : Fragment() {
         binding.textPieceName.text = args.pieceName
         
         setupLevelOptions()
+        
+        // Check if we're in edit mode and set up the ViewModel
+        val editActivity = com.pseddev.practicetracker.ui.progress.EditActivityStorage.getEditActivity()
+        if (editActivity != null) {
+            // Set edit mode in ViewModel
+            viewModel.setEditMode(editActivity)
+        }
+        
+        // Pre-populate fields in edit mode
+        viewModel.editActivity.observe(viewLifecycleOwner) { editActivity ->
+            if (editActivity != null) {
+                // Pre-select the level
+                when (editActivity.level) {
+                    1 -> binding.radioLevel1.isChecked = true
+                    2 -> binding.radioLevel2.isChecked = true
+                    3 -> binding.radioLevel3.isChecked = true
+                    4 -> binding.radioLevel4.isChecked = true
+                }
+                
+                // Pre-select performance type if applicable
+                if (args.activityType == ActivityType.PERFORMANCE) {
+                    when (editActivity.performanceType) {
+                        "online" -> binding.radioPerformanceOnline.isChecked = true
+                        "live" -> binding.radioPerformanceLive.isChecked = true
+                    }
+                }
+            }
+        }
         
         binding.buttonContinue.setOnClickListener {
             val selectedLevel = when {
