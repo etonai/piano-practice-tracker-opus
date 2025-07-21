@@ -704,6 +704,119 @@ Updated calendar selection ring to use a light bright purple color:
 
 ---
 
+### Bug #19: ✅ Dashboard Suggestions Time Display Lacks Context
+**Status:** Fixed  
+**Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-20  
+**Severity:** Low  
+
+**Description:**  
+In the Suggestions section on the Dashboard tab, the time display for pieces shows relative time like "16 days ago" without specifying whether this refers to the last practice or last performance. The text should be more descriptive to provide better context for both the Suggestions section and any other areas on the Dashboard that display similar time information.
+
+**Steps to Reproduce:**  
+1. Open the Dashboard tab
+2. Scroll to the Suggestions section
+3. Observe the time display for suggested pieces
+4. Check other Dashboard areas that may display similar time information
+
+**Expected Behavior:**  
+The time display should specify the activity type throughout the Dashboard, such as:
+- "Last practice 16 days ago"
+- "Last performance 16 days ago"
+
+**Actual Behavior:**  
+The time display only shows relative time like "16 days ago" without specifying whether it was practice or performance.
+
+**Environment:**  
+- App Version: 1.0.7.5
+- All Android devices
+
+**Implementation Details:**  
+Updated Dashboard suggestions to show activity type context in time displays:
+- **Activity Type Detection**: Enhanced suggestions logic to include activity type from `lastActivity.activityType`
+- **Descriptive Text**: Changed from generic "16 days ago" to specific "Last practice 16 days ago" or "Last performance 16 days ago"
+- **Consistent Format**: Applied to both favorite and non-favorite suggestions throughout Dashboard
+- **User Context**: Helps users make informed decisions about which pieces to practice next
+
+**Technical Implementation:**
+- **Dashboard**: DashboardViewModel.kt suggestions generation logic updated (lines 117-123 and 135-141)
+- **Suggestions Tab**: SuggestionsViewModel.kt suggestions generation logic updated (lines 53-59 and 71-77)
+- **Logic**: Added activity type detection using `when (lastActivity!!.activityType)` clause in both ViewModels
+- **Text Format**: "Last practice X days ago" or "Last performance X days ago" 
+- **Scope**: Applied to all suggestion time displays across Dashboard and dedicated Suggestions tab
+
+**Root Cause:** The app has two separate suggestion implementations:
+1. **Dashboard suggestions** (condensed view) - was already fixed in initial implementation
+2. **Dedicated Suggestions tab** (full view) - still showed generic time text until this fix
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/DashboardViewModel.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/SuggestionsViewModel.kt`
+
+---
+
+### Bug #20: ✅ Missing Favorite Toggle in Pieces Tab
+**Status:** Fixed  
+**Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-20  
+**Severity:** Medium  
+
+**Description:**  
+The Pieces tab should allow users to directly toggle whether a piece is marked as a favorite without having to navigate to the separate "Manage Favorites" screen. This would provide a more convenient way to manage favorites while viewing the pieces list.
+
+**Steps to Reproduce:**  
+1. Open the Pieces tab
+2. View the list of pieces/techniques
+3. Look for a way to mark/unmark pieces as favorites
+
+**Expected Behavior:**  
+Each piece in the Pieces tab should have a favorite toggle (such as a star icon) that allows users to:
+- Mark non-favorite pieces as favorites by tapping the star
+- Unmark favorite pieces by tapping the filled star
+- See visual indication of current favorite status
+
+**Actual Behavior:**  
+The Pieces tab only displays piece information without any way to manage favorite status. Users must navigate to Settings > Manage Favorites to change favorite status.
+
+**Environment:**  
+- App Version: 1.0.7.5
+- All Android devices
+
+**Additional Information:**  
+- Could use star icon (filled for favorites, outline for non-favorites)
+- Should update the favorites list immediately when toggled
+- May need to refresh Dashboard suggestions when favorites change
+- Consider adding this to the same location as the sorting options
+
+**Implementation Details:**  
+Added direct favorite toggle functionality to Pieces tab:
+- **Interactive Star Icon**: Made favorite icon clickable with proper touch target (32dp x 32dp)
+- **Visual States**: Shows filled star for favorites, outline star for non-favorites
+- **Immediate Toggle**: Tap star icon to instantly toggle favorite status
+- **Database Update**: Updates PieceOrTechnique entity immediately via ViewModel
+- **No Navigation Required**: Eliminates need to navigate to Settings > Manage Favorites
+
+**Technical Implementation:**
+- **Layout**: Updated item_piece_stats.xml to make star icon always visible and clickable
+- **Adapter**: Enhanced PiecesAdapter with onFavoriteToggle callback and proper icon state management
+- **ViewModel**: Added toggleFavorite() method to PiecesViewModel using viewModelScope.launch
+- **Fragment**: Wired favorite toggle callback in PiecesFragment to connect UI to ViewModel
+- **Icon States**: ic_star_filled for favorites, ic_star_outline for non-favorites
+
+**User Experience Impact:**  
+- Eliminates multiple navigation steps previously required to manage favorites
+- Provides immediate visual feedback for favorite status changes
+- Aligns with modern mobile app patterns for favorite management
+- Significantly improves usability and convenience
+
+**Files Modified:**
+- `app/src/main/res/layout/item_piece_stats.xml`
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/PiecesAdapter.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/PiecesViewModel.kt`
+- `app/src/main/java/com/pseddev/practicetracker/ui/progress/PiecesFragment.kt`
+
+---
+
 ## Bug Report Template
 
 When reporting new bugs, please use this template:

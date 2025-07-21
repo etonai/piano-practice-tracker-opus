@@ -1,6 +1,7 @@
 package com.pseddev.practicetracker.ui.progress
 
 import androidx.lifecycle.*
+import com.pseddev.practicetracker.data.entities.ActivityType
 import com.pseddev.practicetracker.data.entities.ItemType
 import com.pseddev.practicetracker.data.entities.PieceOrTechnique
 import com.pseddev.practicetracker.data.repository.PianoRepository
@@ -49,7 +50,13 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
                                     piece = piece,
                                     lastActivityDate = lastActivityDate,
                                     daysSinceLastActivity = daysSince,
-                                    suggestionReason = "Favorite piece - ${if (lastActivityDate == null) "Never practiced" else "$daysSince days ago"}"
+                                    suggestionReason = if (lastActivityDate == null) "Favorite piece - Never practiced" else {
+                                        val activityTypeText = when (lastActivity!!.activityType) {
+                                            ActivityType.PRACTICE -> "Last practice"
+                                            ActivityType.PERFORMANCE -> "Last performance"
+                                        }
+                                        "Favorite piece - $activityTypeText $daysSince days ago"
+                                    }
                                 )
                             )
                         }
@@ -61,7 +68,13 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
                                     piece = piece,
                                     lastActivityDate = lastActivityDate,
                                     daysSinceLastActivity = daysSince,
-                                    suggestionReason = "$daysSince days ago"
+                                    suggestionReason = {
+                                        val activityTypeText = when (lastActivity!!.activityType) {
+                                            ActivityType.PRACTICE -> "Last practice"
+                                            ActivityType.PERFORMANCE -> "Last performance"
+                                        }
+                                        "$activityTypeText $daysSince days ago"
+                                    }()
                                 )
                             )
                         }

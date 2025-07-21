@@ -41,9 +41,14 @@ class PiecesFragment : Fragment() {
         setupClickListeners()
         setupSortingControls()
         
-        adapter = PiecesAdapter { pieceWithStats ->
-            viewModel.selectPiece(pieceWithStats.piece.id)
-        }
+        adapter = PiecesAdapter(
+            onPieceClick = { pieceWithStats ->
+                viewModel.selectPiece(pieceWithStats.piece.id)
+            },
+            onFavoriteToggle = { pieceWithStats ->
+                viewModel.toggleFavorite(pieceWithStats)
+            }
+        )
         
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter

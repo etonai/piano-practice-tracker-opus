@@ -5,6 +5,7 @@ import com.pseddev.practicetracker.data.entities.Activity
 import com.pseddev.practicetracker.data.entities.ItemType
 import com.pseddev.practicetracker.data.entities.PieceOrTechnique
 import com.pseddev.practicetracker.data.repository.PianoRepository
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -121,6 +122,13 @@ class PiecesViewModel(private val repository: PianoRepository) : ViewModel() {
     
     fun getCurrentSortType(): SortType = sortType.value
     fun getCurrentSortDirection(): SortDirection = sortDirection.value
+    
+    fun toggleFavorite(pieceWithStats: PieceWithStats) {
+        viewModelScope.launch {
+            val updatedPiece = pieceWithStats.piece.copy(isFavorite = !pieceWithStats.piece.isFavorite)
+            repository.updatePieceOrTechnique(updatedPiece)
+        }
+    }
 }
 
 class PiecesViewModelFactory(private val repository: PianoRepository) : ViewModelProvider.Factory {

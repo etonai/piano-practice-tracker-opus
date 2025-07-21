@@ -10,14 +10,15 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class PiecesAdapter(
-    private val onPieceClick: (PieceWithStats) -> Unit
+    private val onPieceClick: (PieceWithStats) -> Unit,
+    private val onFavoriteToggle: (PieceWithStats) -> Unit
 ) : ListAdapter<PieceWithStats, PiecesAdapter.ViewHolder>(DiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemPieceStatsBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return ViewHolder(binding, onPieceClick)
+        return ViewHolder(binding, onPieceClick, onFavoriteToggle)
     }
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -26,7 +27,8 @@ class PiecesAdapter(
     
     class ViewHolder(
         private val binding: ItemPieceStatsBinding,
-        private val onPieceClick: (PieceWithStats) -> Unit
+        private val onPieceClick: (PieceWithStats) -> Unit,
+        private val onFavoriteToggle: (PieceWithStats) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
         
         private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
@@ -41,15 +43,19 @@ class PiecesAdapter(
                 binding.lastActivityText.text = "No activities yet"
             }
             
-            // Show/hide favorite icon
+            // Set favorite icon based on favorite status
             if (item.piece.isFavorite) {
-                binding.favoriteIcon.visibility = android.view.View.VISIBLE
+                binding.favoriteIcon.setImageResource(com.pseddev.practicetracker.R.drawable.ic_star_filled)
             } else {
-                binding.favoriteIcon.visibility = android.view.View.GONE
+                binding.favoriteIcon.setImageResource(com.pseddev.practicetracker.R.drawable.ic_star_outline)
             }
             
             binding.root.setOnClickListener {
                 onPieceClick(item)
+            }
+            
+            binding.favoriteIcon.setOnClickListener {
+                onFavoriteToggle(item)
             }
         }
     }
