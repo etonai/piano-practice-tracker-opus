@@ -186,7 +186,7 @@ When reporting issues:
 
 ## License
 
-*License information would go here*
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Development
 
