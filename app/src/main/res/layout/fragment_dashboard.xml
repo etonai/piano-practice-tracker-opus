@@ -30,7 +30,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Current Streak"
+                    android:text="Current PlayStreak 🎵"
                     android:textAppearance="?attr/textAppearanceSubtitle1" />
 
                 <TextView

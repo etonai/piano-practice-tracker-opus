@@ -817,6 +817,115 @@ Added direct favorite toggle functionality to Pieces tab:
 
 ---
 
+### Bug #21: ✅ Rebrand App from "Music Practice Tracker" to "PlayStreak"
+**Status:** Fixed  
+**Date Reported:** 2025-07-20  
+**Date Fixed:** 2025-07-21  
+**Severity:** Medium  
+
+**Description:**  
+The app needs to be rebranded from "Music Practice Tracker" to "PlayStreak" throughout the application. This includes updating all user-facing text, titles, and branding elements. Where appropriate, the full branding should be "PlayStreak 🎵" to include the musical note emoji.
+
+**Steps to Reproduce:**  
+1. Review all user-facing text in the app
+2. Look for instances of "Music Practice Tracker" 
+3. Check Dashboard for "Current Streak" text
+4. Review app titles, headers, and branding elements
+
+**Expected Behavior:**  
+All instances should be updated to the new branding:
+- "Music Practice Tracker" → "PlayStreak" or "PlayStreak 🎵" where appropriate
+- Dashboard "Current Streak" → "Current PlayStreak 🎵"
+- App titles and headers should reflect new branding
+- Maintain consistency throughout the user interface
+
+**Actual Behavior:**  
+The app currently uses "Music Practice Tracker" branding throughout.
+
+**Environment:**  
+- App Version: 1.0.7.6
+- All Android devices
+
+**Rebranding Requirements:**  
+- **App Name**: Change to "PlayStreak"
+- **Full Branding**: Use "PlayStreak 🎵" where appropriate for visual appeal
+- **Dashboard Streak**: Change "Current Streak" to "Current PlayStreak 🎵"
+- **Consistency**: Ensure uniform branding across all user-facing elements
+- **Scope**: Update titles, headers, welcome messages, and any other branding text
+
+**Areas to Update:**  
+- App navigation titles
+- Dashboard headers and streak display
+- Settings screen titles
+- Any welcome or introductory text
+- Fragment labels and titles
+- README and documentation (if user-facing)
+
+**Implementation Details:**  
+Completed comprehensive rebranding from "Music Practice Tracker" to "PlayStreak":
+- **App Name**: Updated strings.xml app_name to "PlayStreak 🎵"
+- **Navigation**: Changed main navigation label from "Music Practice Tracker" to "PlayStreak" 
+- **Dashboard**: Updated "Current Streak" to "Current PlayStreak 🎵" in fragment_dashboard.xml
+- **Google Drive**: Changed APPLICATION_NAME in GoogleDriveHelper.kt to "PlayStreak"
+- **Project**: Updated settings.gradle.kts rootProject.name to "PlayStreak"
+- **Documentation**: Updated README.md title to "PlayStreak 🎵" and version to 1.0.7.6
+- **License**: Updated LICENSE copyright from "Music Practice Tracker" to "PlayStreak"
+
+**Files Modified:**
+- `app/src/main/res/values/strings.xml`
+- `app/src/main/res/navigation/nav_graph.xml`  
+- `app/src/main/res/layout/fragment_dashboard.xml`
+- `app/src/main/java/com/pseddev/practicetracker/utils/GoogleDriveHelper.kt`
+- `settings.gradle.kts`
+- `README.md`
+- `LICENSE`
+
+---
+
+### Bug #22: 🐛 Add Edit Functionality for Timeline Entries
+**Status:** Open  
+**Date Reported:** 2025-07-21  
+**Severity:** Medium  
+
+**Description:**  
+Users should be able to edit existing entries in the timeline system, specifically allowing them to modify the time and date of practice sessions and performances. This would provide flexibility to correct data entry errors or adjust timing information after activities have been logged.
+
+**Steps to Reproduce:**  
+1. Open the Timeline tab
+2. View existing activity entries
+3. Look for edit options on timeline entries
+
+**Expected Behavior:**  
+Users should be able to:
+- Tap on timeline entries to edit them
+- Modify the date and time of the activity
+- Save changes and see them reflected in the timeline
+- Cancel edits without losing original data
+- Have edited entries update across all views (Dashboard, Calendar, etc.)
+
+**Actual Behavior:**  
+Timeline entries can only be deleted, not edited. Users cannot modify the date, time, or other details of existing activities.
+
+**Environment:**  
+- App Version: 1.0.7.6
+- All Android devices
+
+**Additional Information:**  
+- Edit functionality should allow modification of date, time, and potentially other fields like notes or level
+- Changes should propagate to all views that display the activity data
+- Consider using the existing add activity flow as a template for the edit interface
+- Should maintain data integrity and validation (e.g., can't set future dates)
+- Edit action could be triggered by long press or dedicated edit button alongside the existing delete button
+
+**Implementation Considerations:**
+- Reuse existing add activity fragments for edit mode
+- Pass activity data to edit fragments for pre-population
+- Update database operations to support activity modification
+- Ensure timeline refreshes after successful edits
+- Consider user experience for accessing edit functionality
+
+---
+
 ## Bug Report Template
 
 When reporting new bugs, please use this template:

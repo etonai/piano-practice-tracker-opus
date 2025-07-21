@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Music Practice Tracker</string>
+    <string name="app_name">PlayStreak 🎵</string>
     
     <!-- Practice Levels -->
     <string name="practice_level_1">Level 1 - Essentials</string>

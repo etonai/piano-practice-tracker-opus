@@ -1,8 +1,8 @@
-# Music Practice Tracker
+# PlayStreak 🎵
 
-A comprehensive Android application for tracking music practice activities, performances, and progress. Built with modern Android development practices using Kotlin and AndroidX libraries.
+An Android application for tracking music practice activities, performances, and progress. Built using Kotlin and AndroidX libraries.
 
-**Current Version**: 1.0.7.4 (Development) - *Not yet released on Google Play Store*
+**Current Version**: 1.0.7.6 (Development) - *Not yet released on Google Play Store*
 
 **AI-Assisted Development**: This project was developed collaboratively with Claude Opus (initial development), Claude Sonnet (bug fixes & refinements), ChatGPT and Cursor (design consultation).
 

@@ -58,6 +58,18 @@
         app:layout_constraintTop_toBottomOf="@+id/buttonImportExport" />
 
     <TextView
+        android:id="@+id/textSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Music Practice Tracker"
+        android:textSize="14sp"
+        android:textColor="?android:attr/textColorSecondary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textAppTitle" />
+
+    <TextView
         android:id="@+id/textVersion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -67,7 +79,7 @@
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textAppTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/textSubtitle" />
 
     <TextView
         android:id="@+id/textAuthor"

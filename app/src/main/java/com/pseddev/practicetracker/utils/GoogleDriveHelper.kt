@@ -22,7 +22,7 @@ class GoogleDriveHelper(private val context: Context) {
     
     companion object {
         private const val TAG = "GoogleDriveHelper"
-        private const val APPLICATION_NAME = "Music Practice Trackers"
+        private const val APPLICATION_NAME = "PlayStreak"
         private const val DATA_FILE_NAME = "piano_tracker_data.json"
         private const val METADATA_FILE_NAME = "backup_metadata.json"
         private const val MIME_TYPE_JSON = "application/json"

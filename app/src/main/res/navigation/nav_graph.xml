@@ -31,7 +31,7 @@
     <fragment
         android:id="@+id/progressFragment"
         android:name="com.pseddev.practicetracker.ui.progress.ViewProgressFragment"
-        android:label="Music Practice Tracker"
+        android:label="PlayStreak 🎵"
         tools:layout="@layout/fragment_view_progress">
 
         <action
