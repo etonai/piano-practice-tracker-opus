@@ -2,6 +2,8 @@
 
 A comprehensive Android application for tracking music practice activities, performances, and progress. Built with modern Android development practices using Kotlin and AndroidX libraries.
 
+**Current Version**: 1.0.7.4 (Development) - *Not yet released on Google Play Store*
+
 **AI-Assisted Development**: This project was developed collaboratively with Claude Opus (initial development), Claude Sonnet (bug fixes & refinements), ChatGPT and Cursor (design consultation).
 
 > **Project Origins**: See [`app/docs/initial-prompt.md`](app/docs/initial-prompt.md) for the original project requirements and design concepts that guided this application's development.
