@@ -28,7 +28,8 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
             .combine(repository.getAllActivities()) { pieces, activities ->
                 val pieceActivities = activities.groupBy { it.pieceOrTechniqueId }
                 
-                val suggestions = mutableListOf<SuggestionItem>()
+                val favoriteSuggestions = mutableListOf<SuggestionItem>()
+                val nonFavoriteSuggestions = mutableListOf<SuggestionItem>()
                 
                 pieces.filter { it.type == ItemType.PIECE }.forEach { piece ->
                     val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
@@ -45,7 +46,7 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
                     if (piece.isFavorite) {
                         // Favorites that haven't been practiced in 2+ days
                         if (lastActivityDate == null || lastActivityDate < twoDaysAgo) {
-                            suggestions.add(
+                            favoriteSuggestions.add(
                                 SuggestionItem(
                                     piece = piece,
                                     lastActivityDate = lastActivityDate,
@@ -55,7 +56,8 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
                                             ActivityType.PRACTICE -> "Last practice"
                                             ActivityType.PERFORMANCE -> "Last performance"
                                         }
-                                        "Favorite piece - $activityTypeText $daysSince days ago"
+                                        val dayText = if (daysSince == 1) "day" else "days"
+                                        "Favorite piece - $activityTypeText $daysSince $dayText ago"
                                     }
                                 )
                             )
@@ -63,7 +65,7 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
                     } else {
                         // Non-favorites that haven't been practiced in 7+ days but have been practiced in last 31 days
                         if (lastActivityDate != null && lastActivityDate < sevenDaysAgo && lastActivityDate >= thirtyOneDaysAgo) {
-                            suggestions.add(
+                            nonFavoriteSuggestions.add(
                                 SuggestionItem(
                                     piece = piece,
                                     lastActivityDate = lastActivityDate,
@@ -73,7 +75,8 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
                                             ActivityType.PRACTICE -> "Last practice"
                                             ActivityType.PERFORMANCE -> "Last performance"
                                         }
-                                        "$activityTypeText $daysSince days ago"
+                                        val dayText = if (daysSince == 1) "day" else "days"
+                                        "$activityTypeText $daysSince $dayText ago"
                                     }()
                                 )
                             )
@@ -81,8 +84,107 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
                     }
                 }
                 
-                // Sort favorites first (by last activity, least recent first), then non-favorites (by last activity, least recent first)
-                suggestions.sortedWith(compareBy<SuggestionItem> { !it.piece.isFavorite }
+                // Always aim for up to 4 favorites total
+                val finalFavoriteSuggestions = if (favoriteSuggestions.size < 4) {
+                    val neededCount = 4 - favoriteSuggestions.size
+                    val usedPieceIds = favoriteSuggestions.map { it.piece.id }.toSet()
+                    
+                    // Get fallback favorites (excluding already used pieces)
+                    val allFavorites = pieces.filter { it.type == ItemType.PIECE && it.isFavorite && it.id !in usedPieceIds }
+                    val fallbackFavorites = if (allFavorites.isNotEmpty()) {
+                        val favoritesWithActivity = allFavorites.mapNotNull { piece ->
+                            val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
+                            val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
+                            val lastActivityDate = lastActivity?.timestamp
+                            
+                            val daysSince = if (lastActivityDate != null) {
+                                ((now - lastActivityDate) / (24 * 60 * 60 * 1000)).toInt()
+                            } else {
+                                Int.MAX_VALUE
+                            }
+                            
+                            SuggestionItem(
+                                piece = piece,
+                                lastActivityDate = lastActivityDate,
+                                daysSinceLastActivity = daysSince,
+                                suggestionReason = if (lastActivityDate == null) "Favorite piece - Never practiced" else {
+                                    val activityTypeText = when (lastActivity!!.activityType) {
+                                        ActivityType.PRACTICE -> "Last practice"
+                                        ActivityType.PERFORMANCE -> "Last performance"
+                                    }
+                                    val dayText = if (daysSince == 1) "day" else "days"
+                                    "Favorite piece - $activityTypeText $daysSince $dayText ago"
+                                }
+                            )
+                        }
+                        // Get the least recently practiced favorites (highest daysSince)
+                        if (favoritesWithActivity.isNotEmpty()) {
+                            val maxDays = favoritesWithActivity.maxOf { it.daysSinceLastActivity }
+                            val candidates = favoritesWithActivity.filter { it.daysSinceLastActivity == maxDays }
+                            // Sort by time (earliest first for tie-breaking), then alphabetically
+                            candidates.sortedWith(compareBy<SuggestionItem> { it.lastActivityDate ?: 0L }
+                                .thenBy { it.piece.name.lowercase() })
+                                .take(neededCount)
+                        } else emptyList()
+                    } else emptyList()
+                    
+                    favoriteSuggestions + fallbackFavorites
+                } else favoriteSuggestions
+                
+                // Always aim for up to 4 non-favorites total
+                val finalNonFavoriteSuggestions = if (nonFavoriteSuggestions.size < 4) {
+                    val neededCount = 4 - nonFavoriteSuggestions.size
+                    val usedPieceIds = nonFavoriteSuggestions.map { it.piece.id }.toSet()
+                    
+                    // Get fallback non-favorites (excluding already used pieces)
+                    val allNonFavorites = pieces.filter { it.type == ItemType.PIECE && !it.isFavorite && it.id !in usedPieceIds }
+                    val fallbackNonFavorites = if (allNonFavorites.isNotEmpty()) {
+                        val nonFavoritesWithActivity = allNonFavorites.mapNotNull { piece ->
+                            val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
+                            val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
+                            val lastActivityDate = lastActivity?.timestamp
+                            
+                            // Only include abandoned/inactive pieces (31+ days or never practiced)
+                            if (lastActivityDate == null || lastActivityDate < thirtyOneDaysAgo) {
+                                val daysSince = if (lastActivityDate != null) {
+                                    ((now - lastActivityDate) / (24 * 60 * 60 * 1000)).toInt()
+                                } else {
+                                    Int.MAX_VALUE
+                                }
+                                
+                                SuggestionItem(
+                                    piece = piece,
+                                    lastActivityDate = lastActivityDate,
+                                    daysSinceLastActivity = daysSince,
+                                    suggestionReason = if (lastActivityDate == null) "Never practiced" else {
+                                        val activityTypeText = when (lastActivity!!.activityType) {
+                                            ActivityType.PRACTICE -> "Last practice"
+                                            ActivityType.PERFORMANCE -> "Last performance"
+                                        }
+                                        val dayText = if (daysSince == 1) "day" else "days"
+                                        "$activityTypeText $daysSince $dayText ago"
+                                    }
+                                )
+                            } else null
+                        }
+                        // Get the most recently practiced abandoned pieces (lowest daysSince among abandoned)
+                        if (nonFavoritesWithActivity.isNotEmpty()) {
+                            // Sort abandoned pieces: 1) most recent among abandoned (lowest daysSince), 2) latest timestamp, 3) alphabetical
+                            val sortedCandidates = nonFavoritesWithActivity.sortedWith(
+                                compareBy<SuggestionItem> { it.daysSinceLastActivity } // Most recent among abandoned (lowest days)
+                                .thenByDescending { it.lastActivityDate ?: 0L } // Latest timestamp for tie-breaking
+                                .thenBy { it.piece.name.lowercase() } // Alphabetical
+                            )
+                            sortedCandidates.take(neededCount)
+                        } else emptyList()
+                    } else emptyList()
+                    
+                    nonFavoriteSuggestions + fallbackNonFavorites
+                } else nonFavoriteSuggestions
+                
+                // Combine and sort favorites first (by last activity, least recent first), then non-favorites (by last activity, least recent first)
+                val allSuggestions = finalFavoriteSuggestions + finalNonFavoriteSuggestions
+                allSuggestions.sortedWith(compareBy<SuggestionItem> { !it.piece.isFavorite }
                     .thenByDescending { it.daysSinceLastActivity })
             }
             .asLiveData()

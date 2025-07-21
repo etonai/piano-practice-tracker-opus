@@ -1087,6 +1087,216 @@ Updated database name in Room configuration:
 
 ---
 
+### Bug #25: ❌ Incorrect Activity Count Sorting in Pieces Tab
+**Status:** Closed  
+**Date Reported:** 2025-07-21  
+**Date Closed:** 2025-07-21  
+**Severity:** Medium  
+
+**Description:**  
+When sorting pieces by activity count in the Pieces tab, the sort order is incorrect. Pieces with fewer activities appear between pieces with more activities, despite using descending sort order.
+
+**Steps to Reproduce:**  
+1. Import CSV data with multiple activities for various pieces
+2. Open the Pieces tab
+3. Sort by "Activity" (activity count)
+4. Observe the sort order
+
+**Expected Behavior:**  
+Pieces should be sorted by activity count in descending order (highest count first). For example:
+- Gimmie Gimmie (20 activities)
+- Don't Cry Out Loud (15 activities)  
+- Goodbye Yellow Brick Road (14 activities)
+
+**Actual Behavior:**  
+Goodbye Yellow Brick Road (14 activities) appears between Gimmie Gimmie (20 activities) and Don't Cry Out Loud (15 activities), which violates the descending sort order.
+
+**Environment:**  
+- App Version: 1.0.7.8
+- All Android devices
+
+**Technical Analysis:**
+- **Sorting Logic**: PiecesViewModel.kt uses `sortedBy { it.activityCount }` with direction reversal for descending order
+- **Data Source**: Activity counts calculated from `activities.filter { it.pieceOrTechniqueId == piece.id }.size`
+- **Suspected Issue**: Possible inconsistency in activity count calculation or comparison logic
+- **CSV Import**: Issue appears after importing historical data from piano_tracker_export_2025-07-20_233021.csv
+
+**Closure Reason:**  
+Closed as user error - reporter was mistaken about the sorting behavior. The activity count sorting is working correctly as designed.
+
+**Additional Information:**  
+This issue appeared after importing the 07-20 export data, suggesting it may be related to how imported activities are being counted or filtered in the sorting logic.
+
+---
+
+### Bug #26: ✅ Suggestions Should Fallback to Least Recent Favorite When No "Oldest" Favorites Found
+**Status:** Fixed  
+**Date Reported:** 2025-07-21  
+**Date Fixed:** 2025-07-21  
+**Severity:** Medium  
+
+**Description:**  
+The suggestions algorithm in both the Dashboard suggestions section and the dedicated Suggestions tab currently only suggests pieces that meet the "oldest" criteria. If no favorites qualify as "oldest" based on the current algorithm, no favorite suggestions are shown. Similarly, if no non-favorites qualify as "oldest", no non-favorite suggestions are shown. The system should implement fallback logic to ensure users always get recommendations when pieces exist in each category.
+
+**Steps to Reproduce:**  
+1. Have pieces (both favorites and non-favorites) that don't meet the current "oldest" algorithm criteria
+2. Open the Dashboard tab and view the Suggestions section
+3. Open the dedicated Suggestions tab
+4. Observe that no suggestions are displayed for categories where pieces don't meet "oldest" criteria
+
+**Expected Behavior:**  
+When pieces don't meet the "oldest" criteria, the suggestions should implement fallback logic:
+- **Favorites**: If no favorites meet "oldest" criteria, show the least recently practiced/performed favorite piece
+- **Non-Favorites**: If no non-favorites meet "oldest" criteria, show the most recently practiced/performed inactive (non-favorite) piece  
+- Ensure users always get suggestions when pieces exist in each category
+- Maintain consistent behavior between Dashboard suggestions and dedicated Suggestions tab
+
+**Actual Behavior:**  
+When pieces don't meet the "oldest" criteria, no suggestions are shown for those categories, leaving users without guidance on what to practice when the algorithm finds no "oldest" pieces.
+
+**Environment:**  
+- App Version: 1.0.7.8
+- All Android devices
+
+**Technical Analysis:**
+- **Affected Components**: 
+  - Dashboard suggestions in DashboardViewModel.kt
+  - Dedicated Suggestions tab in SuggestionsViewModel.kt
+- **Current Algorithm**: Only shows favorites that are determined to be "oldest" by the existing logic
+- **Missing Fallback**: No fallback mechanism when pieces don't qualify as "oldest"
+- **Expected Logic**: 
+  - If oldest favorites list is empty, find the favorite with the earliest lastActivityDate
+  - If oldest non-favorites list is empty, find the non-favorite with the latest lastActivityDate
+
+**Resolution:**  
+Implemented comprehensive fallback logic in both suggestion systems:
+- **Favorites fallback**: When no favorites meet the "oldest" criteria (2+ days), system fallbacks to suggest the least recently practiced favorite piece
+- **Non-favorites fallback**: When no non-favorites meet the "oldest" criteria (7+ days but within 31 days), system fallbacks to suggest the most recently practiced non-favorite piece
+- **Consistent behavior**: Applied same logic to both Dashboard suggestions and dedicated Suggestions tab
+- **Preserved existing logic**: Normal suggestion criteria still apply when pieces meet the "oldest" thresholds
+
+**Technical Implementation:**
+- **DashboardViewModel**: Enhanced suggestions flow with fallback logic for both categories
+- **SuggestionsViewModel**: Refactored to separate favorites and non-favorites processing with fallback support
+- **Fallback criteria**: 
+  - Favorites: Finds piece with highest daysSinceLastActivity (least recent)
+  - Non-favorites: Finds piece with lowest daysSinceLastActivity (most recent, among practiced pieces)
+- **User experience**: Ensures users always get suggestions when pieces exist in each category
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt`
+
+---
+
+### Bug #27: 🐛 Increase Suggestion Fallback Limit from 2 to 4 Pieces per Category
+**Status:** Open  
+**Date Reported:** 2025-07-21  
+**Severity:** Low  
+
+**Description:**  
+The suggestion fallback logic currently limits results to a maximum of 2 favorite pieces and 2 non-favorite pieces. This limit should be increased to 4 pieces per category to provide users with more options when the regular suggestion algorithm doesn't find pieces meeting the "oldest" criteria.
+
+**Steps to Reproduce:**  
+1. Have a scenario where the regular suggestion algorithm finds no "oldest" pieces
+2. Observe fallback suggestions in Dashboard or Suggestions tab
+3. Count the number of suggestions shown per category
+
+**Expected Behavior:**  
+Fallback suggestions should show up to:
+- **4 favorite pieces** (instead of current 2)
+- **4 non-favorite pieces** (instead of current 2)
+
+**Actual Behavior:**  
+Fallback suggestions currently limit to:
+- **2 favorite pieces** 
+- **2 non-favorite pieces**
+
+**Environment:**  
+- App Version: 1.0.7.8
+- All Android devices
+
+**Technical Details:**
+- **Current Implementation**: Uses `.take(2)` in both DashboardViewModel and SuggestionsViewModel
+- **Required Change**: Update `.take(2)` to `.take(4)` in fallback logic for both categories
+- **Files to Modify**:
+  - `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt`
+  - `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt`
+
+**Resolution:**  
+Successfully increased fallback suggestion limits from 2 to 4 pieces per category:
+- **Favorites fallback**: Now suggests up to 4 pieces (was 2)
+- **Non-favorites fallback**: Now suggests up to 4 pieces (was 2)
+- **Implementation**: Updated `.take(2)` to `.take(4)` in both DashboardViewModel and SuggestionsViewModel
+- **Preserved logic**: Maintained all existing sorting and tie-breaking algorithms
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt`
+
+---
+
+### Bug #28: ✅ Always Provide Up to 4 Suggestions Per Category Using Combined Regular and Fallback Logic
+**Status:** Fixed  
+**Date Reported:** 2025-07-21  
+**Date Fixed:** 2025-07-21  
+**Severity:** Medium  
+
+**Description:**  
+The suggestion system should always aim to provide up to 4 favorite pieces and 4 non-favorite pieces by combining regular suggestions with fallback suggestions when needed. Currently, if the regular algorithm finds fewer than 4 pieces per category, the system doesn't supplement with fallback suggestions to reach the target of 4 per category.
+
+**Steps to Reproduce:**  
+1. Have a scenario where regular suggestions find fewer than 4 favorites or 4 non-favorites
+2. Observe total suggestion count in Dashboard or Suggestions tab
+3. Note that fallback logic only triggers when regular algorithm finds zero pieces
+
+**Expected Behavior:**  
+The system should always try to provide up to 4 suggestions per category:
+- If regular algorithm finds 2 favorites, supplement with 2 fallback favorites to reach 4 total
+- If regular algorithm finds 1 non-favorite, supplement with 3 fallback non-favorites to reach 4 total
+- If not enough pieces exist to reach 4, show all available pieces up to the maximum possible
+
+**Actual Behavior:**  
+Fallback logic only activates when regular algorithm finds zero pieces in a category. If regular algorithm finds 1-3 pieces, no supplementation occurs, resulting in fewer than 4 suggestions per category.
+
+**Environment:**  
+- App Version: 1.0.7.8
+- All Android devices
+
+**Technical Analysis:**
+- **Current Logic**: Fallback only triggers when regular suggestions are empty (`if (favoriteSuggestions.isEmpty())`)
+- **Required Logic**: Always combine regular and fallback to reach target of 4 per category
+- **Implementation**: Modify suggestion logic to supplement regular results with fallback results
+
+**Implementation Requirements:**
+- Calculate how many additional suggestions are needed per category (4 - regular count)
+- Apply fallback logic to find additional pieces (excluding already selected pieces)
+- Combine regular and supplemental suggestions while maintaining sort order
+- Handle edge cases where not enough total pieces exist to reach 4 per category
+
+**Resolution:**  
+Implemented intelligent combined regular+fallback suggestion system:
+- **Smart Supplementation**: Always aims for 4 suggestions per category by supplementing regular suggestions with fallback when needed
+- **Duplicate Prevention**: Tracks used piece IDs to avoid suggesting the same piece twice
+- **Dynamic Calculation**: Calculates exactly how many fallback suggestions are needed (4 - regular count)
+- **Consistent Behavior**: Applied same logic to both Dashboard and Suggestions tab
+- **Examples**:
+  - Regular finds 2 favorites → adds 2 fallback favorites = 4 total
+  - Regular finds 0 non-favorites → adds 4 fallback non-favorites = 4 total
+  - Regular finds 4+ pieces → uses regular suggestions only
+
+**Technical Implementation:**
+- **Variable Logic**: `neededCount = 4 - regularSuggestions.size`
+- **Filter Logic**: `pieces.filter { it.id !in usedPieceIds }` prevents duplicates
+- **Combination**: `regularSuggestions + fallbackSuggestions`
+- **Preserved Features**: All existing sorting, tie-breaking, and grammar fixes maintained
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt`
+
+---
+
 ## Bug Report Template
 
 When reporting new bugs, please use this template:
