@@ -5,6 +5,7 @@ import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
 import com.pseddev.playstreak.data.repository.PianoRepository
+import com.pseddev.playstreak.utils.ProUserManager
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -34,7 +35,12 @@ data class PieceDetails(
     val lastActivity: Activity?
 )
 
-class PiecesViewModel(private val repository: PianoRepository) : ViewModel() {
+class PiecesViewModel(
+    private val repository: PianoRepository,
+    private val context: android.content.Context
+) : ViewModel() {
+    
+    private val proUserManager = ProUserManager.getInstance(context)
     
     private val selectedPieceId = MutableStateFlow<Long?>(null)
     private val sortType = MutableStateFlow(SortType.ALPHABETICAL)
@@ -123,19 +129,37 @@ class PiecesViewModel(private val repository: PianoRepository) : ViewModel() {
     fun getCurrentSortType(): SortType = sortType.value
     fun getCurrentSortDirection(): SortDirection = sortDirection.value
     
-    fun toggleFavorite(pieceWithStats: PieceWithStats) {
+    fun toggleFavorite(pieceWithStats: PieceWithStats): Boolean {
+        val currentlyFavorite = pieceWithStats.piece.isFavorite
+        
+        // If trying to add a favorite (not currently favorite), check limits for Free users
+        if (!currentlyFavorite) {
+            // Get current favorite count from the live data
+            val currentFavoriteCount = piecesWithStats.value?.count { it.piece.isFavorite } ?: 0
+            
+            if (!proUserManager.canAddMoreFavorites(currentFavoriteCount)) {
+                return false // Cannot add more favorites - caller should show upgrade prompt
+            }
+        }
+        
+        // Proceed with toggle (either removing favorite or adding within limits)
         viewModelScope.launch {
-            val updatedPiece = pieceWithStats.piece.copy(isFavorite = !pieceWithStats.piece.isFavorite)
+            val updatedPiece = pieceWithStats.piece.copy(isFavorite = !currentlyFavorite)
             repository.updatePieceOrTechnique(updatedPiece)
         }
+        
+        return true // Toggle was allowed and performed
     }
 }
 
-class PiecesViewModelFactory(private val repository: PianoRepository) : ViewModelProvider.Factory {
+class PiecesViewModelFactory(
+    private val repository: PianoRepository,
+    private val context: android.content.Context
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(PiecesViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return PiecesViewModel(repository) as T
+            return PiecesViewModel(repository, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

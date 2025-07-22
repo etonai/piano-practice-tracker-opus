@@ -8,9 +8,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.appcompat.app.AlertDialog
+import android.widget.Toast
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentPiecesBinding
+import com.pseddev.playstreak.utils.ProUserManager
 
 class PiecesFragment : Fragment() {
     
@@ -19,7 +22,8 @@ class PiecesFragment : Fragment() {
     
     private val viewModel: PiecesViewModel by viewModels {
         PiecesViewModelFactory(
-            (requireActivity().application as PlayStreakApplication).repository
+            (requireActivity().application as PlayStreakApplication).repository,
+            requireContext()
         )
     }
     
@@ -46,7 +50,10 @@ class PiecesFragment : Fragment() {
                 viewModel.selectPiece(pieceWithStats.piece.id)
             },
             onFavoriteToggle = { pieceWithStats ->
-                viewModel.toggleFavorite(pieceWithStats)
+                val success = viewModel.toggleFavorite(pieceWithStats)
+                if (!success) {
+                    showFavoriteLimitPrompt()
+                }
             }
         )
         
@@ -144,6 +151,17 @@ class PiecesFragment : Fragment() {
     private fun updateSortDirectionButton() {
         val direction = viewModel.getCurrentSortDirection()
         binding.buttonSortDirection.text = if (direction == SortDirection.ASCENDING) "↑" else "↓"
+    }
+    
+    private fun showFavoriteLimitPrompt() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Pro Feature")
+            .setMessage("Free users are limited to ${ProUserManager.FREE_USER_FAVORITE_LIMIT} favorite pieces. Upgrade to Pro for unlimited favorites to organize your entire repertoire.")
+            .setPositiveButton("Learn More") { _, _ ->
+                Toast.makeText(context, "Pro upgrade coming soon!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
     
     override fun onDestroyView() {

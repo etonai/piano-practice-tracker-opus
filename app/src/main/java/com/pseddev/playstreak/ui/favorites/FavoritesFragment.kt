@@ -8,8 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.appcompat.app.AlertDialog
+import android.widget.Toast
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.databinding.FragmentFavoritesBinding
+import com.pseddev.playstreak.utils.ProUserManager
 import com.google.android.material.snackbar.Snackbar
 
 class FavoritesFragment : Fragment() {
@@ -19,7 +22,8 @@ class FavoritesFragment : Fragment() {
     
     private val viewModel: FavoritesViewModel by viewModels {
         FavoritesViewModelFactory(
-            (requireActivity().application as PlayStreakApplication).repository
+            (requireActivity().application as PlayStreakApplication).repository,
+            requireContext()
         )
     }
     
@@ -44,13 +48,17 @@ class FavoritesFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = FavoritesAdapter(
             onFavoriteToggle = { pieceOrTechnique ->
-                viewModel.toggleFavorite(pieceOrTechnique)
-                val message = if (pieceOrTechnique.isFavorite) {
-                    "${pieceOrTechnique.name} removed from favorites"
+                val success = viewModel.toggleFavorite(pieceOrTechnique)
+                if (!success) {
+                    showFavoriteLimitPrompt()
                 } else {
-                    "${pieceOrTechnique.name} added to favorites"
+                    val message = if (pieceOrTechnique.isFavorite) {
+                        "${pieceOrTechnique.name} removed from favorites"
+                    } else {
+                        "${pieceOrTechnique.name} added to favorites"
+                    }
+                    Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                 }
-                Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
             }
         )
         
@@ -70,8 +78,18 @@ class FavoritesFragment : Fragment() {
                 binding.recyclerView.visibility = View.VISIBLE
                 adapter.submitList(items)
             }
-            
         }
+    }
+    
+    private fun showFavoriteLimitPrompt() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Pro Feature")
+            .setMessage("Free users are limited to ${ProUserManager.FREE_USER_FAVORITE_LIMIT} favorite pieces. Upgrade to Pro for unlimited favorites to organize your entire repertoire.")
+            .setPositiveButton("Learn More") { _, _ ->
+                Toast.makeText(context, "Pro upgrade coming soon!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
     
     override fun onDestroyView() {
