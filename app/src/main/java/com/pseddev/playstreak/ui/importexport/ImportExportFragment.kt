@@ -93,12 +93,9 @@ class ImportExportFragment : Fragment() {
         }
         
         binding.importFromCsvButton.setOnClickListener {
-            if (proUserManager.isProUser()) {
-                binding.warningTextView.visibility = View.VISIBLE
-                importCsvLauncher.launch("text/*")
-            } else {
-                showUpgradePrompt()
-            }
+            // This should only fire for Pro users since button is disabled for Free users
+            binding.warningTextView.visibility = View.VISIBLE
+            importCsvLauncher.launch("text/*")
         }
         
         binding.syncWithDriveButton.setOnClickListener {
@@ -111,6 +108,13 @@ class ImportExportFragment : Fragment() {
         
         binding.purgeDataButton.setOnClickListener {
             showPurgeConfirmation()
+        }
+        
+        // Hide purge button in production builds
+        binding.purgeDataButton.visibility = if (com.pseddev.playstreak.BuildConfig.DEBUG) {
+            View.VISIBLE
+        } else {
+            View.GONE
         }
     }
     
@@ -303,22 +307,18 @@ class ImportExportFragment : Fragment() {
     private fun updateImportButtonState() {
         if (proUserManager.isProUser()) {
             binding.importFromCsvButton.text = "Import from CSV"
-            binding.importFromCsvButton.alpha = 1.0f
+            binding.importFromCsvButton.isEnabled = true
         } else {
-            binding.importFromCsvButton.text = "Import from CSV (Pro Only)"
-            binding.importFromCsvButton.alpha = 0.6f
+            binding.importFromCsvButton.text = "Import from CSV (Coming Soon)"
+            binding.importFromCsvButton.isEnabled = false
         }
     }
     
     private fun showUpgradePrompt() {
         AlertDialog.Builder(requireContext())
             .setTitle("Pro Feature")
-            .setMessage("CSV Import is a Pro feature. Export functionality remains available to all users.\n\nUpgrade to Pro to unlock advanced data management features including CSV import.")
-            .setPositiveButton("Learn More") { _, _ ->
-                // For now, just dismiss. In the future, this could navigate to a Pro upgrade screen
-                Toast.makeText(context, "Pro upgrade coming soon!", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel", null)
+            .setMessage("CSV Import is a Pro feature. Export functionality remains available to all users.")
+            .setPositiveButton("OK", null)
             .show()
     }
     
@@ -340,7 +340,7 @@ class ImportExportFragment : Fragment() {
                 binding.lastSyncTextView.text = "Last sync: Never"
             }
         } else {
-            binding.driveStatusTextView.text = "Google Drive functionality currently disabled"
+            binding.driveStatusTextView.text = "Google Drive functionality coming soon"
             binding.driveAccountTextView.visibility = View.GONE
             binding.syncWithDriveButton.text = "Connect to Google Drive"
             binding.lastSyncTextView.text = "Last sync: Never"

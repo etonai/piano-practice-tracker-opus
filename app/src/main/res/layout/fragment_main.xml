@@ -23,6 +23,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/buttonAddPiece"
+        style="@style/RoundedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Add Piece"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonAddActivity" />
+
+    <Button
         android:id="@+id/buttonManageFavorites"
         style="@style/RoundedButton"
         android:layout_width="0dp"
@@ -31,7 +42,7 @@
         android:text="Manage Favorites"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonAddActivity" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonAddPiece" />
 
     <Button
         android:id="@+id/buttonImportExport"
@@ -123,7 +134,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Licensed under MIT License"
+        android:text="All Rights Reserved"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintEnd_toEndOf="parent"

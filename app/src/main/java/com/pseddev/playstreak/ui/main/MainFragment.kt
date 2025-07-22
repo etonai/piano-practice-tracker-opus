@@ -42,6 +42,13 @@ class MainFragment : Fragment() {
         setupClickListeners()
         updateAppTitle()
         updateToggleButtonText(proUserManager.isProUser())
+        
+        // Hide toggle button in production builds
+        binding.buttonTogglePro.visibility = if (BuildConfig.DEBUG) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
     }
     
     private fun setupObservers() {
@@ -54,6 +61,10 @@ class MainFragment : Fragment() {
             binding.buttonManageFavorites.text = buttonText
         }
         
+        viewModel.piecesCount.observe(viewLifecycleOwner) { count ->
+            binding.buttonAddPiece.text = "Add Piece ($count)"
+        }
+        
         // Set version text
         binding.textVersion.text = "Version ${BuildConfig.VERSION_NAME}"
     }
@@ -61,6 +72,10 @@ class MainFragment : Fragment() {
     private fun setupClickListeners() {
         binding.buttonAddActivity.setOnClickListener {
             findNavController().navigate(R.id.action_mainFragment_to_addActivityFragment)
+        }
+        
+        binding.buttonAddPiece.setOnClickListener {
+            findNavController().navigate(R.id.action_mainFragment_to_addPieceFragment)
         }
         
         binding.buttonManageFavorites.setOnClickListener {

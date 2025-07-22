@@ -26,6 +26,10 @@
         <action
             android:id="@+id/action_mainFragment_to_syncFragment"
             app:destination="@id/syncFragment" />
+            
+        <action
+            android:id="@+id/action_mainFragment_to_addPieceFragment"
+            app:destination="@id/addPieceFragment" />
     </fragment>
 
     <fragment

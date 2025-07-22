@@ -441,9 +441,10 @@ High priority as this creates a stronger Pro upgrade incentive while still provi
 
 ---
 
-### Feature #9: 💡 Remove Pro Upgrade Prompts for Free-Only Release
-**Status:** Requested  
+### Feature #9: 🔄 Remove Pro Upgrade Prompts for Free-Only Release
+**Status:** ✅ Implemented  
 **Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
 **Priority:** High  
 **Requested By:** Product Team  
 
@@ -480,8 +481,9 @@ High priority for initial app release strategy. Allows focus on core app quality
 ---
 
 ### Feature #10: 💡 Google Drive Functionality Coming Soon Message
-**Status:** Requested  
+**Status:** ✅ Implemented  
 **Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
 **Priority:** Medium  
 **Requested By:** Product Team  
 
@@ -516,8 +518,9 @@ Medium priority feature that helps set user expectations about upcoming cloud fu
 ---
 
 ### Feature #11: 💡 Purge All Data Button Testing Mode
-**Status:** Requested  
+**Status:** ✅ Implemented  
 **Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
 **Priority:** Medium  
 **Requested By:** Development Team  
 
@@ -557,8 +560,9 @@ Medium priority development tool that improves testing workflow while protecting
 ---
 
 ### Feature #12: 💡 Remove MIT License
-**Status:** Requested  
+**Status:** ✅ Implemented  
 **Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
 **Priority:** High  
 **Requested By:** Legal/Business Team  
 
@@ -600,7 +604,7 @@ High priority for commercial release preparation. MIT License removal is essenti
 ---
 
 ### Feature #13: 💡 Hide Switch to Pro/Free Button Using BuildConfig.DEBUG
-**Status:** Requested  
+**Status:** 🔍 Verifying  
 **Date Requested:** 2025-07-22  
 **Priority:** High  
 **Requested By:** Development Team  
@@ -640,39 +644,45 @@ High priority for production release cleanliness. Testing buttons should not be 
 
 ---
 
-### Feature #14: 💡 Ensure Free Mode is Default
-**Status:** Requested  
+### Feature #14: 💡 Build Variant Default Pro Status
+**Status:** ✅ Implemented  
 **Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
 **Priority:** Critical  
 **Requested By:** Business Team  
 
 **Description:**  
-Ensure that Free mode is the default state for all new users of PlayStreak. New installations should start with Pro status set to false, ensuring users experience the intended Free tier limitations and feature set from the beginning.
+Set different default Pro status based on build variant: Free mode default for release builds (production users), Pro mode default for debug builds (developers/testers). This ensures production users get the intended Free experience while developers can easily test Pro features.
 
 **User Story:**  
-As a new user installing PlayStreak, I should automatically start with the Free experience so that I understand the app's core functionality and limitations without accidentally having access to Pro features I haven't paid for.
+As a production user installing PlayStreak, I should automatically start with the Free experience, while as a developer or tester using debug builds, I should start with Pro access to easily test all features without manual switching.
 
 **Acceptance Criteria:**  
-- [ ] New app installations default to Free mode (isProUser = false)
-- [ ] ProUserManager initializes with Free status by default
-- [ ] All Free tier limitations active from first app launch
-- [ ] No Pro features accessible without explicit upgrade
-- [ ] Consistent Free experience across all app areas
-- [ ] Fresh installs show appropriate Free tier UI (5 tabs, limited suggestions, etc.)
-- [ ] Existing users maintain their current Pro/Free status
+- [ ] Release builds: New installations default to Free mode (isProUser = false)
+- [ ] Debug builds: New installations default to Pro mode (isProUser = true)
+- [ ] ProUserManager initializes with different defaults based on BuildConfig.DEBUG
+- [ ] Release builds: All Free tier limitations active from first app launch
+- [ ] Debug builds: All Pro features accessible from first app launch
+- [ ] Consistent experience within each build variant
+- [ ] Fresh installs show appropriate UI based on build variant (release=5 tabs, debug=6 tabs)
+- [ ] Existing users maintain their current Pro/Free status regardless of build variant
 
 **Technical Considerations:**  
-- Review ProUserManager initialization to ensure default false value
-- Check SharedPreferences default behavior when key doesn't exist
-- Verify that all Pro/Free checks handle null/missing preferences correctly
-- Test fresh installation to confirm Free mode behavior
-- Ensure existing user data is not affected by changes
-- Consider migration logic for any existing test users
+- Update ProUserManager initialization to use BuildConfig.DEBUG for default value
+- Modify SharedPreferences default behavior to return build-variant-specific defaults
+- Verify that all Pro/Free checks handle both debug and release defaults correctly
+- Test fresh installation on both debug and release builds
+- Ensure existing user data is not affected by changes (only impacts new installs)
+- Consider that debug users may need to manually switch to Free for testing
 
 **Priority Justification:**  
-Critical priority for Free-only release strategy. New users must start with the intended Free experience to ensure proper app evaluation, feature limitation understanding, and future monetization path.
+Critical priority for both production release and development efficiency. Production users must start with Free experience for proper evaluation and monetization, while developers need immediate Pro access for efficient feature testing.
 
-**Implementation Approach:**
+**Implementation Approach:**  
+- **Default Logic**: Use `BuildConfig.DEBUG ? true : false` as default Pro status for new users
+- **Location**: Update ProUserManager.isProUser() method to return build-variant-specific defaults
+- **Existing Users**: Preserve current Pro/Free status in SharedPreferences
+- **Testing**: Verify debug builds start Pro, release builds start Free
 - **ProUserManager Default**: Ensure `isProUser()` returns `false` when no preference exists
 - **SharedPreferences**: Use `getBoolean(KEY_IS_PRO_USER, false)` with explicit false default
 - **Fresh Install Testing**: Verify new installations show Free tier behavior
@@ -682,8 +692,9 @@ Critical priority for Free-only release strategy. New users must start with the 
 ---
 
 ### Feature #15: 💡 Add "Add Piece (#)" Button to Settings Page
-**Status:** Requested  
+**Status:** ✅ Implemented  
 **Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
 **Priority:** Medium  
 **Requested By:** UI/UX Team  
 
@@ -773,6 +784,48 @@ High priority for app stability and user trust. Having undefined limits creates 
 - Suggestions algorithm performance with large datasets
 - Export file size and generation time limits
 - Memory usage patterns under maximum load
+
+---
+
+### Feature #17: 💡 Disable Import From CSV Button for Free Users
+**Status:** ✅ Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** High  
+**Requested By:** Business Team  
+
+**Description:**  
+Disable the Import From CSV button functionality for Free users while keeping it enabled for Pro users. This creates a clear Pro/Free differentiation for advanced data management features while maintaining export functionality for all users to ensure data portability.
+
+**User Story:**  
+As a Free user, I should not have access to CSV import functionality, while as a Pro user, I want full data import capabilities so that I can manage my practice data comprehensively.
+
+**Acceptance Criteria:**  
+- [ ] Free users: Import From CSV button disabled/grayed out
+- [ ] Pro users: Import From CSV button fully functional
+- [ ] Button visual state reflects availability (enabled/disabled styling)
+- [ ] Clicking disabled button shows appropriate message (not "Coming Soon")
+- [ ] Export functionality remains available to all users
+- [ ] Pro/Free status changes update button state immediately
+- [ ] Consistent with other Pro/Free feature differentiations
+
+**Technical Considerations:**  
+- Update ImportExportFragment to check Pro status for import button state
+- Modify button click behavior based on Pro/Free status
+- Ensure button styling reflects enabled/disabled state (alpha, colors)
+- Replace "Coming Soon" message with Pro feature prompt for consistency
+- Test button state changes when Pro status toggles
+- Maintain export functionality for all users (data portability)
+
+**Priority Justification:**  
+High priority for establishing clear Pro/Free feature boundaries. Import functionality is an advanced data management feature that should be restricted to Pro users while ensuring all users can export their data.
+
+**Implementation Approach:**
+- **Button State**: Use `button.isEnabled = proUserManager.isProUser()` for import button
+- **Visual Styling**: Apply appropriate alpha/styling for disabled state
+- **Click Behavior**: Show Pro upgrade prompt when disabled button is clicked
+- **Dynamic Updates**: Update button state when Pro status changes in onResume()
+- **User Experience**: Clear visual distinction between enabled/disabled states
 
 ---
 

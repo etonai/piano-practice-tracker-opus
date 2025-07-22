@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.pseddev.playstreak.data.repository.PianoRepository
+import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.utils.StreakCalculator
 import kotlinx.coroutines.flow.map
 
@@ -22,6 +23,12 @@ class MainViewModel(private val repository: PianoRepository) : ViewModel() {
     val favoritesCount: LiveData<Int> = repository.getFavorites()
         .map { favorites ->
             favorites.size
+        }
+        .asLiveData()
+    
+    val piecesCount: LiveData<Int> = repository.getAllPiecesAndTechniques()
+        .map { items ->
+            items.count { it.type == ItemType.PIECE }
         }
         .asLiveData()
 }

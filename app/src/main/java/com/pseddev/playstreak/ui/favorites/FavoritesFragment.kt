@@ -83,12 +83,9 @@ class FavoritesFragment : Fragment() {
     
     private fun showFavoriteLimitPrompt() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Pro Feature")
-            .setMessage("Free users are limited to ${ProUserManager.FREE_USER_FAVORITE_LIMIT} favorite pieces. Upgrade to Pro for unlimited favorites to organize your entire repertoire.")
-            .setPositiveButton("Learn More") { _, _ ->
-                Toast.makeText(context, "Pro upgrade coming soon!", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel", null)
+            .setTitle("Favorite Limit")
+            .setMessage("You can have up to ${ProUserManager.FREE_USER_FAVORITE_LIMIT} favorite pieces.")
+            .setPositiveButton("OK", null)
             .show()
     }
     
