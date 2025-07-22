@@ -5,11 +5,17 @@ import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.repository.PianoRepository
+import com.pseddev.playstreak.utils.ProUserManager
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.combine
 import java.util.*
 
-class DashboardViewModel(private val repository: PianoRepository) : ViewModel() {
+class DashboardViewModel(
+    private val repository: PianoRepository,
+    private val context: android.content.Context
+) : ViewModel() {
+    
+    private val proUserManager = ProUserManager.getInstance(context)
     
     private val todayStart = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, 0)
@@ -153,9 +159,12 @@ class DashboardViewModel(private val repository: PianoRepository) : ViewModel() 
                     favoriteSuggestions.filter { it.daysSinceLastActivity == maxDays }
                 } else emptyList()
                 
-                // Always aim for up to 4 favorites total
-                val finalFavorites = if (regularFavorites.size < 4) {
-                    val neededCount = 4 - regularFavorites.size
+                // Determine favorite limit based on Pro status
+                val favoriteLimit = if (proUserManager.isProUser()) 4 else 1
+                
+                // Always aim for up to limit favorites total
+                val finalFavorites = if (regularFavorites.size < favoriteLimit) {
+                    val neededCount = favoriteLimit - regularFavorites.size
                     val usedPieceIds = regularFavorites.map { it.piece.id }.toSet()
                     
                     // Get fallback favorites (excluding already used pieces)
@@ -206,9 +215,12 @@ class DashboardViewModel(private val repository: PianoRepository) : ViewModel() 
                     nonFavoriteSuggestions.filter { it.daysSinceLastActivity == maxDays }
                 } else emptyList()
                 
-                // Always aim for up to 4 non-favorites total
-                val finalNonFavorites = if (regularNonFavorites.size < 4) {
-                    val neededCount = 4 - regularNonFavorites.size
+                // Determine non-favorite limit based on Pro status  
+                val nonFavoriteLimit = if (proUserManager.isProUser()) 4 else 2
+                
+                // Always aim for up to limit non-favorites total
+                val finalNonFavorites = if (regularNonFavorites.size < nonFavoriteLimit) {
+                    val neededCount = nonFavoriteLimit - regularNonFavorites.size
                     val usedPieceIds = regularNonFavorites.map { it.piece.id }.toSet()
                     
                     // Get fallback non-favorites (excluding already used pieces)
@@ -265,11 +277,14 @@ class DashboardViewModel(private val repository: PianoRepository) : ViewModel() 
     suspend fun calculateStreak(): Int = repository.calculateCurrentStreak()
 }
 
-class DashboardViewModelFactory(private val repository: PianoRepository) : ViewModelProvider.Factory {
+class DashboardViewModelFactory(
+    private val repository: PianoRepository,
+    private val context: android.content.Context
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(DashboardViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return DashboardViewModel(repository) as T
+            return DashboardViewModel(repository, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

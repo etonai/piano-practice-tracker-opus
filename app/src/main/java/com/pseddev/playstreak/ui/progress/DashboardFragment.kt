@@ -20,7 +20,8 @@ class DashboardFragment : Fragment() {
     
     private val viewModel: DashboardViewModel by viewModels {
         DashboardViewModelFactory(
-            (requireActivity().application as PlayStreakApplication).repository
+            (requireActivity().application as PlayStreakApplication).repository,
+            requireContext()
         )
     }
     

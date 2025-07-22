@@ -5,6 +5,7 @@ import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
 import com.pseddev.playstreak.data.repository.PianoRepository
+import com.pseddev.playstreak.utils.ProUserManager
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.combine
 import java.util.*
@@ -16,7 +17,12 @@ data class SuggestionItem(
     val suggestionReason: String
 )
 
-class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel() {
+class SuggestionsViewModel(
+    private val repository: PianoRepository,
+    private val context: android.content.Context
+) : ViewModel() {
+    
+    private val proUserManager = ProUserManager.getInstance(context)
     
     private val now = System.currentTimeMillis()
     private val twoDaysAgo = now - (2 * 24 * 60 * 60 * 1000L)
@@ -84,9 +90,12 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
                     }
                 }
                 
-                // Always aim for up to 4 favorites total
-                val finalFavoriteSuggestions = if (favoriteSuggestions.size < 4) {
-                    val neededCount = 4 - favoriteSuggestions.size
+                // Determine favorite limit based on Pro status
+                val favoriteLimit = if (proUserManager.isProUser()) 4 else 1
+                
+                // Always aim for up to limit favorites total
+                val finalFavoriteSuggestions = if (favoriteSuggestions.size < favoriteLimit) {
+                    val neededCount = favoriteLimit - favoriteSuggestions.size
                     val usedPieceIds = favoriteSuggestions.map { it.piece.id }.toSet()
                     
                     // Get fallback favorites (excluding already used pieces)
@@ -131,9 +140,12 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
                     favoriteSuggestions + fallbackFavorites
                 } else favoriteSuggestions
                 
-                // Always aim for up to 4 non-favorites total
-                val finalNonFavoriteSuggestions = if (nonFavoriteSuggestions.size < 4) {
-                    val neededCount = 4 - nonFavoriteSuggestions.size
+                // Determine non-favorite limit based on Pro status
+                val nonFavoriteLimit = if (proUserManager.isProUser()) 4 else 2
+                
+                // Always aim for up to limit non-favorites total
+                val finalNonFavoriteSuggestions = if (nonFavoriteSuggestions.size < nonFavoriteLimit) {
+                    val neededCount = nonFavoriteLimit - nonFavoriteSuggestions.size
                     val usedPieceIds = nonFavoriteSuggestions.map { it.piece.id }.toSet()
                     
                     // Get fallback non-favorites (excluding already used pieces)
@@ -190,11 +202,14 @@ class SuggestionsViewModel(private val repository: PianoRepository) : ViewModel(
             .asLiveData()
 }
 
-class SuggestionsViewModelFactory(private val repository: PianoRepository) : ViewModelProvider.Factory {
+class SuggestionsViewModelFactory(
+    private val repository: PianoRepository,
+    private val context: android.content.Context
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SuggestionsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SuggestionsViewModel(repository) as T
+            return SuggestionsViewModel(repository, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -17,7 +17,8 @@ class SuggestionsFragment : Fragment() {
     
     private val viewModel: SuggestionsViewModel by viewModels {
         SuggestionsViewModelFactory(
-            (requireActivity().application as PlayStreakApplication).repository
+            (requireActivity().application as PlayStreakApplication).repository,
+            requireContext()
         )
     }
     

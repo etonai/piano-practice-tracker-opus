@@ -279,6 +279,168 @@ High priority as this provides a clear but non-intrusive Pro upgrade incentive. 
 
 ---
 
+### Feature #6: ✅ Hide Inactive Tab for Free Users
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** High  
+**Requested By:** Product Team  
+
+**Description:**  
+Hide the "Inactive" tab from Free users while keeping it visible for Pro users. This provides another Pro-only feature that encourages upgrades while simplifying the interface for Free users.
+
+**User Story:**  
+As a business, we want to limit advanced features like the Inactive tab to Pro users so that we can provide additional value for Pro subscriptions, while as a Free user, I have a simpler interface focused on core functionality.
+
+**Acceptance Criteria:**  
+- [x] Free users cannot see the "Inactive" tab
+- [x] Pro users can see and use the "Inactive" tab normally
+- [x] Tab visibility updates immediately when Pro status changes
+- [x] No crashes or UI issues when tab is hidden/shown
+- [x] Free users still have access to all other tabs and core functionality
+- [x] Clear Pro-only feature differentiation
+
+**Technical Considerations:**  
+- Identify where the Inactive tab is implemented
+- Use ProUserManager to determine tab visibility
+- Handle dynamic tab showing/hiding based on Pro status changes
+- Ensure proper UI layout when tab is hidden
+- Maintain existing functionality for Pro users
+
+**Priority Justification:**  
+High priority as this provides a clear Pro feature differentiation that encourages upgrades while keeping the core app functionality available to Free users.
+
+**Implementation Details:**
+- **Tab Visibility Logic**: Inactive tab only shown when `proUserManager.isProUser()` returns true
+- **Adapter Count**: ViewPager adapter returns 6 items for Pro users, 5 items for Free users
+- **Dynamic Updates**: Tab setup refreshed in `onResume()` to handle Pro status changes
+- **Free User Experience**: 
+  - Shows 5 tabs: Dashboard, Calendar, Suggestions, Pieces, Timeline
+  - No access to Inactive tab or AbandonedFragment
+- **Pro User Experience**: 
+  - Shows all 6 tabs including Inactive tab
+  - Full access to all functionality unchanged
+- **Error Handling**: Proper position validation prevents crashes when tab is hidden
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/ViewProgressFragment.kt`
+
+**Implementation Notes:**  
+- This feature depends on Feature #1 (Pro Mode infrastructure) being implemented first
+- Simple implementation that cleanly hides the tab without affecting other functionality
+- Tab refreshes automatically when Pro status changes during app usage
+
+---
+
+### Feature #7: ✅ Limit Suggestions for Free Users
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** High  
+**Requested By:** Product Team  
+
+**Description:**  
+Limit Free users to only 2 favorite suggestions and 2 non-favorite suggestions in both the Dashboard and Suggestions tab. Pro users continue to see the full suggestion lists (up to 4 favorites and 4 non-favorites each).
+
+**User Story:**  
+As a business, we want to limit the number of practice suggestions for Free users so that we can provide additional value for Pro subscriptions, while as a Pro user, I want access to comprehensive practice suggestions to optimize my practice routine.
+
+**Acceptance Criteria:**  
+- [x] Free users see maximum 1 favorite suggestion (updated from 2 by Feature #8)
+- [x] Free users see maximum 2 non-favorite suggestions (instead of up to 4)
+- [x] Pro users continue to see full suggestion lists (up to 4 each)
+- [x] Limitation applies to both Dashboard and Suggestions tab
+- [x] Suggestion quality maintained - show the most relevant suggestions within limits
+- [x] Suggestion limits update immediately when Pro status changes
+- [x] No crashes or UI issues when suggestions are limited
+
+**Technical Considerations:**  
+- Modify DashboardViewModel suggestions logic to limit results for Free users
+- Modify SuggestionsViewModel to apply same limits for Free users
+- Use ProUserManager to determine suggestion limits
+- Maintain existing suggestion ranking/priority algorithms
+- Apply limits after suggestions are calculated but before returning to UI
+- Ensure consistent behavior across both Dashboard and Suggestions tab
+
+**Priority Justification:**  
+High priority as this provides valuable Pro differentiation while maintaining core suggestion functionality for Free users. Practice suggestions are a key feature that serious practitioners will want unlimited access to.
+
+**Implementation Details:**
+- **Suggestion Limits**: 
+  - Free users: Maximum 1 favorite suggestion + 2 non-favorite suggestions (favorite limit updated by Feature #8)
+  - Pro users: Up to 4 favorite suggestions + 4 non-favorite suggestions (unchanged)
+- **Dynamic Limits**: Both ViewModels check `proUserManager.isProUser()` to determine limits
+- **Consistent Implementation**: Same logic applied to both DashboardViewModel and SuggestionsViewModel
+- **Suggestion Quality**: Existing ranking and fallback algorithms preserved within the reduced limits
+- **Real-time Updates**: Limits apply immediately when Pro status changes since ViewModels react to Pro status
+- **UI Impact**: Dashboard shows fewer suggestions for Free users (3 total vs up to 8), Suggestions tab shows fewer items
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardFragment.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsFragment.kt`
+
+**Implementation Notes:**  
+- This feature depends on Feature #1 (Pro Mode infrastructure) being implemented first
+- Maintains all existing suggestion algorithm logic and quality
+- Provides clear value proposition for Pro upgrade
+- No UI changes needed - suggestion limits work seamlessly with existing displays
+- **Status Update**: Original specification called for 2 favorite suggestions, but Feature #8 further reduced this to 1 favorite suggestion. The non-favorite limit of 2 remains as originally specified.
+
+---
+
+### Feature #8: ✅ Single Favorite Suggestion for Free Users
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** High  
+**Requested By:** Product Team  
+
+**Description:**  
+Limit Free users to only 1 favorite suggestion (instead of 2) in both the Dashboard and Suggestions tab. Free users will always see their least recently practiced/performed favorite piece as the single suggestion. If they have no favorite pieces, no favorite suggestions are shown. Pro users continue to see up to 4 favorite suggestions.
+
+**User Story:**  
+As a business, we want to further limit favorite suggestions for Free users to provide even stronger Pro upgrade incentive, while as a Free user, I still get the most important favorite suggestion (my most neglected favorite piece) to maintain practice value.
+
+**Acceptance Criteria:**  
+- [x] Free users see exactly 1 favorite suggestion (instead of 2)
+- [x] Free users with no favorites see 0 favorite suggestions  
+- [x] The single favorite suggestion is always the least recently practiced/performed favorite piece
+- [x] Pro users continue to see up to 4 favorite suggestions (unchanged)
+- [x] Limitation applies to both Dashboard and Suggestions tab
+- [x] Non-favorite suggestions remain at 2 for Free users
+- [x] Suggestion limits update immediately when Pro status changes
+
+**Technical Considerations:**  
+- Modify DashboardViewModel and SuggestionsViewModel favorite limits from 2 to 1 for Free users
+- Maintain existing "least recently practiced" algorithm for the single suggestion
+- Ensure proper handling when user has no favorites (empty list)
+- Keep non-favorite suggestion limits unchanged (2 for Free, 4 for Pro)
+
+**Priority Justification:**  
+High priority as this creates a stronger Pro upgrade incentive while still providing valuable practice guidance to Free users with their most neglected favorite piece.
+
+**Implementation Details:**
+- **Favorite Limit Change**: Updated from 2 to 1 favorite suggestions for Free users in both ViewModels
+- **Algorithm Preserved**: Existing "least recently practiced/performed" selection logic maintained
+- **Pro Users Unchanged**: Continue to see up to 4 favorite suggestions
+- **Non-favorite Limits**: Unchanged at 2 for Free users, 4 for Pro users
+- **Empty Handling**: When Free users have no favorites, suggestion list naturally shows 0 favorite suggestions
+- **Total Suggestions**: Free users now see maximum 3 suggestions total (1 favorite + 2 non-favorite)
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt`
+
+**Implementation Notes:**  
+- Simple change from `4 else 2` to `4 else 1` in favorite limit logic
+- Leverages existing suggestion algorithms - no complex changes needed
+- Provides stronger Pro upgrade incentive while maintaining core value for Free users
+- Works seamlessly with existing UI - no interface changes required
+
+---
+
 ## Feature Request Template
 
 When requesting new features, please use this template:

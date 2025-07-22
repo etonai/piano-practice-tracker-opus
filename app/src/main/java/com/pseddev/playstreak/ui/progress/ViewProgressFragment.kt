@@ -11,12 +11,15 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.pseddev.playstreak.databinding.FragmentViewProgressBinding
+import com.pseddev.playstreak.utils.ProUserManager
 import com.google.android.material.tabs.TabLayoutMediator
 
 class ViewProgressFragment : Fragment() {
     
     private var _binding: FragmentViewProgressBinding? = null
     private val binding get() = _binding!!
+    
+    private lateinit var proUserManager: ProUserManager
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,9 +33,22 @@ class ViewProgressFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        // Initialize ProUserManager
+        proUserManager = ProUserManager.getInstance(requireContext())
+        
         // Enable options menu for this fragment
         setHasOptionsMenu(true)
         
+        setupTabs()
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Refresh tabs when returning to fragment (in case Pro status changed)
+        setupTabs()
+    }
+    
+    private fun setupTabs() {
         val pagerAdapter = ViewProgressPagerAdapter(this)
         binding.viewPager.adapter = pagerAdapter
         
@@ -46,7 +62,7 @@ class ViewProgressFragment : Fragment() {
                 2 -> "Suggestions"
                 3 -> "Pieces"
                 4 -> "Timeline"
-                5 -> "Inactive"
+                5 -> if (proUserManager.isProUser()) "Inactive" else ""
                 else -> ""
             }
         }.attach()
@@ -73,7 +89,7 @@ class ViewProgressFragment : Fragment() {
     }
     
     private inner class ViewProgressPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
-        override fun getItemCount(): Int = 6
+        override fun getItemCount(): Int = if (proUserManager.isProUser()) 6 else 5
         
         override fun createFragment(position: Int): Fragment {
             return when (position) {
@@ -82,7 +98,7 @@ class ViewProgressFragment : Fragment() {
                 2 -> SuggestionsFragment()
                 3 -> PiecesFragment()
                 4 -> TimelineFragment()
-                5 -> AbandonedFragment()
+                5 -> if (proUserManager.isProUser()) AbandonedFragment() else throw IllegalArgumentException("Invalid position: $position")
                 else -> throw IllegalArgumentException("Invalid position: $position")
             }
         }
