@@ -38,7 +38,14 @@ class TimelineAdapter(
             
             binding.dateText.text = dateFormat.format(Date(activity.timestamp))
             binding.timeText.text = timeFormat.format(Date(activity.timestamp))
-            binding.pieceNameText.text = piece.name
+            
+            // Show technique emoji indicator for techniques
+            val displayName = if (piece.type == com.pseddev.playstreak.data.entities.ItemType.TECHNIQUE) {
+                "🎼 ${piece.name}"
+            } else {
+                piece.name
+            }
+            binding.pieceNameText.text = displayName
             
             val typeText = when (activity.activityType) {
                 ActivityType.PRACTICE -> {

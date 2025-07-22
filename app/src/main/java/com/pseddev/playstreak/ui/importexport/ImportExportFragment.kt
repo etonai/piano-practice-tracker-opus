@@ -18,7 +18,6 @@ import androidx.navigation.fragment.findNavController
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.databinding.FragmentImportExportBinding
 import com.pseddev.playstreak.utils.GoogleDriveHelper
-import com.pseddev.playstreak.utils.ProUserManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
@@ -40,7 +39,6 @@ class ImportExportFragment : Fragment() {
         )
     }
     
-    private lateinit var proUserManager: ProUserManager
     
     private val exportCsvLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("text/csv")
@@ -77,23 +75,19 @@ class ImportExportFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        proUserManager = ProUserManager.getInstance(requireContext())
-        
         setupButtons()
         observeViewModel()
         updateDriveUI()
-        updateImportButtonState()
     }
     
     private fun setupButtons() {
         binding.exportToCsvButton.setOnClickListener {
             val timestamp = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.US).format(Date())
-            val fileName = "play_streak_export_$timestamp.csv"
+            val fileName = "PlayStreak_activities_export_$timestamp.csv"
             exportCsvLauncher.launch(fileName)
         }
         
         binding.importFromCsvButton.setOnClickListener {
-            // This should only fire for Pro users since button is disabled for Free users
             binding.warningTextView.visibility = View.VISIBLE
             importCsvLauncher.launch("text/*")
         }
@@ -293,33 +287,10 @@ class ImportExportFragment : Fragment() {
             .show()
     }
     
-    override fun onResume() {
-        super.onResume()
-        // Update import button state in case Pro status changed while away from this fragment
-        updateImportButtonState()
-    }
     
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-    
-    private fun updateImportButtonState() {
-        if (proUserManager.isProUser()) {
-            binding.importFromCsvButton.text = "Import from CSV"
-            binding.importFromCsvButton.isEnabled = true
-        } else {
-            binding.importFromCsvButton.text = "Import from CSV (Coming Soon)"
-            binding.importFromCsvButton.isEnabled = false
-        }
-    }
-    
-    private fun showUpgradePrompt() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Pro Feature")
-            .setMessage("CSV Import is a Pro feature. Export functionality remains available to all users.")
-            .setPositiveButton("OK", null)
-            .show()
     }
     
     private fun updateDriveUI() {

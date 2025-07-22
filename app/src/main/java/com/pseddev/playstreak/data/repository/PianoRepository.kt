@@ -155,8 +155,13 @@ class PianoRepository(
             // Insert unique pieces/techniques
             Log.d("ImportRepo", "Creating pieces from ${result.uniquePieceNames.size} unique names: ${result.uniquePieceNames}")
             result.uniquePieceNames.forEach { pieceName ->
-                // Determine if it's a piece or technique based on common patterns
-                val itemType = when {
+                // First check if any imported activity provides explicit type info for this piece
+                val explicitType = result.activities
+                    .firstOrNull { it.pieceName == pieceName && it.pieceType != null }
+                    ?.pieceType
+                
+                // Determine if it's a piece or technique - use explicit type if available, otherwise use heuristic
+                val itemType = explicitType ?: when {
                     pieceName.contains("Scale", ignoreCase = true) ||
                     pieceName.contains("Arpeggio", ignoreCase = true) ||
                     pieceName.contains("Exercise", ignoreCase = true) ||

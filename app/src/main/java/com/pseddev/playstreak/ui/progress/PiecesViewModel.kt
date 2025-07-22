@@ -54,7 +54,6 @@ class PiecesViewModel(
             sortDirection
         ) { pieces, activities, currentSortType, currentSortDirection ->
             val piecesWithStats = pieces
-                .filter { it.type == ItemType.PIECE }
                 .map { piece ->
                     val pieceActivities = activities.filter { it.pieceOrTechniqueId == piece.id }
                     PieceWithStats(

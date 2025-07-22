@@ -97,6 +97,14 @@ class DashboardViewModel(
                 val sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000L)
                 val thirtyOneDaysAgo = now - (31 * 24 * 60 * 60 * 1000L)
                 
+                // Calculate start of today (midnight) to exclude pieces practiced today
+                val startOfToday = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+                
                 val pieceActivities = activities.groupBy { it.pieceOrTechniqueId }
                 
                 val favoriteSuggestions = mutableListOf<SuggestionItem>()
@@ -114,8 +122,9 @@ class DashboardViewModel(
                     }
                     
                     if (piece.isFavorite) {
-                        // Favorites that haven't been practiced in 2+ days
-                        if (lastActivityDate == null || lastActivityDate < twoDaysAgo) {
+                        // Favorites that haven't been practiced in 2+ days AND haven't been practiced today
+                        if ((lastActivityDate == null || lastActivityDate < twoDaysAgo) && 
+                            (lastActivityDate == null || lastActivityDate < startOfToday)) {
                             favoriteSuggestions.add(
                                 SuggestionItem(
                                     piece = piece,
@@ -167,13 +176,18 @@ class DashboardViewModel(
                     val neededCount = favoriteLimit - regularFavorites.size
                     val usedPieceIds = regularFavorites.map { it.piece.id }.toSet()
                     
-                    // Get fallback favorites (excluding already used pieces)
+                    // Get fallback favorites (excluding already used pieces and pieces practiced today)
                     val allFavorites = pieces.filter { it.type == ItemType.PIECE && it.isFavorite && it.id !in usedPieceIds }
                     val fallbackFavorites = if (allFavorites.isNotEmpty()) {
                         val favoritesWithActivity = allFavorites.mapNotNull { piece ->
                             val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
                             val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
                             val lastActivityDate = lastActivity?.timestamp
+                            
+                            // Exclude pieces practiced today
+                            if (lastActivityDate != null && lastActivityDate >= startOfToday) {
+                                return@mapNotNull null
+                            }
                             
                             val daysSince = if (lastActivityDate != null) {
                                 ((now - lastActivityDate) / (24 * 60 * 60 * 1000)).toInt()

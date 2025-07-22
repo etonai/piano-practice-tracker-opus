@@ -15,4 +15,7 @@
     <!-- Performance Types -->
     <string name="performance_online">Online Performance</string>
     <string name="performance_live">Live Performance</string>
+    
+    <!-- Accessibility -->
+    <string name="add_activity">Add Activity</string>
 </resources>

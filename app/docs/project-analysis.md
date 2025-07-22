@@ -145,12 +145,48 @@ The codebase is well-maintained with minor technical debt that doesn't impede fu
 
 ## New Feature Proposals
 
-### 1. Practice Intelligence System (Pro Feature)
-**Description**: AI-powered practice recommendations based on user patterns
-- Analyzes practice history to suggest optimal practice times
-- Recommends pieces based on neglect patterns
-- Suggests practice duration based on goals
-- **Monetization**: Strong Pro differentiator
+### 1. Smart Practice Suggestions (Pro Feature)
+**Description**: Enhanced practice recommendations using sophisticated local algorithms
+
+**Current Implementation Reality Check:**
+PlayStreak currently uses a simple rule-based system:
+- Favorites not practiced in 2+ days
+- Non-favorites practiced 7-31 days ago
+- Fallback to least recently practiced
+
+**Challenges for True AI Implementation:**
+1. **Limited Data**: Only tracks date, duration, level, and notes
+2. **Local-Only Architecture**: No server infrastructure for ML models
+3. **Privacy Constraints**: No aggregated user data for training
+4. **Missing Context**: No difficulty ratings, goals, or progression metrics
+
+**Realistic "Smart" Enhancement Approach:**
+Rather than claiming "AI-powered" (which would be misleading), implement enhanced algorithms:
+
+```kotlin
+// Enhanced suggestion scoring system
+- Spaced repetition intervals based on last performance level
+- Practice pattern recognition (time of day, day of week)
+- Rotating focus areas (technique day, repertoire day)
+- Adaptive thresholds based on user's practice frequency
+- Performance preparation urgency
+- Variety scoring to prevent monotony
+```
+
+**Implementation Details:**
+- Use weighted scoring algorithm combining multiple factors
+- Store pattern data locally using existing Room database
+- No external API calls or cloud processing needed
+- Market as "Smart Suggestions" not "AI-powered"
+
+**Pro Features:**
+- Advanced spaced repetition algorithms
+- Custom suggestion weights/preferences
+- Practice session recommendations
+- Pattern insights dashboard
+- Export suggestion analytics
+
+**Monetization**: Strong Pro differentiator without overpromising
 
 ### 2. Repertoire Management (Free with Pro enhancements)
 **Description**: Organize pieces into performance-ready sets
@@ -282,25 +318,27 @@ Your concern about restricting CSV import to Pro users is **absolutely valid**. 
 
 **Free Import Features:**
 - Basic CSV import (up to 1000 activities)
-- Standard field mapping
+- Replace-only mode (current behavior)
 - One import per month
-- Basic duplicate detection
+- Local files only
 
 **Pro Import Enhancements:**
 - Unlimited import size
-- Advanced field mapping
+- Merge mode (add to existing data)
 - Unlimited import frequency
-- Smart duplicate resolution
-- Batch editing after import
-- Import history and rollback
+- Cloud storage import
+- Import preview and validation
+- Undo/rollback capability
 
 This approach:
 - Respects user data ownership
 - Provides genuine Pro value
 - Avoids negative perception
-- Creates recurring use cases
+- Creates recurring use cases for Pro users who manage multiple devices or need frequent backups
 
 ### Detailed CSV Import Differentiation Strategy
+
+**Important Context:** PlayStreak's CSV import/export is designed as a backup/restore feature, not for importing data from other applications. The CSV format is specific to PlayStreak, requiring exact headers and field values. This analysis focuses on enhancing the backup/restore functionality rather than enabling imports from external sources.
 
 **How to meaningfully differentiate CSV import between Free and Pro users:**
 
@@ -320,56 +358,57 @@ This approach:
 
 **Rationale**: Most hobbyists importing from another app will have <1000 activities. Professionals and teachers need unlimited imports for multiple students or historical data.
 
-#### 2. Field Mapping and Data Intelligence
+#### 2. Import Behavior and Options
 
 **Free Users:**
-- Basic field mapping (auto-detect common formats)
-- Standard CSV formats only
-- Manual column selection
-- Basic date/time parsing
+- Replace-only import (current behavior)
+- Basic import summary
+- Standard CSV format only
+- Single file import
 
 **Pro Users:**
-- Smart field mapping with AI suggestions
-- Custom field mapping templates (save/reuse)
-- Support for multiple CSV formats and delimiters
-- Advanced date/time parsing with timezone support
-- Auto-detect and map custom fields
-- Import from Excel files (.xlsx)
+- Merge option (add to existing data instead of replace)
+- Selective import (choose date ranges or pieces)
+- Import preview with statistics
+- Batch import multiple backup files
+- Preserve piece metadata during merge
+- Import conflict resolution options
 
-**Rationale**: Pro users often deal with complex data from various sources and need flexibility.
+**Rationale**: Pro users may need to combine data from multiple devices or recover partial data without losing current entries.
 
-#### 3. Data Validation and Cleaning
+#### 3. Data Validation and Error Handling
 
 **Free Users:**
 - Basic validation (required fields)
 - Simple error reporting
 - Skip invalid rows
+- Summary of imported/skipped rows
 
 **Pro Users:**
-- Advanced validation rules
-- Data cleaning suggestions (fix common issues)
-- Interactive conflict resolution
-- Preview and edit before importing
-- Validation reports with fix suggestions
-- Auto-correction of common data issues
+- Detailed validation reports
+- Line-by-line error details
+- Option to fix and retry failed rows
+- Export error report for manual fixing
+- Continue import despite errors option
+- Validation preview before import
 
-**Rationale**: Pro users importing large datasets need sophisticated tools to ensure data quality.
+**Rationale**: Pro users importing large backup files need detailed feedback to ensure no data is lost.
 
 #### 4. Duplicate Handling
 
 **Free Users:**
-- Basic duplicate detection (exact matches)
-- Skip or replace duplicates
-- Simple date-based matching
+- Replace all data (current behavior)
+- No duplicate detection needed
+- Clean slate approach
 
 **Pro Users:**
-- Smart duplicate detection (fuzzy matching)
-- Merge duplicates with conflict resolution
-- Custom duplicate detection rules
-- Keep both, merge, or selective field updates
-- Duplicate analysis report
+- Duplicate detection for merge imports
+- Skip or update existing activities
+- Piece name matching with normalization
+- Activity timestamp comparison
+- Choose resolution strategy per conflict
 
-**Rationale**: Pro users may import from multiple sources and need intelligent merging.
+**Rationale**: Pro users merging data from multiple devices need control over how duplicates are handled.
 
 #### 5. Import History and Management
 
@@ -388,58 +427,60 @@ This approach:
 
 **Rationale**: Pro users need accountability and ability to correct mistakes.
 
-#### 6. Post-Import Features
+#### 6. Backup Management Features
 
 **Free Users:**
-- Basic success confirmation
+- Basic import confirmation
 - View imported data in app
 
 **Pro Users:**
-- Batch edit imported data
-- Tag imported activities with source
-- Generate import summary reports
-- Apply bulk operations to imported data
-- Create custom categories for imported items
-- Export import reports
+- Automatic backup before import
+- Backup version management
+- Schedule automatic exports
+- Cloud backup integration
+- Compress old backups
+- Backup retention policies
 
-**Rationale**: Pro users often need to organize and categorize large amounts of imported data.
+**Rationale**: Pro users need robust backup strategies to protect their extensive practice history.
 
-#### 7. Advanced Import Sources
+#### 7. Import Convenience Features
 
 **Free Users:**
-- Local CSV file only
+- Local file selection only
+- Manual import process
 
 **Pro Users:**
-- Import from cloud storage (Google Drive, Dropbox)
-- Import from URLs
-- Scheduled imports from cloud sources
-- Import from other music apps via API
-- Import from teacher-provided templates
+- Import from cloud storage (Google Drive where backups are stored)
+- Drag-and-drop import support
+- Recent imports list for re-import
+- Import multiple backup files in sequence
+- Quick restore from latest backup
 
-**Rationale**: Pro users benefit from seamless integration with their existing workflows.
+**Rationale**: Pro users who backup frequently need convenient ways to restore their data.
 
 #### Implementation Example
 
 **Free User Experience:**
 ```
 1. Click "Import CSV" 
-2. Select file (<1000 activities)
-3. Basic field mapping
-4. Review errors
-5. Import complete
+2. Warning: "This will replace all data"
+3. Select PlayStreak backup file
+4. See summary (X activities, Y pieces)
+5. Confirm import
+6. Import complete - all data replaced
 ```
 
 **Pro User Experience:**
 ```
 1. Click "Import Data"
-2. Choose source (local, cloud, URL, or API)
-3. AI suggests field mappings
-4. Preview with data cleaning suggestions
-5. Resolve duplicates interactively
-6. Apply bulk tags/categories
-7. Import with full history tracking
-8. Generate summary report
-9. Option to batch edit post-import
+2. Choose import mode: Replace or Merge
+3. Select source (local, Google Drive, recent)
+4. Preview: X activities, Y pieces, Z potential conflicts
+5. For merge: Choose conflict resolution
+6. See detailed validation report
+7. Confirm import with automatic backup
+8. Import complete with detailed summary
+9. Option to undo import within 24 hours
 ```
 
 This differentiation strategy:
@@ -473,7 +514,7 @@ This differentiation strategy:
 1. **Platform Expansion**: iOS app, web dashboard
 2. **API Development**: Enable third-party integrations
 3. **Community Features**: Forums, sheet music sharing
-4. **AI Integration**: Smart practice recommendations
+4. **Enhanced Intelligence**: Advanced local algorithms for practice optimization
 
 ### Final Thoughts
 

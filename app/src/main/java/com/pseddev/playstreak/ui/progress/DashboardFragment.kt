@@ -81,11 +81,14 @@ class DashboardFragment : Fragment() {
         
         viewLifecycleOwner.lifecycleScope.launch {
             val streak = viewModel.calculateStreak()
-            binding.currentStreakText.text = if (streak >= 6) {
-                "$streak day${if (streak != 1) "s" else ""} 🔥"
-            } else {
-                "$streak day${if (streak != 1) "s" else ""}"
+            val emojiSuffix = when {
+                streak >= 14 -> " 🔥🔥🔥"
+                streak >= 7 -> " 🔥" 
+                streak >= 5 -> " 🎵🎵"
+                streak >= 3 -> " 🎵"
+                else -> ""
             }
+            binding.currentStreakText.text = "$streak day${if (streak != 1) "s" else ""}$emojiSuffix"
         }
         
         viewModel.weekSummary.observe(viewLifecycleOwner) { summary ->

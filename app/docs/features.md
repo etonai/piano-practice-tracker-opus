@@ -938,6 +938,589 @@ Medium priority UX enhancement that significantly improves workflow efficiency. 
 
 ---
 
+### Feature #19: ✅ Add Activity from Inactive Tab
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** User Feedback  
+
+**Description:**  
+Add a quick "Add Activity" feature to the Inactive tab that works like the existing quick add functionality in Suggestions and Pieces tabs. Each piece listed in the Inactive tab should have a small "+" icon that allows users to quickly log an activity for that piece.
+
+**User Story:**  
+As a Pro user viewing my inactive pieces, I want to quickly add an activity for a specific piece by tapping a "+" icon, so that I can efficiently resume practice on neglected pieces without navigating through multiple screens to select the piece name.
+
+**Acceptance Criteria:**  
+- [ ] Add "+" icon to each piece in Inactive tab (Pro users only)
+- [ ] Clicking "+" opens the same QuickAddActivityDialog used in Suggestions/Pieces tabs
+- [ ] Dialog pre-fills piece name (user cannot change it)
+- [ ] Dialog allows selection of Practice vs Performance
+- [ ] Dialog shows proper level options matching regular Add Activity flow
+- [ ] Performance activities show only 3 levels with performance-specific descriptions
+- [ ] Practice activities show 4 levels with practice-specific descriptions  
+- [ ] Performance activities include performance type selection (Online/Live)
+- [ ] Dialog has Add Activity and Cancel buttons
+- [ ] Successful save closes dialog and returns to Inactive tab
+- [ ] Activity will appear in timeline/dashboard after saving
+- [ ] After logging activity, piece should eventually move out of Inactive tab
+- [ ] Icon is visually clear but doesn't dominate the list item
+- [ ] Feature restricted to Pro users only (consistent with Inactive tab access)
+
+**Technical Considerations:**  
+- Add "+" button/icon to inactive piece item layout
+- Reuse existing QuickAddActivityDialogFragment from Feature #18
+- Add onAddActivityClick callback to InactiveAdapter
+- Update InactiveFragment to handle dialog presentation
+- Ensure icon styling matches Suggestions and Pieces tabs
+- Consider that pieces may disappear from Inactive list after activity is added
+- Test that Inactive tab refreshes properly after activity creation
+
+**Priority Justification:**  
+Medium priority UX enhancement that extends the successful quick-add pattern from Feature #18 to the Inactive tab. Provides consistent user experience across all piece-viewing tabs and makes it easier to resume practice on neglected pieces, which directly supports the app's core goal of consistent practice habits.
+
+**Implementation Approach:**
+- **Reuse Components**: Leverage existing QuickAddActivityDialogFragment and ViewModel
+- **UI Consistency**: Use same "+" icon and positioning as Suggestions/Pieces tabs
+- **Adapter Pattern**: Follow same pattern as SuggestionsAdapter and PiecesAdapter
+- **Fragment Integration**: Add dialog handling to InactiveFragment
+- **Pro Restriction**: Maintain consistency with other Pro-only quick-add features
+- **Data Flow**: Ensure Inactive list updates properly when pieces become active again
+
+**Implementation Details:**
+
+**UI Components Modified:**
+- **item_abandoned.xml**: Added addActivityIcon ImageView with + icon, positioned between piece name and days badge
+- Icon styled consistently with other tabs (24dp size, selectableItemBackgroundBorderless background)
+
+**Adapter Updates:**
+- **AbandonedAdapter.kt**: Added constructor parameters for onAddActivityClick callback and ProUserManager
+- Updated ViewHolder to handle + icon clicks and Pro user visibility control
+- Icon visibility controlled by `proUserManager.isProUser()` - visible for Pro, gone for Free users
+
+**Fragment Integration:**
+- **AbandonedFragment.kt**: Updated to create adapter with callback and ProUserManager instance
+- Added `showQuickAddActivityDialog()` method that reuses existing QuickAddActivityDialogFragment
+- Dialog receives abandonedItem.piece.id and abandonedItem.piece.name for pre-filling
+
+**Dialog Reuse:**
+- Leverages existing QuickAddActivityDialogFragment and QuickAddActivityViewModel from Feature #18
+- No new dialog components needed - maintains UI consistency across all tabs
+
+**Pro User Restriction:**
+- + icons only visible when `ProUserManager.getInstance(context).isProUser()` returns true
+- Consistent with Inactive tab being Pro-only feature
+- Maintains feature differentiation between Free and Pro users
+
+**Data Flow:**
+- User clicks + icon → showQuickAddActivityDialog() → QuickAddActivityDialogFragment
+- Dialog pre-fills piece information → User selects activity details → Activity saved
+- After activity creation, piece may naturally move out of Inactive tab on next data refresh
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/AbandonedFragment.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/AbandonedAdapter.kt`
+- `app/src/main/res/layout/item_abandoned.xml`
+
+**Implementation Notes:**  
+- Feature extends successful quick-add pattern from Feature #18 to Inactive/Abandoned tab
+- Reuses existing QuickAddActivityDialogFragment for consistency and maintainability
+- Maintains Pro-only restriction consistent with Inactive tab visibility
+- After adding activity, pieces naturally filter out of Inactive tab on next refresh (30+ day rule)
+- UI styling matches Suggestions and Pieces tabs for consistent user experience
+
+---
+
+### Feature #20: ✅ Exclude Today's Practiced Favorites from Suggestions
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** User Feedback  
+
+**Description:**  
+Modify the favorite suggestions logic to exclude any favorite piece that has already been practiced or performed today. Currently, favorites are suggested if they haven't been practiced in 2+ days, but this should be enhanced to never suggest favorites that have been practiced today, regardless of the 2-day rule.
+
+**User Story:**  
+As a user who has already practiced a favorite piece today, I don't want to see that piece in my suggestions list, so that my suggestions focus on pieces that still need attention today and don't show me redundant recommendations.
+
+**Acceptance Criteria:**  
+- [ ] Favorite pieces practiced or performed today are excluded from suggestions
+- [ ] Applies to both primary suggestions (2+ days rule) and fallback suggestions 
+- [ ] "Today" is defined as current calendar day (midnight to midnight)
+- [ ] Both PRACTICE and PERFORMANCE activities count as "practiced today"
+- [ ] Suggestion logic still follows existing 2+ days rule, but adds today exclusion
+- [ ] Fallback logic (least recently practiced) also excludes today's activities
+- [ ] No impact on non-favorite suggestion logic
+- [ ] Pro and Free user limits remain unchanged
+- [ ] Clear suggestion reasons still displayed for remaining suggestions
+
+**Technical Considerations:**  
+- Update SuggestionsViewModel favorite suggestion logic
+- Add today timestamp calculation (start of current day)
+- Filter out pieces with activities >= today timestamp in both primary and fallback logic
+- Ensure timezone handling is consistent with existing date calculations
+- Update both DashboardViewModel and SuggestionsViewModel for consistency
+- Consider edge case where user has practiced all favorites today (empty favorites list)
+- Maintain existing sorting and limiting logic for remaining favorites
+
+**Priority Justification:**  
+Medium priority UX enhancement that prevents redundant suggestions and helps users focus on pieces that actually need attention. Improves suggestion quality by avoiding pieces already practiced today, making the suggestion system more intelligent and user-friendly.
+
+**Implementation Approach:**
+- **Today Calculation**: Add `startOfToday` timestamp calculation using current date at 00:00:00
+- **Primary Filter**: Update favorite selection to exclude pieces with `lastActivityDate >= startOfToday`  
+- **Fallback Filter**: Apply same filter to fallback favorites selection
+- **Logic Flow**: 
+  1. Calculate `startOfToday = todayMidnight timestamp`
+  2. For each favorite: if `lastActivityDate >= startOfToday` → exclude
+  3. Apply existing 2+ days rule to remaining favorites
+  4. Apply fallback logic to remaining favorites if needed
+- **Consistency**: Update both SuggestionsViewModel and DashboardViewModel
+- **Edge Cases**: Handle scenario where all favorites practiced today (may result in 0 favorite suggestions)
+
+**Implementation Details:**
+
+**Today Calculation:**
+- Added `startOfToday` timestamp calculation using `Calendar.getInstance()` set to midnight (00:00:00)
+- Consistent implementation across both ViewModels using same calendar logic
+
+**Primary Suggestion Filter Enhancement:**
+- **SuggestionsViewModel**: Updated favorite condition from `(lastActivityDate == null || lastActivityDate < twoDaysAgo)` 
+- **Enhanced to**: `(lastActivityDate == null || lastActivityDate < twoDaysAgo) && (lastActivityDate == null || lastActivityDate < startOfToday)`
+- Same logic applied to DashboardViewModel for consistency
+
+**Fallback Suggestion Filter Enhancement:**
+- Added explicit exclusion in fallback favorites mapping: `if (lastActivityDate != null && lastActivityDate >= startOfToday) return@mapNotNull null`
+- Applies to both SuggestionsViewModel and DashboardViewModel fallback logic
+- Ensures pieces practiced today are excluded from all suggestion paths
+
+**Logic Flow:**
+1. Calculate `startOfToday` as current date at 00:00:00 timestamp
+2. For each favorite piece: if practiced today (`lastActivityDate >= startOfToday`) → exclude from suggestions
+3. Apply existing 2+ day rule to remaining (non-today) favorites  
+4. Apply same today exclusion to fallback favorites if primary suggestions insufficient
+5. Maintain existing Pro/Free limits and sorting logic
+
+**Edge Case Handling:**
+- If all favorites practiced today: Results in 0 favorite suggestions (expected behavior)
+- Never-practiced pieces (`lastActivityDate == null`): Still eligible for suggestions
+- Maintains existing suggestion reasons and display logic
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt`
+
+**Implementation Notes:**  
+- Feature enhances suggestion intelligence by preventing redundant recommendations
+- Maintains all existing 2+ day logic while adding today exclusion as prerequisite filter
+- Both primary and fallback suggestion paths now exclude today's practiced favorites
+- May result in fewer suggestions on active practice days, but significantly improves suggestion relevance
+- Helps users focus practice time on pieces that haven't been touched today
+- Consistent implementation across Dashboard and Suggestions tab ensures uniform user experience
+
+---
+
+### Feature #21: ✅ Enhanced Streak Emoji Progression
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** User Experience Team  
+
+**Description:**  
+Enhance the streak display emoji system to provide better visual progression and motivation for different milestone achievements. Currently, the fire emoji (🔥) appears at 6+ days. This should be changed to a more graduated system with multiple emoji stages that align with PlayStreak's musical theme.
+
+**User Story:**  
+As a user building my practice streak, I want to see visual progress indicators that celebrate different milestone achievements, so that I feel motivated to continue practicing and can see my progress through meaningful emoji rewards that connect to PlayStreak's musical theme.
+
+**Acceptance Criteria:**  
+- [ ] 0-2 days: No emoji (same as current)
+- [ ] 3-4 days: Single music note emoji 🎵 (same emoji used elsewhere in PlayStreak)
+- [ ] 5-6 days: Double music note emoji 🎵🎵 (progression within musical theme)
+- [ ] 7-13 days: Single fire emoji 🔥 (upgraded from music notes)
+- [ ] 14+ days: Triple fire emoji 🔥🔥🔥 (maximum achievement level)
+- [ ] Emoji appears after the day count: "3 days 🎵", "5 days 🎵🎵", "7 days 🔥", "14 days 🔥🔥🔥"
+- [ ] Proper spacing between day count and emoji
+- [ ] No other display logic changes (singular/plural "day"/"days" remains the same)
+- [ ] Emoji progression creates sense of achievement and motivation
+
+**Technical Considerations:**  
+- Update DashboardFragment.kt streak display logic
+- Modify the conditional emoji logic from single threshold (6+ days) to multiple thresholds
+- Ensure music note emoji 🎵 matches the same emoji used elsewhere in the app
+- Test emoji display across different Android versions and devices
+- Consider emoji rendering consistency across different font systems
+- Maintain existing streak calculation logic (only change display)
+
+**Priority Justification:**  
+Medium priority UX enhancement that improves user motivation and engagement through better visual feedback. The graduated emoji system provides more frequent positive reinforcement and creates stronger psychological incentive to maintain practice streaks.
+
+**Implementation Approach:**
+- **Emoji Logic**: Replace single `if (streak >= 6)` condition with multiple conditions:
+  ```kotlin
+  val emojiSuffix = when {
+      streak >= 14 -> " 🔥🔥🔥"
+      streak >= 7 -> " 🔥" 
+      streak >= 5 -> " 🎵🎵"
+      streak >= 3 -> " 🎵"
+      else -> ""
+  }
+  binding.currentStreakText.text = "$streak day${if (streak != 1) "s" else ""}$emojiSuffix"
+  ```
+- **Thresholds**: 3+ days (🎵), 5+ days (🎵🎵), 7+ days (🔥), 14+ days (🔥🔥🔥)
+- **Musical Theme**: Music note emoji connects to PlayStreak branding and musical context
+- **Progression**: Creates clear achievement levels with appropriate reward escalation
+- **Testing**: Verify emoji rendering on various Android devices and OS versions
+
+**Implementation Details:**
+
+**Code Changes:**
+- **DashboardFragment.kt**: Replaced simple if/else emoji logic with comprehensive when expression
+- **Old Logic**: Single threshold at 6+ days for fire emoji
+- **New Logic**: Four-tier progression system with multiple emoji milestones
+
+**Emoji Progression Implementation:**
+```kotlin
+val emojiSuffix = when {
+    streak >= 14 -> " 🔥🔥🔥"  // Triple fire for elite 14+ day streaks
+    streak >= 7 -> " 🔥"        // Single fire for solid 7+ day streaks  
+    streak >= 5 -> " 🎵🎵"      // Double music note for 5+ day momentum
+    streak >= 3 -> " 🎵"        // Single music note for 3+ day achievement
+    else -> ""                  // No emoji for 0-2 days
+}
+binding.currentStreakText.text = "$streak day${if (streak != 1) "s" else ""}$emojiSuffix"
+```
+
+**Display Examples:**
+- **"0 days"** - No emoji, encouraging start
+- **"3 days 🎵"** - First musical milestone reward
+- **"5 days 🎵🎵"** - Building momentum with double music notes
+- **"7 days 🔥"** - Transition to "hot streak" territory
+- **"14 days 🔥🔥🔥"** - Ultimate elite status achievement
+
+**User Experience Impact:**
+- **More Frequent Rewards**: Users get first emoji at day 3 instead of day 6
+- **Musical Branding**: Music note emoji (🎵) reinforces PlayStreak's musical identity
+- **Progressive Motivation**: Four distinct achievement levels create psychological incentive
+- **Elite Recognition**: Triple fire emoji provides spectacular reward for 14+ day dedication
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardFragment.kt`
+
+**Implementation Notes:**  
+- Feature enhances existing streak display without changing underlying calculation logic
+- Music note emoji (🎵) reinforces PlayStreak's musical identity and branding throughout early stages
+- Four-tier system provides balanced progression: early achievement (3 days), building momentum (5 days), solid streak (7 days), impressive dedication (14+ days)
+- Double music note progression creates satisfying intermediate reward before transitioning to fire emojis
+- Triple fire emoji (🔥🔥🔥) provides spectacular ultimate visual reward for most dedicated users
+- Maintains all existing text formatting and singular/plural day handling
+- Creates stronger psychological motivation through more frequent positive reinforcement
+
+---
+
+### Feature #22: ✅ Add PieceType to CSV Export/Import
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** High  
+**Requested By:** Data Integrity Team  
+
+**Description:**  
+Add the PieceType field (PIECE or TECHNIQUE) to CSV export and import functionality to preserve complete piece information during data transfers. Currently, piece type information is lost during export/import cycles, requiring the system to guess whether items like "C Major Scale" should be classified as PIECE or TECHNIQUE during import.
+
+**User Story:**  
+As a user who exports and imports my practice data, I want the piece type (PIECE or TECHNIQUE) to be preserved in CSV files, so that my data maintains complete integrity without losing the distinction between musical pieces and technical exercises during import.
+
+**Acceptance Criteria:**  
+- [ ] CSV export includes PieceType column after Piece column
+- [ ] PieceType values are exported as "PIECE" or "TECHNIQUE" (enum string values)
+- [ ] CSV import validates and parses PieceType field correctly
+- [ ] Import creates pieces with correct type classification
+- [ ] Enhanced CSV header: `DateTime,Length,ActivityType,Piece,PieceType,Level,PerformanceType,Notes`
+- [ ] Backward compatibility: Import still works with old CSV format (falls back to type detection)
+- [ ] Export preserves all existing functionality while adding new field
+- [ ] Import validation includes PieceType field validation with clear error messages
+- [ ] Documentation updated to reflect new CSV format
+
+**Technical Considerations:**  
+- Update CsvHandler.exportActivitiesToCsv to include piece.type field
+- Update CSV header constants to include HEADER_PIECE_TYPE
+- Modify import validation to handle both old and new CSV formats
+- Update importActivitiesFromCsv to parse and validate PieceType field
+- Ensure ImportedActivity data class includes pieceType field
+- Add validation for PieceType enum values during import
+- Maintain backward compatibility with existing CSV files
+- Update error messages to include PieceType validation failures
+
+**Priority Justification:**  
+High priority data integrity fix that prevents data loss during export/import cycles. Currently, users lose piece type classification when exporting and re-importing data, requiring manual re-classification or relying on imperfect keyword detection. This is a fundamental data preservation issue that affects the reliability of the backup/restore functionality.
+
+**Implementation Approach:**
+- **Export Enhancement**: Add piece.type.toString() to CSV row data
+  ```kotlin
+  val row = listOf(
+      datetime,
+      activity.minutes.toString(),
+      activity.activityType.toString(),
+      TextNormalizer.normalizePieceName(piece.name),
+      piece.type.toString(), // New field
+      activity.level.toString(),
+      activity.performanceType,
+      TextNormalizer.normalizeUserInput(activity.notes)
+  )
+  ```
+- **Header Update**: Add HEADER_PIECE_TYPE constant and include in header array
+- **Import Enhancement**: Parse PieceType field with validation
+- **Backward Compatibility**: Check CSV column count to handle old vs new format
+- **Data Class Update**: Add pieceType field to ImportedActivity
+- **Validation**: Ensure PieceType is valid ItemType enum value
+
+**Files to Modify:**
+- `app/src/main/java/com/pseddev/playstreak/utils/CsvHandler.kt`
+
+**Implementation Notes:**  
+- Feature addresses critical data integrity issue where piece type information is lost during export/import
+- Maintains backward compatibility with existing CSV files through format detection
+- Enhances the reliability of PlayStreak's backup and restore functionality
+- Prevents users from having to manually re-classify pieces after import
+- Eliminates reliance on imperfect keyword-based type detection during import
+
+---
+
+### Feature #23: ✅ Include Techniques in Pieces Tab with Emoji Indicator
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** User Experience Team  
+
+**Description:**  
+Modify the Pieces tab to display both pieces AND techniques in a unified view, with a visual emoji indicator to distinguish techniques from regular pieces. Currently, the Pieces tab only shows items of type PIECE, but users should be able to see and manage their techniques (scales, exercises, etc.) in the same interface.
+
+**User Story:**  
+As a user managing my practice repertoire, I want to see both my pieces and techniques in the Pieces tab, so that I have a complete view of all my practice materials in one place, with clear visual distinction between pieces and technical exercises.
+
+**Acceptance Criteria:**  
+- [ ] Pieces tab displays both PIECE and TECHNIQUE items in the same list
+- [ ] Techniques show a visual emoji indicator next to their title
+- [ ] Pieces continue to display without technique emoji (maintain current appearance)
+- [ ] Technique emoji should be consistent with PlayStreak's visual theme
+- [ ] Sort functionality works correctly with mixed piece/technique list
+- [ ] Search/filter functionality works with both types
+- [ ] All existing functionality (favorites, quick-add, navigation) works for both types
+- [ ] Tab title remains "Pieces" but content includes techniques
+- [ ] Techniques are visually distinguishable but integrated seamlessly
+- [ ] Activity counts and last practice dates work for both types
+
+**Technical Considerations:**  
+- Update PiecesViewModel to query both PIECE and TECHNIQUE types instead of filtering to PIECE only
+- Modify piece list item layout or adapter to conditionally display technique emoji
+- Determine appropriate emoji for techniques (🎼, 🎹, ⚙️, or other music-related emoji)
+- Ensure sorting algorithms work correctly with mixed item types
+- Update any hardcoded filters that assume only PIECE type in Pieces tab
+- Consider whether techniques should be grouped separately or fully integrated
+- Maintain backward compatibility with existing piece-focused functionality
+
+**Priority Justification:**  
+Medium priority UX enhancement that provides users with a more complete and unified view of their practice materials. Currently, techniques are somewhat hidden or less accessible, but they are an important part of practice routines. This improves discoverability and management of technical exercises.
+
+**Implementation Approach:**
+- **ViewModel Update**: Change filter from `.filter { it.type == ItemType.PIECE }` to include both types
+- **Visual Indicator**: Add conditional emoji display in adapter:
+  ```kotlin
+  // In PiecesAdapter ViewHolder
+  val displayName = if (piece.type == ItemType.TECHNIQUE) {
+      "🎼 ${piece.name}"  // Or chosen technique emoji
+  } else {
+      piece.name
+  }
+  binding.pieceNameText.text = displayName
+  ```
+- **Emoji Selection**: Choose from music-related options:
+  - 🎼 (musical score - indicates written exercises)
+  - 🎹 (piano - indicates piano techniques)  
+  - ⚙️ (gear - indicates technical exercises)
+  - 🔧 (wrench - indicates "technique work")
+- **Sorting Compatibility**: Ensure existing sort options work with mixed types
+- **Testing**: Verify all piece-related functionality works with techniques
+
+**Files to Modify:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/PiecesViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/PiecesAdapter.kt`
+- Possibly `app/src/main/res/layout/item_piece_stats.xml` if emoji needs special styling
+
+**Implementation Notes:**  
+- Feature creates a more unified and complete practice materials management interface
+- Maintains clear visual distinction between pieces and techniques while integrating them
+- Improves discoverability of techniques that may currently be less accessible
+- Preserves all existing functionality while expanding scope to include techniques
+- Choice of emoji should align with PlayStreak's musical theme and be easily recognizable
+
+---
+
+### Feature #24: ✅ Add Technique Emoji to Timeline and Inactive Tab
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** User Experience Team  
+
+**Description:**  
+Add the technique emoji indicator (🎼) next to technique names in both the Timeline and Inactive tabs to maintain visual consistency across the app. This ensures that techniques are clearly distinguished from pieces throughout all interfaces, not just in the Pieces tab.
+
+**User Story:**  
+As a user viewing my activity timeline or inactive items, I want to easily distinguish between pieces and techniques at a glance, so that I can quickly understand what type of practice material each activity involved without having to rely on memory or naming conventions.
+
+**Acceptance Criteria:**  
+- [ ] Timeline tab shows technique emoji (🎼) next to technique names in activity entries
+- [ ] Inactive tab shows technique emoji (🎼) next to technique names in the pieces list
+- [ ] Regular pieces continue to display without emoji in both tabs
+- [ ] Emoji placement is consistent with Pieces tab implementation (before the name)
+- [ ] Timeline activity formatting maintains readability with emoji addition
+- [ ] Inactive tab list formatting maintains readability with emoji addition
+- [ ] All existing functionality (navigation, quick-add, sorting) works unchanged
+- [ ] Emoji rendering is consistent across all tabs (Timeline, Inactive, Pieces)
+- [ ] Performance impact is minimal (emoji added at display time, not stored)
+
+**Technical Considerations:**  
+- Update TimelineAdapter to conditionally display emoji for techniques
+- Update AbandonedAdapter (Inactive tab) to conditionally display emoji for techniques
+- Ensure consistent emoji choice (🎼) across all implementations
+- Modify piece name display logic in both adapters
+- Consider caching piece type information to avoid repeated database queries
+- Test emoji rendering consistency across different Android versions
+- Verify that emoji doesn't interfere with existing text truncation or styling
+
+**Priority Justification:**  
+Medium priority UX consistency enhancement that extends the visual distinction system from Feature #23 across the entire app. Provides uniform user experience and reduces cognitive load when scanning through practice history or inactive items.
+
+**Implementation Approach:**
+- **Timeline Adapter**: Update activity display to include emoji for techniques:
+  ```kotlin
+  // In TimelineAdapter ViewHolder
+  val pieceName = if (pieceOrTechnique.type == ItemType.TECHNIQUE) {
+      "🎼 ${pieceOrTechnique.name}"
+  } else {
+      pieceOrTechnique.name
+  }
+  // Use pieceName in activity display string
+  ```
+- **Inactive Adapter**: Update piece name display to include emoji for techniques:
+  ```kotlin
+  // In AbandonedAdapter ViewHolder  
+  val displayName = if (item.piece.type == ItemType.TECHNIQUE) {
+      "🎼 ${item.piece.name}"
+  } else {
+      item.piece.name
+  }
+  binding.pieceNameText.text = displayName
+  ```
+- **Consistency**: Use same emoji (🎼) and placement pattern across all tabs
+- **Performance**: Add emoji at display time, not stored in database
+
+**Files to Modify:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/TimelineAdapter.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/AbandonedAdapter.kt`
+
+**Implementation Notes:**  
+- Feature provides visual consistency across all tabs where pieces/techniques are displayed
+- Maintains same emoji choice (🎼) and placement pattern established in Feature #23
+- Enhances user ability to quickly scan and understand practice material types
+- No data model changes required - purely a display enhancement
+- Should be implemented after or alongside Feature #23 for consistency
+- Improves overall app cohesion and user experience through consistent visual language
+
+**Dependencies:**
+- Should align with emoji choice made in Feature #23 (Pieces tab technique emoji)
+- Consider implementing together with Feature #23 for consistent rollout
+
+---
+
+### Feature #25: ✅ Import/Export Button Label Updates and Free User Access
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** User Interface Team  
+
+**Description:**  
+Update the import/export UI to provide clearer button labeling and remove unnecessary feature gating for free users on the import functionality. The export button should be renamed to "Export Activities to CSV" and the import button to "Import Activities from CSV" for better clarity. Additionally, free users should have access to the same import button as Pro users, removing the current disabled/different import button behavior.
+
+**User Story:**  
+As a user, I want clear and descriptive button labels so that I understand exactly what each action will do, and as a free user, I want access to import functionality without being shown disabled buttons that create confusion about available features.
+
+**Acceptance Criteria:**  
+- [ ] Export button text changed from current label to "Export Activities to CSV"
+- [ ] Import button text changed from current label to "Import Activities from CSV"  
+- [ ] Free users see the same enabled import button as Pro users
+- [ ] Remove any code that shows disabled/different import buttons for free users
+- [ ] Import functionality works identically for both free and Pro users
+- [ ] Export functionality continues to work unchanged (only button label changes)
+- [ ] UI layout and styling remain consistent with current design
+- [ ] No breaking changes to existing import/export logic
+
+**Technical Considerations:**  
+- Update button text resources in strings.xml or directly in layout/code
+- Remove Pro user checks specifically around import button display/enablement
+- Verify that import functionality doesn't have other Pro-gated features that would break
+- Test both free and Pro user flows to ensure consistent behavior
+- Consider if this aligns with overall monetization strategy
+
+**Priority Justification:**  
+Medium priority UX improvement that removes user confusion and provides clearer interface labeling. Removing arbitrary feature gates on import improves user experience without significantly impacting Pro value proposition, as the core differentiation should focus on other premium features.
+
+**Implementation Approach:**
+- **UI Updates**: Update button text resources for clarity
+- **Feature Gate Removal**: Remove Pro user checks around import button display
+- **Testing**: Verify import works consistently for both user types
+
+**Files to Modify:**
+- Import/Export fragment/activity files (likely in `ui/importexport/`)
+- String resources (`res/values/strings.xml`)
+- Any ProUserManager checks related to import button display
+
+---
+
+### Feature #26: ✅ Update Default Export Filename Format
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** Low  
+**Requested By:** User Interface Team  
+
+**Description:**  
+Update the default export filename format to better reflect the PlayStreak brand and clarify the export content type. The current filename uses underscores and a generic "export" label that doesn't specify what type of data is being exported. With future plans for multiple export types (pieces, favorites, etc.), the filename should be more descriptive and consistent with branding.
+
+**User Story:**  
+As a user exporting my practice data, I want the default filename to clearly indicate what type of data is being exported and maintain consistent branding, so that I can easily organize and identify my exported files.
+
+**Acceptance Criteria:**  
+- [ ] Default export filename uses "PlayStreak" as a single word (not "play_streak")
+- [ ] Filename includes "activities" to specify the export type
+- [ ] Filename format supports future differentiation from other export types
+- [ ] Maintains timestamp for uniqueness
+- [ ] Uses consistent naming conventions with underscores as separators
+
+**Technical Considerations:**  
+- Update filename generation in ImportExportFragment
+- Consider establishing naming convention pattern for future export types
+- Ensure filename compatibility across different operating systems
+- Maintain backward compatibility (existing functionality unchanged)
+
+**Priority Justification:**  
+Low priority cosmetic improvement that enhances user experience through clearer file identification and consistent branding. Prepares filename structure for future multiple export types.
+
+**Implementation Approach:**
+- **Current Format**: `play_streak_export_YYYY-MM-DD_HHMMSS.csv`
+- **New Format**: `PlayStreak_activities_export_YYYY-MM-DD_HHMMSS.csv`
+- **Future Formats**: `PlayStreak_pieces_export_...`, `PlayStreak_favorites_export_...`, etc.
+
+**Files to Modify:**
+- `app/src/main/java/com/pseddev/playstreak/ui/importexport/ImportExportFragment.kt`
+
+---
+
 ## Feature Request Template
 
 When requesting new features, please use this template:

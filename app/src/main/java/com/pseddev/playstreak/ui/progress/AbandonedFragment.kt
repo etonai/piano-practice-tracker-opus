@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.databinding.FragmentAbandonedBinding
+import com.pseddev.playstreak.utils.ProUserManager
 
 class AbandonedFragment : Fragment() {
     
@@ -23,6 +24,7 @@ class AbandonedFragment : Fragment() {
     
     private lateinit var adapter: AbandonedAdapter
     private var shouldScrollToTop = false
+    private lateinit var proUserManager: ProUserManager
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,9 +38,15 @@ class AbandonedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        proUserManager = ProUserManager.getInstance(requireContext())
         setupSortControls()
         
-        adapter = AbandonedAdapter()
+        adapter = AbandonedAdapter(
+            onAddActivityClick = { abandonedItem ->
+                showQuickAddActivityDialog(abandonedItem)
+            },
+            proUserManager = proUserManager
+        )
         binding.abandonedRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.abandonedRecyclerView.adapter = adapter
         
@@ -78,6 +86,14 @@ class AbandonedFragment : Fragment() {
     private fun updateSortDirectionButton() {
         val direction = viewModel.getCurrentSortDirection()
         binding.buttonSortDirection.text = if (direction == AbandonedSortDirection.ASCENDING) "↑" else "↓"
+    }
+    
+    private fun showQuickAddActivityDialog(abandonedItem: AbandonedItem) {
+        val dialog = QuickAddActivityDialogFragment.newInstance(
+            abandonedItem.piece.id,
+            abandonedItem.piece.name
+        )
+        dialog.show(parentFragmentManager, "QuickAddActivityDialog")
     }
     
     override fun onDestroyView() {

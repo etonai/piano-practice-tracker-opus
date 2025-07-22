@@ -24,6 +24,7 @@ class CsvHandler {
         private const val HEADER_LENGTH = "Length"
         private const val HEADER_ACTIVITY_TYPE = "ActivityType"
         private const val HEADER_PIECE = "Piece"
+        private const val HEADER_PIECE_TYPE = "PieceType"
         private const val HEADER_LEVEL = "Level"
         private const val HEADER_PERFORMANCE_TYPE = "PerformanceType"
         private const val HEADER_NOTES = "Notes"
@@ -47,6 +48,7 @@ class CsvHandler {
                     HEADER_LENGTH,
                     HEADER_ACTIVITY_TYPE,
                     HEADER_PIECE,
+                    HEADER_PIECE_TYPE,
                     HEADER_LEVEL,
                     HEADER_PERFORMANCE_TYPE,
                     HEADER_NOTES
@@ -67,6 +69,7 @@ class CsvHandler {
                             activity.minutes.toString(),
                             activity.activityType.toString(),
                             TextNormalizer.normalizePieceName(piece.name),
+                            piece.type.toString(),
                             activity.level.toString(),
                             activity.performanceType,
                             TextNormalizer.normalizeUserInput(activity.notes)
@@ -114,6 +117,9 @@ class CsvHandler {
                     errors.add("Invalid CSV header format")
                     return ImportResult(emptyList(), emptySet(), errors)
                 }
+                
+                // Determine if this is the new format with PieceType
+                val isNewFormat = header.size >= 8 && header[4] == HEADER_PIECE_TYPE
                 
                 var lineNumber = 2 // Start from 2 (after header)
                 var line: Array<String>?
@@ -168,11 +174,24 @@ class CsvHandler {
                             continue
                         }
                         
-                        // Parse level
+                        // Parse piece type (only in new format)
+                        val pieceType = if (isNewFormat) {
+                            try {
+                                ItemType.valueOf(row[4])
+                            } catch (e: Exception) {
+                                // Default to PIECE if invalid or missing
+                                ItemType.PIECE
+                            }
+                        } else {
+                            null
+                        }
+                        
+                        // Parse level (column index depends on format)
+                        val levelColumnIndex = if (isNewFormat) 5 else 4
                         val level = try {
-                            row[4].toInt()
+                            row[levelColumnIndex].toInt()
                         } catch (e: Exception) {
-                            errors.add("Line $lineNumber: Invalid level '${row[4]}'")
+                            errors.add("Line $lineNumber: Invalid level '${row[levelColumnIndex]}'")
                             lineNumber++
                             continue
                         }
@@ -195,8 +214,12 @@ class CsvHandler {
                             }
                         }
                         
-                        val performanceType = row[5]
-                        val notes = if (row.size > 6) TextNormalizer.normalizeUserInput(row[6]) else ""
+                        // Parse performance type and notes (column indices depend on format)
+                        val performanceTypeIndex = if (isNewFormat) 6 else 5
+                        val notesIndex = if (isNewFormat) 7 else 6
+                        
+                        val performanceType = row[performanceTypeIndex]
+                        val notes = if (row.size > notesIndex) TextNormalizer.normalizeUserInput(row[notesIndex]) else ""
                         
                         // Explicitly check for duplicates to work around Set issues
                         val alreadyExists = uniquePieces.any { existing ->
@@ -220,6 +243,7 @@ class CsvHandler {
                             ImportedActivity(
                                 timestamp = timestamp,
                                 pieceName = pieceName,
+                                pieceType = pieceType,
                                 activityType = activityType,
                                 level = level,
                                 performanceType = performanceType,
@@ -248,18 +272,32 @@ class CsvHandler {
         private fun validateHeader(header: Array<String>): Boolean {
             if (header.size < 6) return false
             
-            return header[0] == HEADER_DATE &&
+            // Support both old format (7 columns) and new format (8 columns with PieceType)
+            val isOldFormat = header.size == 7 && 
+                    header[0] == HEADER_DATE &&
                     header[1] == HEADER_LENGTH &&
                     header[2] == HEADER_ACTIVITY_TYPE &&
                     header[3] == HEADER_PIECE &&
                     header[4] == HEADER_LEVEL &&
                     header[5] == HEADER_PERFORMANCE_TYPE
+            
+            val isNewFormat = header.size >= 8 &&
+                    header[0] == HEADER_DATE &&
+                    header[1] == HEADER_LENGTH &&
+                    header[2] == HEADER_ACTIVITY_TYPE &&
+                    header[3] == HEADER_PIECE &&
+                    header[4] == HEADER_PIECE_TYPE &&
+                    header[5] == HEADER_LEVEL &&
+                    header[6] == HEADER_PERFORMANCE_TYPE
+            
+            return isOldFormat || isNewFormat
         }
     }
     
     data class ImportedActivity(
         val timestamp: Long,
         val pieceName: String,
+        val pieceType: ItemType?,
         val activityType: ActivityType,
         val level: Int,
         val performanceType: String,

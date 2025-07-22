@@ -40,7 +40,13 @@ class PiecesAdapter(
         private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
         
         fun bind(item: PieceWithStats) {
-            binding.pieceNameText.text = item.piece.name
+            // Show technique emoji indicator for techniques
+            val displayName = if (item.piece.type == com.pseddev.playstreak.data.entities.ItemType.TECHNIQUE) {
+                "🎼 ${item.piece.name}"
+            } else {
+                item.piece.name
+            }
+            binding.pieceNameText.text = displayName
             binding.activityCountText.text = "${item.activityCount} activities"
             
             if (item.lastActivityDate != null) {
