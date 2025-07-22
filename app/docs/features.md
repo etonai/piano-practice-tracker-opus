@@ -829,6 +829,115 @@ High priority for establishing clear Pro/Free feature boundaries. Import functio
 
 ---
 
+### Feature #18: ✅ Add Activity from Suggestions or Pieces Tab
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** UX Team  
+
+**Description:**  
+Add a quick "Add Activity" feature directly from the Suggestions and Pieces tabs. Each piece listed should have a small "+" icon that allows users to quickly log an activity for that piece without navigating through the full Add Activity flow and without needing to select the piece name again.
+
+**User Story:**  
+As a user viewing my suggestions or pieces list, I want to quickly add an activity for a specific piece by tapping a "+" icon, so that I can efficiently log practice sessions without navigating through multiple screens to select the piece name.
+
+**Acceptance Criteria:**  
+- [x] Add "+" icon to each piece in Suggestions tab (Pro users only)
+- [x] Add "+" icon to each piece in Pieces tab (Pro users only)
+- [x] Clicking "+" opens simplified Add Activity dialog
+- [x] Dialog pre-fills piece name (user cannot change it)
+- [x] Dialog allows selection of Practice vs Performance
+- [x] Dialog shows proper level options matching regular Add Activity flow
+- [x] Performance activities show only 3 levels with performance-specific descriptions
+- [x] Practice activities show 4 levels with practice-specific descriptions  
+- [x] Performance activities include performance type selection (Online/Live)
+- [x] Dialog has Add Activity and Cancel buttons
+- [x] Successful save closes dialog and returns to original tab
+- [x] Activity will appear in timeline/dashboard after saving
+- [x] Icon is visually clear but doesn't dominate the list item
+- [x] Feature restricted to Pro users only
+
+**Technical Considerations:**  
+- Add "+" button/icon to suggestion item layout and pieces item layout
+- Create simplified Add Activity dialog fragment or modal
+- Pre-populate piece ID and name in the dialog
+- Use existing activity creation logic but skip piece selection step
+- Handle navigation back to originating tab after save
+- Ensure icon styling is consistent and accessible
+- Consider icon placement (end of row, overlay, etc.)
+
+**Priority Justification:**  
+Medium priority UX enhancement that significantly improves workflow efficiency. Reduces friction for the most common user action (logging practice) by eliminating navigation overhead when users already know which piece they want to practice.
+
+**Implementation Details:**
+
+**UI Components Created:**
+- **QuickAddActivityDialogFragment.kt**: Simplified dialog for quick activity addition
+- **QuickAddActivityViewModel.kt**: ViewModel to handle activity creation logic
+- **dialog_quick_add_activity.xml**: Layout for the dialog with spinners for activity type and level
+- **ic_add.xml**: Vector drawable for the "+" icon
+
+**Layout Modifications:**
+- **item_suggestion.xml**: Added clickable "+" icon next to existing favorite star
+- **item_piece_stats.xml**: Added clickable "+" icon between piece name and favorite star
+
+**Adapter Updates:**
+- **SuggestionsAdapter.kt**: Added onAddActivityClick callback, updated ViewHolder to handle + icon clicks
+- **PiecesAdapter.kt**: Added onAddActivityClick callback, updated ViewHolder to handle + icon clicks
+
+**Fragment Integration:**
+- **SuggestionsFragment.kt**: Shows QuickAddActivityDialogFragment when + icon clicked
+- **PiecesFragment.kt**: Shows QuickAddActivityDialogFragment when + icon clicked
+
+**Dialog Features:**
+- Pre-filled piece name (read-only display)
+- Activity type spinner (Practice/Performance)
+- Dynamic level spinner that matches regular Add Activity flow:
+  - **Practice**: Level 1-4 with specific descriptions (Essentials, Incomplete, Complete with Review, Perfect Complete)
+  - **Performance**: Level 1-3 with specific descriptions (Failed, Unsatisfactory, Satisfactory)
+- Performance type spinner (Online Performance/Live Performance) - only visible for Performance activities
+- Default values: Practice type, 30 minutes for practice activities, "online" performance type
+- Toast notifications for success/failure
+- Automatic dialog dismissal on success
+- **Pro User Restriction**: + icons only visible to Pro users
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsFragment.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsAdapter.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/PiecesFragment.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/PiecesAdapter.kt`
+- `app/src/main/res/layout/item_suggestion.xml`
+- `app/src/main/res/layout/item_piece_stats.xml`
+
+**Files Created:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/QuickAddActivityDialogFragment.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/QuickAddActivityViewModel.kt`
+- `app/src/main/res/layout/dialog_quick_add_activity.xml`
+- `app/src/main/res/drawable/ic_add.xml`
+
+**Implementation Notes:**
+
+**Version 2 Updates (Based on User Feedback):**
+- **Pro User Restriction Added**: + icons are now only visible to Pro users, providing additional Pro feature differentiation
+- **Level System Corrected**: Updated from generic 1-10 levels to match exact level descriptions from regular Add Activity flow:
+  - Practice: 4 levels with meaningful descriptions (Essentials, Incomplete, Complete with Review, Perfect Complete)  
+  - Performance: 3 levels with performance-specific descriptions (Failed, Unsatisfactory, Satisfactory)
+- **Performance Type Integration**: Added performance type selection (Online/Live) that appears only for Performance activities
+- **Data Consistency**: Ensures QuickAddActivityDialog creates activities with identical structure to regular Add Activity flow
+
+**Implementation Approach:**
+- **UI Design**: Add small "+" icon (24dp) to right side of each list item  
+- **Pro Restriction**: Use ProUserManager to control + icon visibility
+- **Dialog Creation**: Create simplified AddActivityDialog with pre-filled piece info and dynamic level options
+- **Navigation Flow**: Dialog → Activity Type → Dynamic Level Options → Performance Type (if needed) → Save → Return to original tab
+- **Icon Styling**: Use Material Design add icon with subtle styling
+- **Level Logic**: Mirror SelectLevelFragment.setupLevelOptions() for consistency
+- **Integration**: Leverage existing activity creation repository methods
+- **User Experience**: Fast, one-tap access to activity logging from browsing context
+
+---
+
 ## Feature Request Template
 
 When requesting new features, please use this template:

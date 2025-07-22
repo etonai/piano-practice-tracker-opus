@@ -5,7 +5,8 @@ This document tracks known bugs, their status, and resolutions for the Piano Tra
 ## Status Legend
 - 🐛 **Open** - Bug is confirmed and needs fixing
 - 🔄 **In Progress** - Bug is being worked on
-- ✅ **Fixed** - Bug has been resolved
+- 🔍 **Verifying** - Fix implemented, awaiting user verification
+- ✅ **Fixed** - Bug has been resolved and verified
 - ❌ **Closed** - Bug closed without fix (e.g., not reproducible, won't fix)
 
 ## Known Bugs
@@ -1189,9 +1190,10 @@ Implemented comprehensive fallback logic in both suggestion systems:
 
 ---
 
-### Bug #27: 🐛 Increase Suggestion Fallback Limit from 2 to 4 Pieces per Category
-**Status:** Open  
+### Bug #27: ✅ Increase Suggestion Fallback Limit from 2 to 4 Pieces per Category
+**Status:** Fixed  
 **Date Reported:** 2025-07-21  
+**Date Fixed:** 2025-07-22  
 **Severity:** Low  
 
 **Description:**  
@@ -1294,6 +1296,57 @@ Implemented intelligent combined regular+fallback suggestion system:
 **Files Modified:**
 - `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt`
 - `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt`
+
+---
+
+### Bug #29: ✅ Incorrect Sort Order for Non-Favorites in Suggestions Tab
+**Status:** Fixed  
+**Date Reported:** 2025-07-22  
+**Date Fixed:** 2025-07-22  
+**Severity:** Medium  
+
+**Description:**  
+The sort order for non-favorite pieces in the Suggestions tab is incorrect. When comparing the same non-favorite suggestions between the Dashboard tab and the Suggestions tab, they appear in different orders. The Dashboard tab shows the correct sort order, but the Suggestions tab shows them in the wrong order.
+
+**Steps to Reproduce:**  
+1. Open the Dashboard tab and observe the order of non-favorite suggestions
+2. Switch to the Suggestions tab 
+3. Compare the order of the same non-favorite pieces between both tabs
+
+**Expected Behavior:**  
+Non-favorite pieces should appear in the same sort order in both the Dashboard tab and Suggestions tab. The Dashboard tab appears to have the correct sort order.
+
+**Actual Behavior:**  
+Non-favorite pieces appear in different sort orders between Dashboard and Suggestions tabs, with the Suggestions tab showing an incorrect order.
+
+**Environment:**  
+- App Version: Current development version
+- All Android devices
+
+**Additional Information:**  
+- Favorites appear to sort correctly in both tabs
+- Only non-favorites have this sort order discrepancy
+- The Dashboard implementation appears to be correct and should be the reference
+
+**Root Cause:**  
+The issue was caused by an additional sorting operation in `SuggestionsViewModel.kt` that was applied AFTER combining favorites and non-favorites. This additional sort disrupted the carefully established order within each category.
+
+- **Dashboard (correct)**: Simple concatenation `finalFavorites + finalNonFavorites`
+- **Suggestions (incorrect)**: Additional sort by `daysSinceLastActivity` across ALL suggestions, disrupting category-specific ordering
+
+**Resolution:**  
+Removed the problematic additional sorting operation in `SuggestionsViewModel.kt` and replaced with simple concatenation to match `DashboardViewModel.kt` approach. Non-favorite pieces now appear in the same order in both Dashboard and Suggestions tabs.
+
+**Technical Fix:**  
+- **Issue**: Lines 199-200 in SuggestionsViewModel applied `sortedWith(compareBy { !it.piece.isFavorite }.thenByDescending { it.daysSinceLastActivity })` which re-sorted all suggestions by days since last activity
+- **Fix**: Replaced with simple concatenation `finalFavoriteSuggestions + finalNonFavoriteSuggestions` 
+- **Result**: Both tabs now use identical suggestion ordering logic
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt`
+
+**Verification:**  
+Confirmed that non-favorite pieces appear in the same sort order in both Dashboard and Suggestions tabs.
 
 ---
 

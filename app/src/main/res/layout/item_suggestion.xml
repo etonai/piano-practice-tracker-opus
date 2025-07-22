@@ -34,6 +34,17 @@
                 android:visibility="gone"
                 android:contentDescription="Favorite piece" />
 
+            <ImageView
+                android:id="@+id/addActivityIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_add"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Add activity for this piece" />
+
         </LinearLayout>
 
         <TextView

@@ -1,24 +1,28 @@
 package com.pseddev.playstreak.ui.progress
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.pseddev.playstreak.databinding.ItemPieceStatsBinding
+import com.pseddev.playstreak.utils.ProUserManager
 import java.text.SimpleDateFormat
 import java.util.*
 
 class PiecesAdapter(
     private val onPieceClick: (PieceWithStats) -> Unit,
-    private val onFavoriteToggle: (PieceWithStats) -> Unit
+    private val onFavoriteToggle: (PieceWithStats) -> Unit,
+    private val onAddActivityClick: (PieceWithStats) -> Unit,
+    private val proUserManager: ProUserManager
 ) : ListAdapter<PieceWithStats, PiecesAdapter.ViewHolder>(DiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemPieceStatsBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return ViewHolder(binding, onPieceClick, onFavoriteToggle)
+        return ViewHolder(binding, onPieceClick, onFavoriteToggle, onAddActivityClick, proUserManager)
     }
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -28,7 +32,9 @@ class PiecesAdapter(
     class ViewHolder(
         private val binding: ItemPieceStatsBinding,
         private val onPieceClick: (PieceWithStats) -> Unit,
-        private val onFavoriteToggle: (PieceWithStats) -> Unit
+        private val onFavoriteToggle: (PieceWithStats) -> Unit,
+        private val onAddActivityClick: (PieceWithStats) -> Unit,
+        private val proUserManager: ProUserManager
     ) : RecyclerView.ViewHolder(binding.root) {
         
         private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
@@ -56,6 +62,17 @@ class PiecesAdapter(
             
             binding.favoriteIcon.setOnClickListener {
                 onFavoriteToggle(item)
+            }
+            
+            binding.addActivityIcon.setOnClickListener {
+                onAddActivityClick(item)
+            }
+            
+            // Show add activity icon only for Pro users
+            if (proUserManager.isProUser()) {
+                binding.addActivityIcon.visibility = View.VISIBLE
+            } else {
+                binding.addActivityIcon.visibility = View.GONE
             }
         }
     }

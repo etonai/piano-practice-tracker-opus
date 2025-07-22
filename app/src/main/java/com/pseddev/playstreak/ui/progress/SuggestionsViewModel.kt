@@ -194,10 +194,8 @@ class SuggestionsViewModel(
                     nonFavoriteSuggestions + fallbackNonFavorites
                 } else nonFavoriteSuggestions
                 
-                // Combine and sort favorites first (by last activity, least recent first), then non-favorites (by last activity, least recent first)
-                val allSuggestions = finalFavoriteSuggestions + finalNonFavoriteSuggestions
-                allSuggestions.sortedWith(compareBy<SuggestionItem> { !it.piece.isFavorite }
-                    .thenByDescending { it.daysSinceLastActivity })
+                // Combine favorites first, then non-favorites (preserving the internal sort order of each category)
+                finalFavoriteSuggestions + finalNonFavoriteSuggestions
             }
             .asLiveData()
 }

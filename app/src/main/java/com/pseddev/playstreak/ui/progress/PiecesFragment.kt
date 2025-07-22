@@ -45,6 +45,8 @@ class PiecesFragment : Fragment() {
         setupClickListeners()
         setupSortingControls()
         
+        val proUserManager = ProUserManager.getInstance(requireContext())
+        
         adapter = PiecesAdapter(
             onPieceClick = { pieceWithStats ->
                 viewModel.selectPiece(pieceWithStats.piece.id)
@@ -54,7 +56,16 @@ class PiecesFragment : Fragment() {
                 if (!success) {
                     showFavoriteLimitPrompt()
                 }
-            }
+            },
+            onAddActivityClick = { pieceWithStats ->
+                // Show quick add activity dialog with piece pre-filled
+                val dialog = QuickAddActivityDialogFragment.newInstance(
+                    pieceWithStats.piece.id,
+                    pieceWithStats.piece.name
+                )
+                dialog.show(parentFragmentManager, "QuickAddActivityDialog")
+            },
+            proUserManager
         )
         
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
