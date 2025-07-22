@@ -441,6 +441,341 @@ High priority as this creates a stronger Pro upgrade incentive while still provi
 
 ---
 
+### Feature #9: 💡 Remove Pro Upgrade Prompts for Free-Only Release
+**Status:** Requested  
+**Date Requested:** 2025-07-22  
+**Priority:** High  
+**Requested By:** Product Team  
+
+**Description:**  
+Remove all Pro upgrade prompts and monetization messaging for the initial Free-only release of PlayStreak. Users will experience Free tier limitations without upgrade pressure, creating a clean user experience focused on core functionality.
+
+**User Story:**  
+As a user downloading the Free version of PlayStreak, I want to understand the app's limitations without being pressured to upgrade, so that I can focus on using the core features and providing authentic feedback about the app's value.
+
+**Acceptance Criteria:**  
+- [ ] Import CSV prompt changed from Pro upgrade to "Coming Soon" message
+- [ ] Favorites limit prompt changed from Pro upgrade to simple limitation explanation
+- [ ] No "Learn More" or "Upgrade" buttons in limitation messages
+- [ ] All upgrade-related messaging removed from the app
+- [ ] Users still experience authentic Free tier limitations (4 favorites, 1 favorite suggestion, etc.)
+- [ ] Clean, professional messaging about current app capabilities
+- [ ] Pro/Free logic remains intact for future Pro launch
+
+**Technical Considerations:**  
+- Modify ImportExportFragment upgrade prompt to show "Coming Soon" message
+- Update favorites limit prompts in PiecesFragment and FavoritesFragment
+- Remove upgrade action buttons but keep informative dialogs
+- Preserve underlying Pro/Free differentiation logic for future use
+- Maintain current limitation behaviors without monetization pressure
+
+**Priority Justification:**  
+High priority for initial app release strategy. Allows focus on core app quality and user feedback without monetization complexity, while preserving architecture for future Pro launch.
+
+**Implementation Approach:**
+- **Import CSV**: Change "Pro Feature" dialog to "Coming Soon - Import from CSV functionality will be available in a future update"
+- **Favorites Limit**: Change "Pro Feature" dialog to "Favorites Limit - This app supports up to 4 favorite pieces to help you focus on your most important repertoire"
+- **Preserve Logic**: Keep all existing Pro/Free differentiation code intact for easy future conversion back to upgrade prompts
+
+---
+
+### Feature #10: 💡 Google Drive Functionality Coming Soon Message
+**Status:** Requested  
+**Date Requested:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** Product Team  
+
+**Description:**  
+Add "Google Drive functionality coming soon" messaging to the Import/Export Data page to inform users about planned cloud storage integration for data backup and sync capabilities.
+
+**User Story:**  
+As a user of PlayStreak, I want to know that Google Drive integration is planned so that I can look forward to cloud backup and sync capabilities for my practice data in future updates.
+
+**Acceptance Criteria:**  
+- [ ] Import/Export Data page shows "Google Drive functionality coming soon" message
+- [ ] Message is clearly visible and professionally presented
+- [ ] Message doesn't interfere with existing export functionality
+- [ ] Gives users expectation of future cloud storage features
+- [ ] Consistent with overall app messaging style
+
+**Technical Considerations:**  
+- Add informational message/section to ImportExportFragment
+- Place message prominently but not intrusively on the Import/Export screen
+- Consider adding icon or visual element to make message more noticeable
+- Ensure message fits well with existing UI layout
+
+**Priority Justification:**  
+Medium priority feature that helps set user expectations about upcoming cloud functionality while building anticipation for future updates. Supports user retention by showing ongoing development.
+
+**Implementation Approach:**
+- Add a dedicated "Coming Soon" section or card to the Import/Export screen
+- Include Google Drive icon if available
+- Use encouraging messaging like "Google Drive sync and backup functionality coming in a future update!"
+- Position prominently but maintain focus on current export capabilities
+
+---
+
+### Feature #11: 💡 Purge All Data Button Testing Mode
+**Status:** Requested  
+**Date Requested:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** Development Team  
+
+**Description:**  
+Add "(Testing)" label to the Purge All Data button and implement functionality to hide/show this button for production vs testing builds using BuildConfig.DEBUG. The button should be visible during development and testing but hidden in production releases, with ability to reveal it when needed for testing purposes.
+
+**User Story:**  
+As a developer, I want to be able to easily reset all app data during testing while ensuring production users don't accidentally access this destructive functionality, and as a tester, I want to be able to reveal the purge button when needed for test scenarios.
+
+**Acceptance Criteria:**  
+- [ ] Purge All Data button shows "(Testing)" label in the text
+- [ ] Button is hidden by default in production builds
+- [ ] Button can be revealed through a testing mechanism (debug menu, build flag, etc.)
+- [ ] Button remains fully functional when visible
+- [ ] Clear visual indication that this is a testing/development feature
+- [ ] No accidental access by regular users in production
+- [ ] Easy to enable for QA testing scenarios
+
+**Technical Considerations:**  
+- Add "(Testing)" text to the button label
+- Implement build variant or debug flag to control button visibility
+- Consider adding to existing debug/testing menu if available
+- Ensure button functionality remains unchanged when visible
+- Use BuildConfig.DEBUG or similar mechanism for production detection
+- Alternative reveal methods: long press, secret gesture, or settings toggle
+
+**Priority Justification:**  
+Medium priority development tool that improves testing workflow while protecting production users from accidental data loss. Important for QA processes and development efficiency.
+
+**Implementation Approach:**
+- **Button Label**: Change to "Purge All Data (Testing)" 
+- **Visibility Control**: Hide in production builds using `if (BuildConfig.DEBUG)` or similar
+- **Testing Access**: Provide mechanism to reveal button when needed (debug menu, long press, etc.)
+- **Safety**: Maintain existing confirmation dialogs when button is used
+- **Documentation**: Clear instructions for testers on how to access the button
+
+---
+
+### Feature #12: 💡 Remove MIT License
+**Status:** Requested  
+**Date Requested:** 2025-07-22  
+**Priority:** High  
+**Requested By:** Legal/Business Team  
+
+**Description:**  
+Remove the MIT License from the PlayStreak app and replace it with a commercial "All Rights Reserved" license to prepare for commercial release. This includes removing MIT license files, replacing with commercial copyright, and updating any license references in the app or documentation.
+
+**User Story:**  
+As a business preparing for commercial app release, I want to replace the open-source MIT License with a commercial "All Rights Reserved" license so that the app can be properly licensed as a commercial product with full ownership protection.
+
+**Acceptance Criteria:**  
+- [ ] Remove MIT LICENSE file from project root
+- [ ] Add new COPYRIGHT file with "All Rights Reserved" commercial license
+- [ ] Remove MIT license headers from all source files
+- [ ] Add copyright notice to app About/Settings screen
+- [ ] Update documentation files to reference commercial licensing
+- [ ] Ensure no remaining MIT License artifacts in the codebase
+- [ ] Update any build scripts or configuration that reference the license
+- [ ] Professional commercial licensing presentation
+
+**Technical Considerations:**  
+- Search entire codebase for "MIT", "License", or license headers
+- Remove or update LICENSE files in project root
+- Check app's About/Settings screens for license display
+- Review build.gradle files for license-related configurations
+- Ensure third-party library licenses are handled separately
+- Update README or other documentation that references licensing
+
+**Priority Justification:**  
+High priority for commercial release preparation. MIT License removal is essential before app store publication to avoid legal complications and establish proper commercial licensing.
+
+**Implementation Approach:**
+- **License Replacement**: Delete MIT LICENSE file and add COPYRIGHT file with commercial license
+- **Commercial License Text**: "Copyright (c) 2025 [Your Name/Company]. All rights reserved. This software and associated documentation files are proprietary and confidential. Unauthorized copying, distribution, or modification is strictly prohibited."
+- **Source Headers**: Remove MIT headers from .kt, .java files (optional commercial headers)
+- **UI Integration**: Add copyright notice to About/Settings screen
+- **Documentation**: Update README and other docs to reference commercial licensing
+- **Build Configuration**: Update any license-related build configurations
+
+---
+
+### Feature #13: 💡 Hide Switch to Pro/Free Button Using BuildConfig.DEBUG
+**Status:** Requested  
+**Date Requested:** 2025-07-22  
+**Priority:** High  
+**Requested By:** Development Team  
+
+**Description:**  
+Hide the Switch to Pro/Free button in production builds using BuildConfig.DEBUG while keeping it visible in debug builds for testing. This ensures production users don't see testing functionality while maintaining developer/tester access to Pro status switching.
+
+**User Story:**  
+As a production user, I should not see testing buttons that allow switching between Pro and Free modes, while as a developer or tester, I want access to the Pro/Free switch button in debug builds to test different user experiences.
+
+**Acceptance Criteria:**  
+- [ ] Switch to Pro/Free button hidden in production/release builds
+- [ ] Switch to Pro/Free button visible in debug builds
+- [ ] Uses BuildConfig.DEBUG to control visibility
+- [ ] Button functionality unchanged when visible
+- [ ] No impact on other Pro/Free differentiation logic
+- [ ] Clean production UI without testing artifacts
+- [ ] Easy testing access in debug builds
+
+**Technical Considerations:**  
+- Locate Switch to Pro/Free button in Settings or main interface
+- Wrap button visibility with `if (BuildConfig.DEBUG)` condition
+- Ensure button container/layout adjusts properly when hidden
+- Maintain existing button functionality when visible
+- Consider using `View.GONE` vs `View.INVISIBLE` for clean layout
+- Test both debug and release build variants
+
+**Priority Justification:**  
+High priority for production release cleanliness. Testing buttons should not be visible to production users as they create confusion and expose internal functionality not intended for end users.
+
+**Implementation Approach:**
+- **Visibility Control**: Use `button.visibility = if (BuildConfig.DEBUG) View.VISIBLE else View.GONE`
+- **Location**: Find Switch to Pro/Free button in Settings screen or similar
+- **Layout**: Ensure parent layout handles hidden button gracefully
+- **Testing**: Verify button works in debug builds and is hidden in release builds
+- **Clean UI**: Production users see polished interface without testing elements
+
+---
+
+### Feature #14: 💡 Ensure Free Mode is Default
+**Status:** Requested  
+**Date Requested:** 2025-07-22  
+**Priority:** Critical  
+**Requested By:** Business Team  
+
+**Description:**  
+Ensure that Free mode is the default state for all new users of PlayStreak. New installations should start with Pro status set to false, ensuring users experience the intended Free tier limitations and feature set from the beginning.
+
+**User Story:**  
+As a new user installing PlayStreak, I should automatically start with the Free experience so that I understand the app's core functionality and limitations without accidentally having access to Pro features I haven't paid for.
+
+**Acceptance Criteria:**  
+- [ ] New app installations default to Free mode (isProUser = false)
+- [ ] ProUserManager initializes with Free status by default
+- [ ] All Free tier limitations active from first app launch
+- [ ] No Pro features accessible without explicit upgrade
+- [ ] Consistent Free experience across all app areas
+- [ ] Fresh installs show appropriate Free tier UI (5 tabs, limited suggestions, etc.)
+- [ ] Existing users maintain their current Pro/Free status
+
+**Technical Considerations:**  
+- Review ProUserManager initialization to ensure default false value
+- Check SharedPreferences default behavior when key doesn't exist
+- Verify that all Pro/Free checks handle null/missing preferences correctly
+- Test fresh installation to confirm Free mode behavior
+- Ensure existing user data is not affected by changes
+- Consider migration logic for any existing test users
+
+**Priority Justification:**  
+Critical priority for Free-only release strategy. New users must start with the intended Free experience to ensure proper app evaluation, feature limitation understanding, and future monetization path.
+
+**Implementation Approach:**
+- **ProUserManager Default**: Ensure `isProUser()` returns `false` when no preference exists
+- **SharedPreferences**: Use `getBoolean(KEY_IS_PRO_USER, false)` with explicit false default
+- **Fresh Install Testing**: Verify new installations show Free tier behavior
+- **User Migration**: Ensure existing users (if any) maintain current status
+- **Consistency Check**: All Pro/Free logic should assume Free by default
+
+---
+
+### Feature #15: 💡 Add "Add Piece (#)" Button to Settings Page
+**Status:** Requested  
+**Date Requested:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** UI/UX Team  
+
+**Description:**  
+Add an "Add Piece" button to the Settings page positioned right after the "Add Activity" button. The button should display the current count of pieces in parentheses (e.g., "Add Piece (12)") to provide users with quick access to piece management and visibility into their repertoire size.
+
+**User Story:**  
+As a user, I want quick access to add new pieces from the Settings page and see at a glance how many pieces are in my repertoire, so that I can easily manage my practice library and understand the scope of my collection.
+
+**Acceptance Criteria:**  
+- [ ] "Add Piece" button added to Settings page after "Add Activity" button
+- [ ] Button shows current piece count in parentheses format: "Add Piece (12)"
+- [ ] Piece count updates dynamically when pieces are added/removed
+- [ ] Button navigates to Add Piece screen/functionality
+- [ ] Consistent styling with existing Settings page buttons
+- [ ] Count reflects actual number of pieces in user's library
+- [ ] Real-time count updates when returning to Settings page
+
+**Technical Considerations:**  
+- Add button to Settings page layout after Add Activity button
+- Query repository to get current piece count
+- Use LiveData or similar to observe piece count changes
+- Navigate to appropriate Add Piece screen when clicked
+- Ensure count updates when user returns from adding/removing pieces
+- Consider performance impact of frequent count queries
+- Handle zero pieces case gracefully ("Add Piece (0)")
+
+**Priority Justification:**  
+Medium priority UI enhancement that improves user experience by providing quick access to piece management and useful repertoire size information. Helps users understand and manage their practice library more effectively.
+
+**Implementation Approach:**
+- **Button Placement**: Add after existing Add Activity button in Settings layout
+- **Count Query**: Use repository to get piece count with `repository.getAllPiecesAndTechniques().count { it.type == ItemType.PIECE }`
+- **Dynamic Updates**: Observe piece data changes with LiveData
+- **Navigation**: Navigate to Add Piece screen (create if doesn't exist)
+- **Styling**: Match existing Settings page button design
+- **Performance**: Cache count or use efficient query for real-time updates
+
+---
+
+### Feature #16: 💡 Set Application Limits for Activities and Pieces
+**Status:** Requested  
+**Date Requested:** 2025-07-22  
+**Priority:** High  
+**Requested By:** Engineering/QA Team  
+
+**Description:**  
+Investigate and establish reasonable limits for the number of activities that can be created per day and the total number of pieces the app can hold. Implement these limits with proper validation and user feedback to ensure stable app performance and prevent edge cases that could cause crashes or poor performance.
+
+**User Story:**  
+As a user, I want the app to function reliably even with extensive use, and as a developer, I want to ensure the app has tested, guaranteed performance limits rather than unknown breaking points that could cause crashes or poor user experience.
+
+**Acceptance Criteria:**  
+- [ ] Research and determine reasonable daily activity limits (e.g., 50-100 activities per day)
+- [ ] Research and determine reasonable total piece limits (e.g., 500-1000 pieces)
+- [ ] Test app performance at determined limits to ensure stability
+- [ ] Implement validation to prevent exceeding limits
+- [ ] Provide clear user feedback when approaching/hitting limits
+- [ ] Graceful handling when limits are reached (no crashes)
+- [ ] Document limits for user support, troubleshooting, and testing documentation
+- [ ] Consider different limits for Free vs Pro users if applicable
+
+**Technical Considerations:**  
+- Performance testing with large datasets (database queries, UI rendering, memory usage)
+- Database performance with thousands of activities and hundreds of pieces
+- UI responsiveness with large lists (RecyclerView performance, pagination)
+- Memory usage analysis under heavy data loads
+- Export/import performance with maximum data sets
+- Search and filtering performance with large datasets
+- Calendar rendering with many activities per day
+
+**Priority Justification:**  
+High priority for app stability and user trust. Having undefined limits creates risk of crashes, poor performance, and bad user experience. Professional apps should have tested, documented limits to ensure reliability.
+
+**Implementation Approach:**
+- **Research Phase**: Performance testing with synthetic large datasets
+- **Limit Determination**: Based on testing results and user research
+- **Validation**: Add checks when creating activities/pieces
+- **User Feedback**: Clear messages like "Daily activity limit reached (50/50)"
+- **Graceful Degradation**: Disable add buttons/show alternative options when limits reached
+- **Documentation**: Include limits in user guide, support materials, and testing documentation
+- **Monitoring**: Track usage patterns to validate limit appropriateness
+
+**Suggested Research Areas:**
+- Database performance with 10,000+ activities and 1,000+ pieces
+- Calendar view rendering with 50+ activities per day
+- Suggestions algorithm performance with large datasets
+- Export file size and generation time limits
+- Memory usage patterns under maximum load
+
+---
+
 ## Feature Request Template
 
 When requesting new features, please use this template:
