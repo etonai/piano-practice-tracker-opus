@@ -1,7 +1,7 @@
 # PlayStreak Project Analysis
 
 **Date:** July 22, 2025  
-**Author:** Claude Code Assistant  
+**Author:** Claude Code Assistant (Opus model)
 **Version:** 1.0.0
 
 ## Executive Summary
@@ -299,6 +299,156 @@ This approach:
 - Provides genuine Pro value
 - Avoids negative perception
 - Creates recurring use cases
+
+### Detailed CSV Import Differentiation Strategy
+
+**How to meaningfully differentiate CSV import between Free and Pro users:**
+
+#### 1. Import Size and Frequency Limits
+
+**Free Users:**
+- Import up to 1,000 activities per file
+- Import up to 100 pieces per file
+- One import per 30 days
+- Single file import only
+
+**Pro Users:**
+- Unlimited activities per import
+- Unlimited pieces per import
+- Unlimited import frequency
+- Bulk import multiple files at once
+
+**Rationale**: Most hobbyists importing from another app will have <1000 activities. Professionals and teachers need unlimited imports for multiple students or historical data.
+
+#### 2. Field Mapping and Data Intelligence
+
+**Free Users:**
+- Basic field mapping (auto-detect common formats)
+- Standard CSV formats only
+- Manual column selection
+- Basic date/time parsing
+
+**Pro Users:**
+- Smart field mapping with AI suggestions
+- Custom field mapping templates (save/reuse)
+- Support for multiple CSV formats and delimiters
+- Advanced date/time parsing with timezone support
+- Auto-detect and map custom fields
+- Import from Excel files (.xlsx)
+
+**Rationale**: Pro users often deal with complex data from various sources and need flexibility.
+
+#### 3. Data Validation and Cleaning
+
+**Free Users:**
+- Basic validation (required fields)
+- Simple error reporting
+- Skip invalid rows
+
+**Pro Users:**
+- Advanced validation rules
+- Data cleaning suggestions (fix common issues)
+- Interactive conflict resolution
+- Preview and edit before importing
+- Validation reports with fix suggestions
+- Auto-correction of common data issues
+
+**Rationale**: Pro users importing large datasets need sophisticated tools to ensure data quality.
+
+#### 4. Duplicate Handling
+
+**Free Users:**
+- Basic duplicate detection (exact matches)
+- Skip or replace duplicates
+- Simple date-based matching
+
+**Pro Users:**
+- Smart duplicate detection (fuzzy matching)
+- Merge duplicates with conflict resolution
+- Custom duplicate detection rules
+- Keep both, merge, or selective field updates
+- Duplicate analysis report
+
+**Rationale**: Pro users may import from multiple sources and need intelligent merging.
+
+#### 5. Import History and Management
+
+**Free Users:**
+- No import history
+- Cannot undo imports
+- No import analytics
+
+**Pro Users:**
+- Complete import history with metadata
+- Undo/rollback imports (up to 90 days)
+- Import source tracking
+- Import analytics (success rates, data quality)
+- Re-run previous imports with same settings
+- Import audit trail
+
+**Rationale**: Pro users need accountability and ability to correct mistakes.
+
+#### 6. Post-Import Features
+
+**Free Users:**
+- Basic success confirmation
+- View imported data in app
+
+**Pro Users:**
+- Batch edit imported data
+- Tag imported activities with source
+- Generate import summary reports
+- Apply bulk operations to imported data
+- Create custom categories for imported items
+- Export import reports
+
+**Rationale**: Pro users often need to organize and categorize large amounts of imported data.
+
+#### 7. Advanced Import Sources
+
+**Free Users:**
+- Local CSV file only
+
+**Pro Users:**
+- Import from cloud storage (Google Drive, Dropbox)
+- Import from URLs
+- Scheduled imports from cloud sources
+- Import from other music apps via API
+- Import from teacher-provided templates
+
+**Rationale**: Pro users benefit from seamless integration with their existing workflows.
+
+#### Implementation Example
+
+**Free User Experience:**
+```
+1. Click "Import CSV" 
+2. Select file (<1000 activities)
+3. Basic field mapping
+4. Review errors
+5. Import complete
+```
+
+**Pro User Experience:**
+```
+1. Click "Import Data"
+2. Choose source (local, cloud, URL, or API)
+3. AI suggests field mappings
+4. Preview with data cleaning suggestions
+5. Resolve duplicates interactively
+6. Apply bulk tags/categories
+7. Import with full history tracking
+8. Generate summary report
+9. Option to batch edit post-import
+```
+
+This differentiation strategy:
+- ✅ Respects data ownership (free users can import)
+- ✅ Provides substantial Pro value
+- ✅ Creates recurring use cases (multiple imports)
+- ✅ Scales with user needs
+- ✅ Justifies subscription cost
+- ✅ Avoids negative perception
 
 ---
 
