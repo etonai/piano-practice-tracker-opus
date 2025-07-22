@@ -1,11 +1,13 @@
-# PlayStreak Product Specification
+# PlayStreak Product Specification (Original)
 
 **Version:** 1.0.0  
 **Date:** July 22, 2025  
-**Status:** SUPERSEDED - See product-specification-actual.md
+**Status:** ARCHIVED - For Reference Only
 **Author:** Claude Code Assistant (Opus model)
 
-> **Important Note:** This document has been replaced by `product-specification-actual.md`, which accurately describes PlayStreak as built. This original specification contains many features that were not implemented (batch entry, analytics, multiple import sources, etc.) and should be considered a speculative vision document rather than an accurate specification of the existing product.
+> **Important Note:** This is an archived copy of the original product specification. This document is identical to `product-specification.md` which has been superseded by `product-specification-actual.md`. The original specification contains many features that were not implemented (batch entry, analytics, multiple import sources, etc.) and should be considered a speculative vision document rather than an accurate specification of the existing product.
+>
+> **For accurate documentation of PlayStreak as built, see `product-specification-actual.md`**
 
 ## Executive Summary
 
