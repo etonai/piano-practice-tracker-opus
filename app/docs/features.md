@@ -1521,6 +1521,169 @@ Low priority cosmetic improvement that enhances user experience through clearer 
 
 ---
 
+### Feature #27: 💡 Implement Piece/Technique Count Limits
+**Status:** Requested  
+**Date Requested:** 2025-07-22  
+**Priority:** High  
+**Requested By:** Free Release Team  
+
+**Description:**  
+Implement limits on the total number of pieces and techniques that users can add to the app. Free users should be limited to 50 total items (pieces + techniques combined), while Pro users can have up to 60 total items. This limit only applies to new additions - users who already have more items than the limit should be allowed to keep them but not add more.
+
+**User Story:**  
+As a system administrator, I want to limit the number of pieces and techniques users can add based on their subscription tier, so that we can maintain app performance and create differentiation between Free and Pro users while ensuring existing users aren't penalized.
+
+**Acceptance Criteria:**  
+- [ ] Free users limited to maximum 50 pieces + techniques combined
+- [ ] Pro users limited to maximum 60 pieces + techniques combined  
+- [ ] Limit enforcement only applies to new piece/technique additions
+- [ ] Users with existing items above the limit can keep them but cannot add more
+- [ ] Clear error message when user attempts to exceed limit
+- [ ] Error message should suggest Pro upgrade for Free users (when Pro is available)
+- [ ] Add piece dialog should check limits before allowing submission
+- [ ] Quick-add functionality should respect limits
+- [ ] Import functionality should handle limits appropriately (see Investigation section)
+- [ ] Limits are enforced consistently across all piece/technique creation flows
+
+**Technical Considerations:**  
+- Update AddPieceViewModel to check current count before allowing new pieces
+- Add ProUserManager method to get appropriate limit for user type
+- Update PianoRepository to provide current piece/technique count
+- Modify all piece creation flows (manual add, quick-add, import) to respect limits
+- Consider database performance for count queries
+- Handle edge cases where count changes between check and insertion
+- Ensure thread safety for concurrent piece additions
+
+**Priority Justification:**  
+High priority for Free release preparation. Essential for creating meaningful differentiation between Free and Pro tiers while ensuring good performance for all users. Prevents potential abuse and ensures sustainable resource usage.
+
+**Implementation Approach:**
+- **Constants**: Define `FREE_USER_PIECE_LIMIT = 50` and `PRO_USER_PIECE_LIMIT = 60`
+- **Validation**: Check current count before allowing new piece creation
+- **User Experience**: Clear, helpful error messages with upgrade path information
+- **Performance**: Efficient count queries that don't impact app performance
+
+**Investigation Required: Import Handling**
+**Issue:** How should the system handle piece/technique limits when importing CSV data?
+
+**Scenarios to Consider:**
+1. Free user imports CSV with 75 pieces - exceeds 50 piece limit
+2. User already has 45 pieces, imports CSV with 20 more pieces
+3. Pro user imports CSV that would exceed 60 piece limit
+4. User downgrades from Pro to Free after having 55 pieces
+
+**Recommendation:** 
+Implement **Import Limit Enforcement with User Choice**:
+
+1. **Pre-Import Validation:**
+   - Count total unique pieces in CSV file
+   - Compare with user's current count + import count vs limit
+   - If would exceed limit, show warning dialog before import
+
+2. **Import Options Dialog:**
+   ```
+   "Import Limit Warning
+   
+   This import contains 75 pieces, but Free users are limited to 50 pieces total.
+   You currently have 30 pieces.
+   
+   Choose an option:
+   • Import first 20 pieces (up to your limit)
+   • Cancel import and upgrade to Pro for higher limits
+   • Proceed anyway (existing pieces kept, new ones truncated)"
+   ```
+
+3. **Truncation Strategy:**
+   - Import pieces in CSV order until limit reached
+   - Log which pieces were skipped in import results
+   - Allow user to see list of skipped pieces
+
+4. **Alternative Approach:**
+   - Allow import to proceed but mark excess pieces as "inactive"
+   - User can choose which pieces to keep active within their limit
+   - Provides more user control over which pieces are important
+
+**Files to Modify:**
+- `app/src/main/java/com/pseddev/playstreak/ui/pieces/AddPieceViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/utils/ProUserManager.kt`  
+- `app/src/main/java/com/pseddev/playstreak/data/repository/PianoRepository.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/QuickAddActivityDialogFragment.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/importexport/ImportExportViewModel.kt`
+
+**Implementation Notes:**  
+- Feature is critical for Free release and Pro differentiation
+- Import handling requires careful UX design to avoid user frustration
+- Consider phased implementation: basic limits first, import handling second
+- Should integrate with existing ProUserManager architecture
+- Error messages should be helpful and guide users toward solutions
+
+---
+
+### Feature #28: ✅ Update Practice Suggestions Algorithm Timing
+**Status:** Implemented  
+**Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** Medium  
+**Requested By:** User Experience Team
+
+**Description:**  
+Update the user-facing text description of the practice suggestions algorithm to clarify the timing intervals. Change the explanation text from "favorites after 2+ days, others after 7-31 days" to "favorites after 1+ day, others after 7+ days" to better communicate the suggestion criteria to users.
+
+**User Story:**  
+As a user who practices regularly, I want to see practice suggestions more frequently so that I can maintain consistent practice on my favorite pieces and don't forget about other pieces in my repertoire for too long.
+
+**Acceptance Criteria:**  
+- [ ] Favorite pieces appear in suggestions after 1+ day without practice (down from 2+ days)
+- [ ] Non-favorite pieces appear in suggestions after 7+ days without practice
+- [ ] Today exclusion logic remains unchanged (pieces practiced today are never suggested)
+- [ ] Suggestion priority remains: favorites first, then non-favorites by longest time since practice
+- [ ] Pro/Free suggestion count limits remain unchanged
+- [ ] Dashboard suggestions follow same timing rules as Suggestions tab
+- [ ] Clear suggestion reasons display updated timing ("not practiced in 1+ day" vs "not practiced in 7+ days")
+- [ ] Fallback logic (least recently practiced) uses same timing thresholds
+
+**Technical Considerations:**  
+- Update SuggestionsViewModel favorite condition from 2+ days to 1+ day
+- Update DashboardViewModel to match SuggestionsViewModel timing
+- Modify suggestion reason text to reflect new timing
+- Update any hardcoded day calculations (twoDaysAgo → oneDayAgo, etc.)
+- Ensure consistent implementation across all suggestion logic paths
+- Consider impact on suggestion frequency and user experience
+- Test with various practice patterns to ensure appropriate suggestion behavior
+
+**Priority Justification:**  
+Medium priority UX enhancement that makes the suggestion system more responsive and encourages more frequent practice. The shorter intervals align with daily practice habits and help users maintain momentum with their favorite pieces while ensuring other repertoire doesn't get forgotten.
+
+**Implementation Approach:**
+- **Favorites Logic**: Change from `lastActivityDate < twoDaysAgo` to `lastActivityDate < oneDayAgo`
+- **Non-Favorites Logic**: Implement `lastActivityDate < sevenDaysAgo` threshold for non-favorite suggestions
+- **Time Calculations**: 
+  ```kotlin
+  val oneDayAgo = System.currentTimeMillis() - (24 * 60 * 60 * 1000)
+  val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000)
+  ```
+- **Suggestion Reasons**: Update display text to reflect new timing intervals
+- **Consistency**: Ensure both SuggestionsViewModel and DashboardViewModel use identical logic
+
+**Current vs New Behavior:**
+- **Current**: Favorites suggested after 2+ days, others suggested less frequently
+- **New**: Favorites suggested after 1+ day, others suggested after 7+ days
+- **Impact**: More frequent suggestions overall, better coverage of user's repertoire
+
+**Files to Modify:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt`
+- Any suggestion reason text resources or string formatting
+
+**Implementation Notes:**  
+- Feature makes suggestions more responsive to daily practice patterns
+- Should encourage more consistent practice by surfacing favorites more frequently
+- 7-day threshold for non-favorites prevents repertoire from being completely forgotten
+- Maintains existing suggestion prioritization and limits
+- Should be tested with various practice schedules to ensure good user experience
+
+---
+
 ## Feature Request Template
 
 When requesting new features, please use this template:
