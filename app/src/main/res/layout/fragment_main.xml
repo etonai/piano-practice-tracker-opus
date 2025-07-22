@@ -44,6 +44,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonManageFavorites" />
 
+    <Button
+        android:id="@+id/buttonTogglePro"
+        style="@style/RoundedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Toggle Pro Status (Testing)"
+        android:backgroundTint="?attr/colorSecondary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonImportExport" />
+
     <TextView
         android:id="@+id/textAppTitle"
         android:layout_width="wrap_content"
@@ -55,7 +67,7 @@
         android:textColor="?android:attr/textColorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonImportExport" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonTogglePro" />
 
     <TextView
         android:id="@+id/textSubtitle"

@@ -11,6 +11,7 @@ import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentMainBinding
+import com.pseddev.playstreak.utils.ProUserManager
 
 class MainFragment : Fragment() {
     
@@ -20,6 +21,8 @@ class MainFragment : Fragment() {
     private val viewModel: MainViewModel by viewModels {
         MainViewModelFactory((requireActivity().application as PlayStreakApplication).repository)
     }
+    
+    private lateinit var proUserManager: ProUserManager
     
     override fun onCreateView(
         inflater: LayoutInflater, 
@@ -33,8 +36,12 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        proUserManager = ProUserManager.getInstance(requireContext())
+        
         setupObservers()
         setupClickListeners()
+        updateAppTitle()
+        updateToggleButtonText(proUserManager.isProUser())
     }
     
     private fun setupObservers() {
@@ -63,6 +70,37 @@ class MainFragment : Fragment() {
         binding.buttonImportExport.setOnClickListener {
             findNavController().navigate(R.id.action_mainFragment_to_syncFragment)
         }
+        
+        binding.buttonTogglePro.setOnClickListener {
+            val newStatus = proUserManager.toggleProStatus()
+            updateAppTitle()
+            updateToggleButtonText(newStatus)
+        }
+    }
+    
+    private fun updateAppTitle() {
+        val title = if (proUserManager.isProUser()) {
+            getString(R.string.app_name) + " Pro"
+        } else {
+            getString(R.string.app_name)
+        }
+        binding.textAppTitle.text = title
+    }
+    
+    private fun updateToggleButtonText(isProUser: Boolean) {
+        val buttonText = if (isProUser) {
+            "Switch to Free (Testing)"
+        } else {
+            "Switch to Pro (Testing)"
+        }
+        binding.buttonTogglePro.text = buttonText
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Update title and button text when returning to the fragment in case Pro status changed
+        updateAppTitle()
+        updateToggleButtonText(proUserManager.isProUser())
     }
     
     override fun onDestroyView() {

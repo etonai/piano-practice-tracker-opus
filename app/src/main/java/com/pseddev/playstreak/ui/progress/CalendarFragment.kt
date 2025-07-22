@@ -23,6 +23,7 @@ import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.databinding.FragmentCalendarBinding
+import com.pseddev.playstreak.utils.ProUserManager
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
@@ -42,6 +43,7 @@ class CalendarFragment : Fragment() {
     private var selectedDate: LocalDate? = null
     private var monthlyActivities: Map<LocalDate, List<ActivityWithPiece>> = emptyMap()
     private var currentDisplayMonth: YearMonth = YearMonth.now()
+    private lateinit var proUserManager: ProUserManager
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,9 +57,12 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        proUserManager = ProUserManager.getInstance(requireContext())
+        
         setupClickListeners()
         setupCalendar()
         updateMonthDisplay()
+        updateColorGuideVisibility()
         
         viewModel.selectedDateActivities.observe(viewLifecycleOwner) { activities ->
             updateSelectedDateView(activities)
@@ -259,6 +264,12 @@ class CalendarFragment : Fragment() {
             return ContextCompat.getColor(requireContext(), R.color.calendar_no_activity)
         }
         
+        // Free users get simplified heat map: only light blue for any activities
+        if (!proUserManager.isProUser()) {
+            return ContextCompat.getColor(requireContext(), R.color.calendar_practice_light)
+        }
+        
+        // Pro users get full heat map with multiple colors and intensities
         val activityCount = activities.size
         val hasPerformance = activities.any { it.activity.activityType == ActivityType.PERFORMANCE }
         
@@ -279,6 +290,11 @@ class CalendarFragment : Fragment() {
         }
     }
     
+    private fun updateColorGuideVisibility() {
+        val isProUser = proUserManager.isProUser()
+        binding.colorGuideTitle.visibility = if (isProUser) View.VISIBLE else View.GONE
+        binding.colorGuideContainer.visibility = if (isProUser) View.VISIBLE else View.GONE
+    }
     
     private fun setupClickListeners() {
         binding.buttonAddActivity.setOnClickListener {
@@ -327,6 +343,13 @@ class CalendarFragment : Fragment() {
         
         // Refresh the calendar view to show the new selection
         binding.calendarView.notifyCalendarChanged()
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Refresh calendar and color guide in case Pro status changed while away from this fragment
+        binding.calendarView.notifyCalendarChanged()
+        updateColorGuideVisibility()
     }
     
     override fun onDestroyView() {
