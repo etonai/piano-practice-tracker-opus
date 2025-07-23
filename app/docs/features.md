@@ -2292,6 +2292,225 @@ val emojiSuffix = when {
 
 ---
 
+### Feature #36: Firebase Crashlytics and Analytics Integration
+**Status:** 💡 Requested  
+**Date Requested:** 2025-07-23  
+**Priority:** High (Release Critical)  
+**Requested By:** Release Preparation Team  
+
+**Description:**  
+Integrate Firebase Crashlytics for crash reporting and Firebase Analytics for basic usage tracking to monitor app health, user engagement, and support successful free release launch. This is a critical component of the free release preparation identified in free-release-readiness.md.
+
+**User Story:**  
+As a developer preparing for free release, I want comprehensive crash reporting and usage analytics so that I can monitor app stability, identify issues quickly, track user engagement patterns, and make data-driven decisions for app improvements.
+
+**Acceptance Criteria:**  
+- [ ] Firebase project created and configured for PlayStreak
+- [ ] Firebase Crashlytics SDK integrated and functional
+- [ ] Firebase Analytics SDK integrated and functional
+- [ ] Crash reporting working with test crash functionality
+- [ ] Basic usage events tracked (app opens, activities logged, streaks achieved)
+- [ ] Custom events for key user actions implemented
+- [ ] Privacy policy updated to reflect data collection
+- [ ] Analytics dashboard accessible and functional
+
+**Implementation Steps:**
+
+#### **Phase 1: Firebase Project Setup**
+1. **Create Firebase Project**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Click "Create a project" or "Add project"
+   - Project name: "PlayStreak" or "playstreak-android"
+   - Enable Google Analytics for project (recommended)
+   - Choose or create Google Analytics account
+   - Accept Firebase terms and create project
+
+2. **Add Android App to Project**
+   - Click "Add app" → Android icon
+   - **Android package name**: `com.pseddev.playstreak` (must match build.gradle)
+   - **App nickname**: "PlayStreak Android"
+   - **SHA-1 signing certificate**: Generate using `./gradlew signingReport`
+   - Download `google-services.json` file
+
+3. **Add Configuration File**
+   - Place `google-services.json` in `app/` directory (same level as build.gradle.kts)
+   - Add to `.gitignore` if contains sensitive data (optional for this project)
+
+#### **Phase 2: Gradle Configuration**
+4. **Project-level build.gradle.kts Updates**
+   - Add Google Services plugin to classpath:
+   ```kotlin
+   plugins {
+       id("com.google.gms.google-services") version "4.4.0" apply false
+       id("com.google.firebase.crashlytics") version "2.9.9" apply false
+   }
+   ```
+
+5. **App-level build.gradle.kts Updates**
+   - Apply Firebase plugins:
+   ```kotlin
+   plugins {
+       // existing plugins...
+       id("com.google.gms.google-services")
+       id("com.google.firebase.crashlytics")
+   }
+   ```
+   
+   - Add Firebase dependencies:
+   ```kotlin
+   dependencies {
+       // Firebase BOM (Bill of Materials)
+       implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+       
+       // Firebase Crashlytics and Analytics
+       implementation("com.google.firebase:firebase-crashlytics-ktx")
+       implementation("com.google.firebase:firebase-analytics-ktx")
+       
+       // existing dependencies...
+   }
+   ```
+
+#### **Phase 3: Crashlytics Implementation**
+6. **Initialize Crashlytics**
+   - Add to `PlayStreakApplication.kt` or `MainActivity.kt`:
+   ```kotlin
+   import com.google.firebase.crashlytics.FirebaseCrashlytics
+   
+   // In onCreate() or initialization
+   FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+   ```
+
+7. **Test Crash Reporting**
+   - Add test crash button/method for development:
+   ```kotlin
+   // For testing only - remove before release
+   FirebaseCrashlytics.getInstance().recordException(RuntimeException("Test crash"))
+   // Or force crash:
+   throw RuntimeException("Test crash")
+   ```
+
+8. **Custom Crash Logging**
+   - Add custom keys and logs to crashes:
+   ```kotlin
+   FirebaseCrashlytics.getInstance().apply {
+       setCustomKey("user_type", if (proUserManager.isProUser()) "pro" else "free")
+       setCustomKey("piece_count", pieceCount)
+       log("User performed action: $actionName")
+   }
+   ```
+
+#### **Phase 4: Analytics Implementation**
+9. **Initialize Analytics**
+   - Add to application initialization:
+   ```kotlin
+   import com.google.firebase.analytics.FirebaseAnalytics
+   
+   private lateinit var firebaseAnalytics: FirebaseAnalytics
+   
+   // In onCreate()
+   firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+   ```
+
+10. **Track Key Events**
+    - **App Opens**: Automatic (no code needed)
+    - **Activity Logged**:
+    ```kotlin
+    firebaseAnalytics.logEvent("activity_logged") {
+        param("activity_type", activityType.name)
+        param("piece_type", pieceType)
+        param("has_duration", hasDuration)
+    }
+    ```
+    
+    - **Streak Achieved**:
+    ```kotlin
+    firebaseAnalytics.logEvent("streak_achieved") {
+        param("streak_length", streakLength)
+        param("emoji_level", emojiLevel)
+    }
+    ```
+    
+    - **Piece Added**:
+    ```kotlin
+    firebaseAnalytics.logEvent("piece_added") {
+        param("piece_type", pieceType)
+        param("total_pieces", totalPieceCount)
+    }
+    ```
+    
+    - **CSV Import/Export**:
+    ```kotlin
+    firebaseAnalytics.logEvent("csv_operation") {
+        param("operation_type", "import" or "export")
+        param("activity_count", activityCount)
+        param("success", isSuccessful)
+    }
+    ```
+
+#### **Phase 5: Privacy and Compliance**
+11. **Update Privacy Policy**
+    - Add Firebase data collection disclosure
+    - Mention crash reporting and usage analytics
+    - Include Google Analytics data sharing (if enabled)
+    - Link to Google's privacy policy for Firebase services
+
+12. **User Consent Handling** (Optional for initial release)
+    - Consider adding analytics opt-out setting
+    - Implement consent management if required by target markets
+    - Default to enabled for app stability monitoring
+
+#### **Phase 6: Testing and Validation**
+13. **Test Implementation**
+    - Verify Crashlytics dashboard shows test crashes
+    - Confirm Analytics events appear in Firebase console
+    - Test custom parameters and user properties
+    - Validate event tracking across key user flows
+
+14. **Release Configuration**
+    - Ensure crash reporting works in release builds
+    - Verify ProGuard/R8 rules don't break Firebase
+    - Test with release keystore and production configuration
+
+**Technical Requirements:**
+- Android SDK 19+ (already met - minSdk 24)
+- Google Play Services available on device
+- Internet connection for data transmission
+- Proper ProGuard/R8 configuration for release builds
+
+**Dependencies:**
+- Google Services Plugin
+- Firebase Crashlytics and Analytics SDKs
+- Updated privacy policy before release
+
+**Expected Outcomes:**
+- Real-time crash reporting and alerting
+- User engagement metrics and retention tracking
+- Key performance indicators for app health
+- Data-driven insights for feature improvements
+- Improved user support through crash diagnostics
+
+**Files to Modify:**
+- `build.gradle.kts` (project and app level)
+- `PlayStreakApplication.kt` or main activity
+- Key activity classes for event tracking
+- Privacy policy documentation
+- ProGuard rules (if needed)
+
+**Testing Notes:**
+- Test on both debug and release builds
+- Verify events appear in Firebase console within 24 hours
+- Test crash reporting with actual crashes (not just exceptions)
+- Validate custom parameters and user properties
+- Ensure privacy policy accurately reflects data collection
+
+**Post-Implementation:**
+- Monitor Firebase console for crash reports and analytics
+- Set up alerting for critical crashes or performance issues
+- Regular review of user engagement metrics
+- Use data for prioritizing future feature development
+
+---
+
 ### Priority Levels
 - **Critical** - Essential for app functionality or user safety
 - **High** - Significant user value and feasible with current resources
