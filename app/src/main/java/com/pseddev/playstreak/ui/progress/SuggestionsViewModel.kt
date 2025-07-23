@@ -228,6 +228,14 @@ class SuggestionsViewModel(
                 val performanceSuggestions = if (proUserManager.isProUser()) {
                     val twentyEightDaysAgo = now - (28 * 24 * 60 * 60 * 1000L)
                     
+                    // Calculate start of today (midnight) to exclude pieces performed today
+                    val startOfToday = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+                    
                     val firstTierSuggestions = mutableListOf<SuggestionItem>()
                     val secondTierSuggestions = mutableListOf<SuggestionItem>()
                     
@@ -276,8 +284,8 @@ class SuggestionsViewModel(
                                         suggestionType = SuggestionType.PERFORMANCE
                                     )
                                 )
-                            } else {
-                                // Second tier: Practiced ≥3 times in 28 days (includes recent performances)
+                            } else if (lastPerformanceDate!! < startOfToday) {
+                                // Second tier: Practiced ≥3 times in 28 days AND performed in 28 days BUT not today
                                 val favoritePrefix = if (piece.isFavorite) "⭐ " else ""
                                 secondTierSuggestions.add(
                                     SuggestionItem(

@@ -99,6 +99,14 @@ class DashboardViewModel(
                 val now = System.currentTimeMillis()
                 val twentyEightDaysAgo = now - (28 * 24 * 60 * 60 * 1000L)
                 
+                // Calculate start of today (midnight) to exclude pieces performed today
+                val startOfToday = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+                
                 val performanceActivities = activities.filter { it.activityType == ActivityType.PERFORMANCE }
                 val piecePerformanceActivities = performanceActivities.groupBy { it.pieceOrTechniqueId }
                 val pieceActivities = activities.groupBy { it.pieceOrTechniqueId }
@@ -151,8 +159,8 @@ class DashboardViewModel(
                                     suggestionType = SuggestionType.PERFORMANCE
                                 )
                             )
-                        } else {
-                            // Second tier: Practiced ≥3 times in 28 days (includes recent performances)
+                        } else if (lastPerformanceDate!! < startOfToday) {
+                            // Second tier: Practiced ≥3 times in 28 days AND performed in 28 days BUT not today
                             val favoritePrefix = if (piece.isFavorite) "⭐ " else ""
                             secondTierSuggestions.add(
                                 SuggestionItem(

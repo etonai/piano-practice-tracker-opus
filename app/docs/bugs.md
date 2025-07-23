@@ -1447,6 +1447,75 @@ Medium priority as this affects user experience after data import, particularly 
 
 ---
 
+### Bug #32: ✅ Performance Suggestions Second Tier Should Exclude Pieces Performed Today
+**Status:** Fixed  
+**Date Reported:** 2025-07-23  
+**Severity:** Medium  
+**Reporter:** User Experience Team
+
+**Description:**  
+The Performance Suggestions algorithm's second tier was suggesting pieces that were performed earlier the same day. This creates awkward situations where users might be suggested to perform a piece they already performed that morning or earlier in the day.
+
+**Steps to Reproduce:**  
+1. Perform a piece (that meets the algorithm requirements) earlier today
+2. Open Dashboard or Suggestions tab
+3. Check Performance Suggestions
+4. The piece performed today appears in the suggestions
+
+**Expected Behavior:**  
+Pieces performed today should not be suggested for performance until the next day, even if they meet all other algorithm requirements.
+
+**Actual Behavior:**  
+Pieces performed earlier the same day were being suggested in the second tier for continued performance rotation.
+
+**Algorithm Details:**
+**Before Fix:**
+- **Second Tier**: Practiced ≥3 times in 28 days AND performed in last 28 days
+- **Issue**: Could suggest pieces performed hours ago on the same day
+
+**After Fix:**
+- **Second Tier**: Practiced ≥3 times in 28 days AND performed in last 28 days BUT NOT today
+- **Logic**: Added `lastPerformanceDate!! < startOfToday` condition to exclude same-day performances
+
+**Environment:**  
+- App Version: 1.0.8+
+- Feature: Performance Suggestions (Feature #32)
+- Affects: Pro users only
+
+**Technical Implementation:**
+- **Files Modified**: 
+  - `DashboardViewModel.kt` - Updated second tier condition
+  - `SuggestionsViewModel.kt` - Updated second tier condition
+- **Logic Change**: Added `startOfToday` timestamp calculation (midnight boundary)
+- **Condition Updated**: Changed `} else {` to `} else if (lastPerformanceDate!! < startOfToday) {`
+- **Impact**: More practical suggestions that avoid same-day redundancy
+
+**Solution:**
+Added `startOfToday` calculation in both ViewModels:
+```kotlin
+val startOfToday = Calendar.getInstance().apply {
+    set(Calendar.HOUR_OF_DAY, 0)
+    set(Calendar.MINUTE, 0)
+    set(Calendar.SECOND, 0)
+    set(Calendar.MILLISECOND, 0)
+}.timeInMillis
+```
+
+Updated second tier condition to exclude pieces performed today:
+```kotlin
+} else if (lastPerformanceDate!! < startOfToday) {
+    // Second tier: Practiced ≥3 times in 28 days AND performed in 28 days BUT not today
+```
+
+**Test Cases:**
+- ✅ Piece performed yesterday → Still eligible for second tier
+- ✅ Piece performed 5 days ago → Still eligible for second tier  
+- ✅ Piece performed 20 days ago → Still eligible for second tier
+- ❌ Piece performed this morning → Excluded from both tiers until tomorrow
+- ✅ Piece performed 30 days ago → First tier (not performed in 28 days)
+
+---
+
 ## Bug Report Template
 
 When reporting new bugs, please use this template:
