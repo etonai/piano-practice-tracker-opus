@@ -1996,8 +1996,8 @@ High priority Pro feature that adds significant value for performing musicians. 
 
 ---
 
-### Feature #33: Filter Timeline by Performances (Pro Only)
-**Status:** Requested  
+### Feature #33: Filter Timeline by Performances (Pro Only) - SPLIT INTO SUB-FEATURES
+**Status:** Split for Safe Implementation  
 **Date Requested:** 2025-07-23  
 **Priority:** Medium  
 **Requested By:** Pro User Experience Team  
@@ -2008,47 +2008,116 @@ Add a filter option to the Timeline tab that allows Pro users to view only Perfo
 **User Story:**  
 As a Pro user tracking my performance activities, I want to filter the Timeline tab to show only performances, so that I can focus on my performance history without being distracted by practice activities and better analyze my performance patterns over time.
 
+**Implementation Strategy:**  
+Due to previous app crashes when implementing this feature, it has been split into smaller, safer sub-features that can be implemented and tested incrementally.
+
+---
+
+### Feature #33A: Timeline Pro User Detection and Basic Filter UI
+**Status:** ✅ Implemented  
+**Priority:** High (Foundation)  
+**Dependencies:** None
+
+**Description:**  
+Add basic Pro user detection to Timeline and create minimal filter UI structure without any functional filtering logic.
+
 **Acceptance Criteria:**  
-- [ ] Filter option appears only for Pro users in Timeline tab
-- [ ] Filter allows toggling between "All Activities" and "Performances Only" views
-- [ ] When "Performances Only" is selected, only Performance activities are displayed
-- [ ] Filter state is preserved when navigating away and returning to Timeline tab
-- [ ] Performance count and statistics update to reflect filtered view
-- [ ] Filter UI is intuitive and clearly labeled
-- [ ] Free users see no filter option and always see all activities
-- [ ] Filter works with existing timeline functionality (scrolling, date grouping, etc.)
-- [ ] Clear visual indication when filter is active
-- [ ] Easy way to return to "All Activities" view
+- [x] Add ProUserManager integration to TimelineViewModel
+- [x] Add basic filter UI section that shows/hides based on Pro status
+- [x] Filter UI appears only for Pro users
+- [x] Filter UI shows placeholder text (no actual filtering)
+- [x] Free users see no filter changes
+- [x] No crashes when switching between tabs
 
-**Technical Considerations:**  
-- Add filter toggle UI to Timeline fragment header or toolbar
-- Modify Timeline ViewModel to support activity type filtering
-- Filter activities by `ActivityType.PERFORMANCE` when filter is active
-- Preserve filter state using SharedPreferences or ViewModel state
-- Update activity count displays to reflect filtered results
-- Ensure filtering works with existing timeline grouping and sorting logic
-- Consider performance impact of additional filtering operations
-- Integrate with existing Pro user detection system
+**Technical Focus:**
+- Safe ProUserManager integration in TimelineViewModel
+- Basic UI visibility logic in TimelineFragment
+- Minimal layout changes to timeline XML
+- No filtering logic - just UI framework
 
-**Priority Justification:**  
-Medium priority Pro feature that adds value for performing musicians who want to focus specifically on their performance history. Helps Pro users analyze performance patterns and frequency without practice activity noise.
+**Risk Level:** Low (UI-only changes, no filtering logic)
 
-**Implementation Approach:**
-- **UI Integration**: Add filter toggle in Timeline tab header (chip, toggle button, or dropdown)
-- **Pro User Check**: Use existing ProUserManager to show/hide filter option
-- **ViewModel Enhancement**: Add filtering logic to TimelineViewModel
-- **State Management**: Preserve filter selection across navigation
-- **Performance Filtering**: Filter activities by `ActivityType.PERFORMANCE` when active
-- **Visual Feedback**: Clear indication when filter is applied
+---
 
-**Similar Features:**  
-This complements the existing Performance Suggestions feature by providing a focused view of historical performance data, helping Pro users make informed decisions about future performances.
+### Feature #33B: Timeline Filter State Management
+**Status:** Planned  
+**Priority:** High (Core Logic)  
+**Dependencies:** Feature #33A
 
-**Files to Modify:**
-- Timeline fragment layout for filter UI
-- TimelineViewModel for filtering logic
-- Timeline fragment for filter interaction handling
-- Possible shared preferences for state persistence
+**Description:**  
+Add filter state management to TimelineViewModel without connecting it to actual data filtering.
+
+**Acceptance Criteria:**  
+- [ ] Add filter state LiveData in TimelineViewModel
+- [ ] Add methods to toggle filter state
+- [ ] Filter state responds to UI interactions
+- [ ] Filter state is logged for debugging
+- [ ] No actual data filtering occurs yet
+- [ ] App remains stable when toggling filter
+
+**Technical Focus:**
+- LiveData for filter state management
+- Basic toggle methods in ViewModel
+- UI interaction handling in Fragment
+- Debug logging for state changes
+- No data transformation yet
+
+**Risk Level:** Low (State management only, no data filtering)
+
+---
+
+### Feature #33C: Timeline Data Filtering Logic
+**Status:** Planned  
+**Priority:** Medium (Filtering Implementation)  
+**Dependencies:** Feature #33B
+
+**Description:**  
+Implement actual activity filtering based on filter state, showing only Performance activities when filter is active.
+
+**Acceptance Criteria:**  
+- [ ] Activities are filtered by ActivityType.PERFORMANCE when filter is active
+- [ ] "All Activities" shows all activities (current behavior)
+- [ ] "Performances Only" shows only performance activities
+- [ ] Empty state updates appropriately for filtered view
+- [ ] Filtering works with existing sorting and display logic
+
+**Technical Focus:**
+- Activity filtering in ViewModel data flow
+- Proper LiveData transformation
+- Empty state message updates
+- Preserve existing timeline functionality
+
+**Risk Level:** Medium (Data transformation logic)
+
+---
+
+### Feature #33D: Timeline Filter State Persistence
+**Status:** Planned  
+**Priority:** Low (Enhancement)  
+**Dependencies:** Feature #33C
+
+**Description:**  
+Add SharedPreferences to persist filter state across app sessions and navigation.
+
+**Acceptance Criteria:**  
+- [ ] Filter state persists when navigating away and back
+- [ ] Filter state persists across app restarts
+- [ ] Different users can have different filter preferences
+- [ ] State persistence doesn't affect app performance
+
+**Technical Focus:**
+- SharedPreferences integration
+- State restoration on ViewModel initialization
+- User-specific preference keys
+- Performance optimization
+
+**Risk Level:** Low (Preference storage only)
+
+**Files to Modify Across All Sub-Features:**
+- **33A**: Timeline fragment layout, TimelineFragment.kt (minimal)
+- **33B**: TimelineViewModel.kt (state management)
+- **33C**: TimelineViewModel.kt (filtering logic)
+- **33D**: TimelineViewModel.kt (SharedPreferences)
 
 ---
 

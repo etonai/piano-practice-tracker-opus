@@ -65,7 +65,14 @@ class TimelineFragment : Fragment() {
     }
     
     private fun setupFilterUI() {
-        // No filter UI for now
+        // Feature #33A: Show filter UI only for Pro users
+        if (viewModel.isProUser) {
+            binding.filterSection.visibility = View.VISIBLE
+            binding.filterDivider.visibility = View.VISIBLE
+        } else {
+            binding.filterSection.visibility = View.GONE
+            binding.filterDivider.visibility = View.GONE
+        }
     }
     
     private fun observeViewModel() {

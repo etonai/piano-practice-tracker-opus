@@ -6,6 +6,40 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!-- Filter Section (Pro Only) - Feature #33A: Basic UI Structure -->
+    <LinearLayout
+        android:id="@+id/filterSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter Options (Pro Feature)"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?attr/colorPrimary" />
+            
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Timeline filtering controls will appear here"
+            android:textAppearance="?attr/textAppearanceCaption"
+            android:alpha="0.7" />
+
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:id="@+id/filterDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:visibility="gone" />
+
     <!-- Main Content -->
     <FrameLayout
         android:layout_width="match_parent"

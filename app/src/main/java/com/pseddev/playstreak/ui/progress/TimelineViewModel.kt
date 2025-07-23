@@ -2,6 +2,7 @@ package com.pseddev.playstreak.ui.progress
 
 import androidx.lifecycle.*
 import com.pseddev.playstreak.data.repository.PianoRepository
+import com.pseddev.playstreak.utils.ProUserManager
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
 
@@ -10,12 +11,17 @@ class TimelineViewModel(
     private val context: android.content.Context
 ) : ViewModel() {
     
+    private val proUserManager = ProUserManager.getInstance(context)
+    
     val activitiesWithPieces: LiveData<List<ActivityWithPiece>> = 
         repository.getAllActivitiesWithPieces()
             .map { activities ->
                 activities.sortedByDescending { it.activity.timestamp }
             }
             .asLiveData()
+    
+    val isProUser: Boolean
+        get() = proUserManager.isProUser()
     
     fun deleteActivity(activityWithPiece: ActivityWithPiece) {
         viewModelScope.launch {
