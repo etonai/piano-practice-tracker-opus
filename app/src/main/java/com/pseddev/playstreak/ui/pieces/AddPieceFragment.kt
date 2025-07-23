@@ -1,5 +1,6 @@
 package com.pseddev.playstreak.ui.pieces
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +20,8 @@ class AddPieceFragment : Fragment() {
     
     private val viewModel: AddPieceViewModel by viewModels {
         AddPieceViewModelFactory(
-            (requireActivity().application as PlayStreakApplication).repository
+            (requireActivity().application as PlayStreakApplication).repository,
+            requireContext()
         )
     }
     
@@ -71,8 +73,26 @@ class AddPieceFragment : Fragment() {
                 is AddPieceResult.Error -> {
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_LONG).show()
                 }
+                is AddPieceResult.PieceLimitReached -> {
+                    showPieceLimitDialog(result.currentCount, result.limit, result.isProUser)
+                }
             }
         }
+    }
+    
+    private fun showPieceLimitDialog(currentCount: Int, limit: Int, isProUser: Boolean) {
+        val message = "Piece Limit Reached\n\n" +
+                "You currently have $currentCount pieces and techniques. " +
+                "This app supports up to $limit pieces total to ensure good performance.\n\n" +
+                "You can keep all your existing pieces, but cannot add new ones until you remove some pieces."
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Cannot Add Piece")
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
     
     override fun onDestroyView() {

@@ -1521,9 +1521,10 @@ Low priority cosmetic improvement that enhances user experience through clearer 
 
 ---
 
-### Feature #27: 💡 Implement Piece/Technique Count Limits
-**Status:** Requested  
+### Feature #27: ✅ Implement Piece/Technique Count Limits
+**Status:** Implemented  
 **Date Requested:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
 **Priority:** High  
 **Requested By:** Free Release Team  
 
@@ -1563,6 +1564,22 @@ High priority for Free release preparation. Essential for creating meaningful di
 - **User Experience**: Clear, helpful error messages with upgrade path information
 - **Performance**: Efficient count queries that don't impact app performance
 
+**Implementation Details:**
+- **Piece Limits**: Added constants FREE_USER_PIECE_LIMIT = 50 and PRO_USER_PIECE_LIMIT = 60
+- **ProUserManager**: Enhanced with canAddMorePieces() and getPieceLimit() methods  
+- **AddPieceViewModel**: Added piece count validation before saving new pieces
+- **AddPieceFragment**: Added limit reached dialog with clear messaging
+- **Validation Logic**: Checks current piece/technique count against user type limits
+- **User Experience**: Shows informative dialog when limit reached, allows keeping existing pieces
+- **Manual Addition**: Fully implemented for Add Piece functionality
+
+**Phase 1 Complete - Manual Piece Addition:**
+- ✅ Piece limit constants and validation logic implemented
+- ✅ User-friendly error dialog with clear messaging  
+- ✅ Existing pieces preserved (grandfathered) above limits
+- ✅ Consistent Pro/Free user differentiation
+
+**Phase 2 Pending - CSV Import Handling:**
 **Investigation Required: Import Handling**
 **Issue:** How should the system handle piece/technique limits when importing CSV data?
 
@@ -1584,12 +1601,11 @@ Implement **Import Limit Enforcement with User Choice**:
    ```
    "Import Limit Warning
    
-   This import contains 75 pieces, but Free users are limited to 50 pieces total.
+   This import contains 75 pieces, but you are limited to 50 pieces total.
    You currently have 30 pieces.
    
    Choose an option:
    • Import first 20 pieces (up to your limit)
-   • Cancel import and upgrade to Pro for higher limits
    • Proceed anyway (existing pieces kept, new ones truncated)"
    ```
 
@@ -1603,11 +1619,13 @@ Implement **Import Limit Enforcement with User Choice**:
    - User can choose which pieces to keep active within their limit
    - Provides more user control over which pieces are important
 
-**Files to Modify:**
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/utils/ProUserManager.kt`
 - `app/src/main/java/com/pseddev/playstreak/ui/pieces/AddPieceViewModel.kt`
-- `app/src/main/java/com/pseddev/playstreak/utils/ProUserManager.kt`  
+- `app/src/main/java/com/pseddev/playstreak/ui/pieces/AddPieceFragment.kt`
+
+**Files Pending (Import Functionality):**
 - `app/src/main/java/com/pseddev/playstreak/data/repository/PianoRepository.kt`
-- `app/src/main/java/com/pseddev/playstreak/ui/progress/QuickAddActivityDialogFragment.kt`
 - `app/src/main/java/com/pseddev/playstreak/ui/importexport/ImportExportViewModel.kt`
 
 **Implementation Notes:**  
@@ -1681,6 +1699,53 @@ Medium priority UX enhancement that makes the suggestion system more responsive 
 - 7-day threshold for non-favorites prevents repertoire from being completely forgotten
 - Maintains existing suggestion prioritization and limits
 - Should be tested with various practice schedules to ensure good user experience
+
+---
+
+### Feature #29: ✅ Set App Version to Beta Status
+**Status:** Implemented  
+**Date Requested:** 2025-07-23  
+**Date Implemented:** 2025-07-23  
+**Priority:** High  
+**Requested By:** Development Team  
+
+**Description:**  
+Update the app version number in build.gradle.kts to include a "-beta" suffix to clearly indicate the current development stage. The version should be changed from "1.0.8.3" to "1.0.8.3-beta" to properly reflect that this is a beta release.
+
+**User Story:**  
+As a developer or beta tester, I want the app version to clearly indicate beta status so that everyone understands this is a pre-release version, and as a user, I want to know when I'm using beta software so I can set appropriate expectations.
+
+**Acceptance Criteria:**  
+- [x] App version changed from "1.0.8.3" to "1.0.8.3-beta" in build.gradle.kts
+- [x] Version naming strategy documented for future beta releases (1.0.8.4-beta, 1.0.8.5-beta, etc.)
+- [x] Production release target set as 1.0.9 (without beta suffix)
+- [x] Beta version is visible in app UI where version is displayed
+- [x] Consistent beta labeling across development workflow
+
+**Technical Considerations:**  
+- Update versionName in app/build.gradle.kts defaultConfig section
+- Ensure version is properly displayed in About/Settings screens
+- Plan version numbering strategy for future beta releases
+- Prepare transition to stable release version (1.0.9)
+
+**Priority Justification:**  
+High priority for proper beta release management and user expectation setting. Beta versioning prevents confusion about app maturity level and ensures appropriate feedback from testers.
+
+**Implementation Details:**
+- **Version Change**: Updated `versionName` from "1.0.8.3" to "1.0.8.3-beta" in build.gradle.kts
+- **Future Strategy**: Next beta versions will be 1.0.8.4-beta, 1.0.8.5-beta, etc.
+- **Production Target**: Stable release will be version 1.0.9 (removing beta suffix)
+- **Documentation**: Updated free-release-readiness.md to reflect beta versioning approach
+
+**Files Modified:**
+- `app/build.gradle.kts`
+- `app/docs/free-release-readiness.md`
+
+**Implementation Notes:**  
+- Feature provides clear beta status indication for all stakeholders
+- Maintains version continuity while adding development stage clarity
+- Prepares path for smooth transition to stable release
+- Aligns with standard software development versioning practices
 
 ---
 

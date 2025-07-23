@@ -28,7 +28,7 @@ class MainViewModel(private val repository: PianoRepository) : ViewModel() {
     
     val piecesCount: LiveData<Int> = repository.getAllPiecesAndTechniques()
         .map { items ->
-            items.count { it.type == ItemType.PIECE }
+            items.size  // Count both pieces and techniques for limit display
         }
         .asLiveData()
 }

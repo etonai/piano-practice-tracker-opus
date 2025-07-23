@@ -61,7 +61,9 @@ Release a stable, polished Free version of PlayStreak that provides excellent va
   - Test release build thoroughly on different devices
 
 - [ ] **Version Management**
-  - Finalize version number (suggest 1.0.0 for first public release)
+  - Use 1.0.8.3-beta naming for current development stage
+  - Plan Beta release cycle (1.0.8.4-beta, 1.0.8.5-beta, etc.) for testing and refinement
+  - Target stable 1.0.9 for first public Google Play Store release
   - Prepare release notes highlighting key features
   - Plan version naming strategy for future updates
 
@@ -104,9 +106,56 @@ Release a stable, polished Free version of PlayStreak that provides excellent va
   - Support for larger text sizes
   - Screen reader compatibility for key workflows
 
+### **5. Data Management & Activity Compression Strategy**
+**Priority:** Medium-High  
+**Impact:** Long-term app sustainability and performance
+
+- [ ] **Hard Activity Limit Implementation**
+  - Set hard limit of 2000 activities maximum for all users *(Note: 2000 is a starting point - final limit TBD based on performance testing)*
+  - Implement warning system at 80% capacity (1600 activities)
+  - Add periodic warnings as user approaches and reaches limit
+  - Prevent new activity creation once limit is reached
+
+- [ ] **Activity Compression System**
+  - Design piece-level activity counters (practice count, performance count by year)
+  - Create "Compress Data" functionality to archive old activities
+  - Allow users to export activities before compression
+  - Implement data compression that deletes old activities while preserving:
+    - Total practice/performance counts per piece per year
+    - Recent activity history (e.g., last 3-6 months of detailed records)
+    - Streak calculation data requirements
+
+- [ ] **Export Enhancement (Prerequisite)**
+  - Implement export pieces functionality before compression system
+  - Ensure users can backup all data before compression
+  - Add export options for different date ranges
+  - Provide clear guidance on data export before compression
+
+- [ ] **Database Schema Enhancement**
+  - Add yearly activity counter fields to piece data structure:
+    - `practiceCount2024`, `performanceCount2024`, etc.
+    - Or implement separate ActivitySummary table by piece/year
+  - Ensure counters are updated when activities are added/deleted
+  - Design migration strategy for existing activity data
+
+- [ ] **Import Conflict Resolution (Pro Feature)**
+  - Implement additive import mode for Pro users (vs. current replace-all behavior)
+  - Add duplicate detection logic to prevent duplicate activities during import
+  - Design conflict resolution UI for when duplicates are detected
+  - Consider detection criteria: same piece, same timestamp, same duration, etc.
+  - Provide user options: skip duplicates, merge data, or manual resolution
+  - Maintain current replace-all behavior for Free users for simplicity
+
+- [ ] **Beta Version Implementation**
+  - Set app version to 1.0.8.3-beta to properly reflect development stage ✅ 
+  - Update build.gradle.kts version configuration ✅
+  - Plan version numbering strategy for Beta releases (1.0.8.4-beta, 1.0.8.5-beta, etc.)
+  - Transition to stable 1.0.9 for first public release on Google Play Store
+  - Update any version references in documentation and code
+
 ## 📋 Nice-to-Have (Not Release Blocking)
 
-### **5. Enhanced Settings**
+### **6. Enhanced Settings**
 **Priority:** Low  
 **Impact:** User customization
 
@@ -122,7 +171,7 @@ Release a stable, polished Free version of PlayStreak that provides excellent va
   - Basic troubleshooting options (refresh data, reset preferences)
   - Contact/feedback mechanism for user support
 
-### **6. Documentation & Communication**
+### **7. Documentation & Communication**
 **Priority:** Low  
 **Impact:** Marketing, user education
 

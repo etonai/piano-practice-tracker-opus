@@ -12,6 +12,7 @@ import com.pseddev.playstreak.data.models.SyncOperationResult
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.CsvHandler
 import com.pseddev.playstreak.utils.GoogleDriveHelper
+import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.SyncManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -28,6 +29,7 @@ class ImportExportViewModel(
     
     private val driveHelper = GoogleDriveHelper(context)
     private val syncManager = SyncManager(context, repository, driveHelper)
+    private val proUserManager = ProUserManager.getInstance(context)
     private val sharedPrefs = context.getSharedPreferences("play_streak_export_prefs", Context.MODE_PRIVATE)
     
     private val _isLoading = MutableLiveData<Boolean>()
@@ -38,6 +40,9 @@ class ImportExportViewModel(
     
     private val _importResult = MutableLiveData<Event<Result<CsvHandler.ImportResult>>>()
     val importResult: LiveData<Event<Result<CsvHandler.ImportResult>>> = _importResult
+    
+    private val _validationResult = MutableLiveData<Event<CsvHandler.CsvValidationResult>>()
+    val validationResult: LiveData<Event<CsvHandler.CsvValidationResult>> = _validationResult
     
     private val _purgeResult = MutableLiveData<Event<Result<String>>>()
     val purgeResult: LiveData<Event<Result<String>>> = _purgeResult
@@ -78,14 +83,39 @@ class ImportExportViewModel(
         }
     }
     
-    fun importFromCsv(reader: Reader) {
+    fun importFromCsv(csvContent: String) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                val result = repository.importFromCsv(reader)
-                _importResult.value = Event(Result.success(result))
+                // First validate the CSV against user limits
+                val pieceLimit = proUserManager.getPieceLimit()
+                val activityLimit = proUserManager.getActivityLimit()
+                
+                val validationResult = withContext(Dispatchers.IO) {
+                    CsvHandler.validateCsv(csvContent.reader(), pieceLimit, activityLimit)
+                }
+                
+                if (!validationResult.isValid) {
+                    // Validation failed - show error dialog
+                    _validationResult.value = Event(validationResult)
+                } else {
+                    // Validation passed - proceed with actual import using fresh reader
+                    val importResult = withContext(Dispatchers.IO) {
+                        repository.importFromCsv(csvContent.reader())
+                    }
+                    
+                    _importResult.value = Event(Result.success(importResult))
+                }
+                
             } catch (e: Exception) {
-                _importResult.value = Event(Result.failure(e))
+                _validationResult.value = Event(
+                    CsvHandler.CsvValidationResult(
+                        isValid = false,
+                        activityCount = 0,
+                        uniquePieceCount = 0,
+                        errors = listOf("Failed to validate CSV: ${e.message}")
+                    )
+                )
             } finally {
                 _isLoading.value = false
             }

@@ -62,10 +62,48 @@ class ProUserManager private constructor(context: Context) {
         }
     }
     
+    /**
+     * Check if user can add more pieces/techniques based on Pro status and current count
+     * @param currentPieceCount the current total number of pieces and techniques the user has
+     * @return true if user can add more pieces/techniques, false if at limit
+     */
+    fun canAddMorePieces(currentPieceCount: Int): Boolean {
+        val limit = getPieceLimit()
+        return currentPieceCount < limit
+    }
+    
+    /**
+     * Get the piece limit for the current user type
+     * @return the maximum number of pieces allowed for this user
+     */
+    fun getPieceLimit(): Int {
+        return if (isProUser()) {
+            PRO_USER_PIECE_LIMIT
+        } else {
+            FREE_USER_PIECE_LIMIT
+        }
+    }
+    
+    /**
+     * Get the activity limit for the current user type
+     * @return the maximum number of activities allowed for this user
+     */
+    fun getActivityLimit(): Int {
+        return if (isProUser()) {
+            PRO_USER_ACTIVITY_LIMIT
+        } else {
+            FREE_USER_ACTIVITY_LIMIT
+        }
+    }
+    
     companion object {
         private const val PREFS_NAME = "playstreak_pro_prefs"
         private const val KEY_IS_PRO_USER = "is_pro_user"
         const val FREE_USER_FAVORITE_LIMIT = 4
+        const val FREE_USER_PIECE_LIMIT = 50
+        const val PRO_USER_PIECE_LIMIT = 500
+        const val FREE_USER_ACTIVITY_LIMIT = 800
+        const val PRO_USER_ACTIVITY_LIMIT = 9000
         
         @Volatile
         private var INSTANCE: ProUserManager? = null

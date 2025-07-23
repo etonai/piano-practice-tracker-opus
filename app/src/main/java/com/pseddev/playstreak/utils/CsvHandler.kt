@@ -292,6 +292,79 @@ class CsvHandler {
             
             return isOldFormat || isNewFormat
         }
+        
+        /**
+         * Validates a CSV file without importing it, checking piece and activity limits
+         * @param reader Reader for the CSV file
+         * @param maxPieces Maximum allowed pieces for this user type
+         * @param maxActivities Maximum allowed activities for this user type
+         * @return CsvValidationResult with counts and validation status
+         */
+        fun validateCsv(reader: Reader, maxPieces: Int, maxActivities: Int): CsvValidationResult {
+            val csvReader = CSVReader(reader)
+            val errors = mutableListOf<String>()
+            val uniquePieces = mutableSetOf<String>()
+            var activityCount = 0
+            
+            try {
+                // Skip header
+                val header = csvReader.readNext()
+                if (header == null || !validateHeader(header)) {
+                    return CsvValidationResult(
+                        isValid = false,
+                        activityCount = 0,
+                        uniquePieceCount = 0,
+                        errors = listOf("Invalid CSV header format")
+                    )
+                }
+                
+                // Count activities and unique pieces
+                var row: Array<String>?
+                while (csvReader.readNext().also { row = it } != null) {
+                    row?.let { currentRow ->
+                        if (currentRow.size >= 6) {
+                            activityCount++
+                            
+                            // Extract piece name (column 3 in both formats)
+                            val pieceName = TextNormalizer.normalizePieceName(currentRow[3])
+                            if (pieceName.isNotBlank()) {
+                                uniquePieces.add(pieceName)
+                            }
+                        }
+                    }
+                }
+                
+                // Check limits
+                if (uniquePieces.size > maxPieces) {
+                    errors.add("This file contains ${uniquePieces.size} unique pieces, but the limit is $maxPieces pieces.")
+                }
+                
+                if (activityCount > maxActivities) {
+                    errors.add("This file contains $activityCount activities, but the limit is $maxActivities activities.")
+                }
+                
+                return CsvValidationResult(
+                    isValid = errors.isEmpty(),
+                    activityCount = activityCount,
+                    uniquePieceCount = uniquePieces.size,
+                    errors = errors
+                )
+                
+            } catch (e: Exception) {
+                return CsvValidationResult(
+                    isValid = false,
+                    activityCount = activityCount,
+                    uniquePieceCount = uniquePieces.size,
+                    errors = listOf("Error reading CSV file: ${e.message}")
+                )
+            } finally {
+                try {
+                    csvReader.close()
+                } catch (e: Exception) {
+                    // Ignore close errors
+                }
+            }
+        }
     }
     
     data class ImportedActivity(
@@ -308,6 +381,13 @@ class CsvHandler {
     data class ImportResult(
         val activities: List<ImportedActivity>,
         val uniquePieceNames: Set<String>,
+        val errors: List<String>
+    )
+    
+    data class CsvValidationResult(
+        val isValid: Boolean,
+        val activityCount: Int,
+        val uniquePieceCount: Int,
         val errors: List<String>
     )
 }

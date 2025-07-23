@@ -1350,6 +1350,53 @@ Confirmed that non-favorite pieces appear in the same sort order in both Dashboa
 
 ---
 
+### Bug #30: ✅ Fix "No pieces recorded yet" Text in Pieces Tab
+**Status:** Implemented  
+**Date Reported:** 2025-07-22  
+**Date Implemented:** 2025-07-22  
+**Priority:** Low  
+**Requested By:** User Interface Team  
+
+**Description:**  
+The empty state message in the Pieces tab currently shows "No pieces recorded yet" which is grammatically awkward and doesn't match the app's terminology. This should be changed to "No pieces added yet" for better clarity and consistency with the app's language around adding pieces.
+
+**Steps to Reproduce:**  
+1. Open the Pieces tab when no pieces have been added to the app
+2. Observe the empty state message text
+
+**Expected Behavior:**  
+The empty state message should read "No pieces added yet" to match the app's terminology used elsewhere (e.g., "Add Piece" buttons).
+
+**Actual Behavior:**  
+The empty state message shows "No pieces recorded yet" which sounds awkward and doesn't align with the app's standard terminology.
+
+**Environment:**  
+- App Version: Current development version
+- All Android devices
+
+**Technical Considerations:**  
+- Locate empty state text in Pieces tab layout or string resources
+- Update text resource or hardcoded string to new wording
+- Verify change doesn't affect other parts of the app using same string resource
+- Test empty state display to ensure proper formatting
+
+**Priority Justification:**  
+Low priority cosmetic fix that improves user experience through clearer, more grammatically correct messaging that aligns with the app's terminology standards.
+
+**Resolution:**  
+Updated the empty state text in the Pieces tab from "No pieces recorded yet" to "No pieces added yet" to improve grammar and align with the app's consistent terminology around adding pieces.
+
+**Implementation Details:**
+- **Text Change**: Updated android:text attribute from "No pieces recorded yet" to "No pieces added yet"
+- **Location**: Found in fragment_pieces.xml layout file, line 101
+- **Consistency**: Now matches terminology used in "Add Piece" buttons and other UI elements
+- **User Experience**: Provides clearer, more grammatically correct messaging for empty state
+
+**Files Modified:**
+- `app/src/main/res/layout/fragment_pieces.xml`
+
+---
+
 ## Bug Report Template
 
 When reporting new bugs, please use this template:

@@ -165,6 +165,21 @@ class ImportExportFragment : Fragment() {
             }
         }
         
+        viewModel.validationResult.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { validationResult ->
+                if (validationResult.isValid) {
+                    // Show success message with counts
+                    val message = "CSV file is valid!\n" +
+                            "Contains: ${validationResult.activityCount} activities, ${validationResult.uniquePieceCount} unique pieces"
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                } else {
+                    // Show rejection dialog
+                    showValidationErrorDialog(validationResult)
+                }
+                binding.warningTextView.visibility = View.GONE
+            }
+        }
+        
         viewModel.purgeResult.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { result ->
                 result.fold(
@@ -253,8 +268,8 @@ class ImportExportFragment : Fragment() {
     private fun importFromCsv(uri: Uri) {
         try {
             requireContext().contentResolver.openInputStream(uri)?.use { inputStream ->
-                val reader = InputStreamReader(inputStream)
-                viewModel.importFromCsv(reader)
+                val csvContent = InputStreamReader(inputStream).readText()
+                viewModel.importFromCsv(csvContent)
             }
         } catch (e: Exception) {
             Toast.makeText(
@@ -398,6 +413,29 @@ class ImportExportFragment : Fragment() {
                 updateDriveUI()
             }
             .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun showValidationErrorDialog(validationResult: com.pseddev.playstreak.utils.CsvHandler.CsvValidationResult) {
+        val message = buildString {
+            appendLine("CSV File Rejected")
+            appendLine()
+            appendLine("File contents:")
+            appendLine("• ${validationResult.activityCount} activities")
+            appendLine("• ${validationResult.uniquePieceCount} unique pieces")
+            appendLine()
+            appendLine("Limit violations:")
+            validationResult.errors.forEach { error ->
+                appendLine("• $error")
+            }
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Import Not Allowed")
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
             .show()
     }
     
