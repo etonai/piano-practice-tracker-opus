@@ -1397,6 +1397,56 @@ Updated the empty state text in the Pieces tab from "No pieces recorded yet" to 
 
 ---
 
+### Bug #31: 🔄 Calendar Heat Map Doesn't Auto-Update When Scrolling to Imported Historical Data
+**Status:** In Progress  
+**Date Reported:** 2025-07-23  
+**Priority:** Medium  
+**Requested By:** User Testing  
+
+**Description:**  
+After importing the PlayTest_2024.csv document, the calendar heat map doesn't automatically update to show activity data when scrolling back to early 2024. The heat map appears empty for historical dates that should have imported activity data, requiring manual refresh or navigation to see the data properly.
+
+**Steps to Reproduce:**  
+1. Import the PlayTest_2024.csv file using the CSV import functionality
+2. Navigate to the Calendar tab
+3. Scroll back to early 2024 (January, February, March 2024)
+4. Observe the heat map display for dates that should contain imported activities
+
+**Expected Behavior:**  
+The calendar heat map should automatically load and display activity data for historical dates when scrolling, showing appropriate heat map colors for days with imported activities from 2024.
+
+**Actual Behavior:**  
+The heat map appears empty/blank for historical dates in early 2024, even though the imported data contains activities for those dates. The heat map may require manual refresh, app restart, or other navigation to properly display the imported historical data.
+
+**Environment:**  
+- App Version: 1.0.8.3-beta
+- Test Data: PlayTest_2024.csv
+- Calendar tab heat map functionality
+- Historical data scrolling behavior
+
+**Technical Analysis:**  
+- Issue likely related to calendar data loading/refresh logic after import
+- Heat map may not be invalidating cached data for historical date ranges
+- Calendar view might need to refresh activity data when scrolling to new date ranges
+- Import process may not be triggering proper calendar data refresh
+
+**Potential Causes:**  
+- Calendar fragment not observing activity data changes after import
+- Heat map calculation not refreshing for dates outside current visible range
+- Calendar view caching issue preventing display of newly imported historical data
+- LiveData/Observer pattern not properly updating calendar when data changes
+
+**Priority Justification:**  
+Medium priority as this affects user experience after data import, particularly for users importing historical practice data. While not preventing core functionality, it creates confusion about whether import was successful and reduces confidence in data integrity.
+
+**Investigation Needed:**  
+- Verify that imported 2024 activities are properly stored in database
+- Check if calendar heat map refreshes when navigating away and back to Calendar tab
+- Test if manual refresh actions (pull-to-refresh, tab switching) resolve the display
+- Examine calendar data loading logic and LiveData observers for historical date ranges
+
+---
+
 ## Bug Report Template
 
 When reporting new bugs, please use this template:
