@@ -31,6 +31,12 @@ class MainViewModel(private val repository: PianoRepository) : ViewModel() {
             items.size  // Count both pieces and techniques for limit display
         }
         .asLiveData()
+    
+    val activitiesCount: LiveData<Int> = repository.getAllActivities()
+        .map { activities ->
+            activities.size
+        }
+        .asLiveData()
 }
 
 class MainViewModelFactory(private val repository: PianoRepository) : ViewModelProvider.Factory {

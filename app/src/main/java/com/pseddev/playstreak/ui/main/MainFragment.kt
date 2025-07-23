@@ -65,6 +65,10 @@ class MainFragment : Fragment() {
             binding.buttonAddPiece.text = "Add Piece ($count)"
         }
         
+        viewModel.activitiesCount.observe(viewLifecycleOwner) { count ->
+            binding.buttonAddActivity.text = "Add Activity ($count)"
+        }
+        
         // Set version text
         binding.textVersion.text = "Version ${BuildConfig.VERSION_NAME}"
     }

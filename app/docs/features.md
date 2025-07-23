@@ -1749,6 +1749,165 @@ High priority for proper beta release management and user expectation setting. B
 
 ---
 
+### Feature #30: ✅ Add Activity Count to Settings Page Add Activity Button
+**Status:** Implemented  
+**Date Requested:** 2025-07-23  
+**Date Implemented:** 2025-07-23  
+**Priority:** Low  
+**Requested By:** User Interface Team  
+
+**Description:**  
+Add the current total number of activities to the Add Activity button in the Settings page, similar to how the Add Piece button shows the piece count. The button should display the format "Add Activity (#)" where # is the total number of activities in the user's database.
+
+**User Story:**  
+As a user, I want to see at a glance how many activities I have logged in total when I'm on the Settings page, so that I can quickly understand the scope of my practice history and track my overall activity volume.
+
+**Acceptance Criteria:**  
+- [x] Add Activity button in Settings page shows current activity count in parentheses
+- [x] Button format: "Add Activity (123)" where 123 is the total activity count
+- [x] Activity count updates dynamically when activities are added/removed
+- [x] Count reflects actual total number of activities in user's database
+- [x] Button functionality remains unchanged (still navigates to Add Activity screen)
+- [x] Consistent styling with existing Add Piece button that shows piece count
+- [x] Real-time count updates when returning to Settings page after adding activities
+- [x] Performance is acceptable (count query doesn't slow down Settings page)
+
+**Technical Considerations:**  
+- Add activity count query to Settings page/ViewModel
+- Use LiveData or similar reactive pattern to observe activity count changes
+- Query repository for total activity count: `repository.getAllActivities().count()`
+- Update button text dynamically based on observed activity count
+- Consider caching strategy if count queries impact performance
+- Ensure count updates when user returns from adding/editing activities
+- Handle zero activities case gracefully ("Add Activity (0)")
+
+**Priority Justification:**  
+Low priority UI enhancement that provides useful information to users about their practice volume. Complements the existing Add Piece (#) button pattern and helps users understand their overall app usage statistics at a glance.
+
+**Implementation Approach:**
+- **Data Source**: Use repository.getAllActivities() to get activity count
+- **UI Pattern**: Follow same pattern as existing Add Piece button with count display
+- **Observer Pattern**: Use LiveData to reactively update count when activities change
+- **Button Text**: Update from "Add Activity" to "Add Activity (#)" format
+- **Performance**: Use efficient count query or cached count if needed
+- **Consistency**: Match styling and behavior of Add Piece button
+
+**Similar Features:**  
+This feature mirrors Feature #15 (Add Piece button with count) but for activities instead of pieces, providing users with a complete view of both their repertoire size and practice volume.
+
+**Files to Modify:**
+- Settings page/fragment (likely `app/src/main/java/com/pseddev/playstreak/ui/main/MainFragment.kt`)
+- Settings ViewModel if exists, or add activity count to MainViewModel
+- Settings layout file for button text updates
+
+**Implementation Details:**
+- **MainViewModel Enhancement**: Added `activitiesCount` LiveData using `repository.getAllActivities().map { activities -> activities.size }`
+- **Observer Pattern**: Added observer in MainFragment that updates button text: `binding.buttonAddActivity.text = "Add Activity ($count)"`
+- **Real-time Updates**: Uses reactive LiveData pattern to automatically update count when activities are added/removed
+- **Performance**: Leverages existing repository.getAllActivities() flow with efficient mapping to count
+- **UI Consistency**: Follows same pattern as existing Add Piece button implementation
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/main/MainViewModel.kt`
+- `app/src/main/java/com/pseddev/playstreak/ui/main/MainFragment.kt`
+
+**Implementation Notes:**  
+- Feature provides symmetric information display with piece count button
+- Helps users understand their practice activity volume at a glance
+- Uses efficient database queries without performance impact
+- Count display creates sense of accomplishment for active users  
+- May be useful for tracking progress toward activity limits in future features
+- Seamlessly integrates with existing Settings page UI pattern
+
+---
+
+### Feature #31: ✅ Update Developer Attribution to PseudonymousEd
+**Status:** Implemented  
+**Date Requested:** 2025-07-23  
+**Date Implemented:** 2025-07-23  
+**Priority:** High  
+**Requested By:** Developer/Legal Team  
+
+**Description:**  
+Update all references to the developer's real name throughout the codebase, documentation, and configuration files to use "PseudonymousEd" instead. This includes code comments, copyright notices, author attributions, package names, documentation, and any other places where the developer name appears.
+
+**User Story:**  
+As a developer preparing for public release, I want to use a pseudonymous identity "PseudonymousEd" instead of my real name in all project files, so that my personal identity is protected while maintaining proper attribution for the work.
+
+**Acceptance Criteria:**  
+- [x] All code files updated to reference "PseudonymousEd" instead of real name
+- [x] Documentation files updated with new attribution
+- [x] Copyright notices updated to use "PseudonymousEd" 
+- [x] Package names or namespaces updated if they contain personal name references
+- [x] Build configuration files updated (gradle, manifest, etc.)
+- [x] README files and project descriptions updated
+- [ ] Git commit author information considerations addressed
+- [x] No remaining references to real name anywhere in the project
+- [x] Consistent use of "PseudonymousEd" across all files and contexts
+- [x] Legal/licensing files updated to reflect new attribution
+
+**Technical Considerations:**  
+- Search entire codebase for real name references
+- Update package declarations if they contain personal name
+- Review AndroidManifest.xml for developer/author references  
+- Check gradle files for author or developer information
+- Update any LICENSE or COPYRIGHT files
+- Consider implications for app store listings and developer accounts
+- Review documentation files (README, CHANGELOG, etc.)
+- Check string resources for developer attribution
+- Verify no hardcoded personal information remains
+
+**Priority Justification:**  
+High priority for privacy and professional pseudonymous identity management. Essential for public release preparation to protect developer's personal identity while maintaining proper code attribution and ownership.
+
+**Implementation Approach:**
+- **Global Search**: Use IDE or command-line tools to find all instances of real name
+- **Systematic Replacement**: Replace with "PseudonymousEd" maintaining context appropriateness
+- **File Types to Check**:
+  - Source code files (.kt, .java)
+  - Documentation (.md, .txt)
+  - Configuration files (build.gradle.kts, AndroidManifest.xml)
+  - Legal files (LICENSE, COPYRIGHT)
+  - Resource files (strings.xml)
+- **Verification**: Final search to ensure no instances remain
+
+**Files to Investigate:**
+- All source code files in `app/src/`
+- Documentation files in `app/docs/`
+- Build configuration files (`build.gradle.kts`, `AndroidManifest.xml`)
+- Legal/licensing files in project root
+- Any README or project description files
+- String resources in `app/src/main/res/values/`
+
+**Implementation Details:**
+- **UI Attribution**: Updated fragment_main.xml author text from real name to "PseudonymousEd"
+- **Package Names**: Confirmed existing package "com.pseddev.playstreak" already uses pseudonymous identity
+- **Documentation**: Verified and updated features.md to remove real name references
+- **Copyright Files**: Confirmed COPYRIGHT file already uses pseudonymous "PlayStreak" attribution
+- **README**: Verified README.md already uses pseudonymous references throughout
+- **AndroidManifest**: Confirmed uses pseudonymous package name
+- **Build Files**: Confirmed no real name references in build.gradle.kts
+
+**Files Modified:**
+- `app/src/main/res/layout/fragment_main.xml` - Updated author attribution text
+- `app/docs/features.md` - Removed real name references from feature description
+
+**Verification Results:**
+- No remaining real name references found in source code
+- All documentation uses pseudonymous identity
+- Package names and namespaces are pseudonymous
+- Legal/copyright files use business name attribution
+- UI displays "PseudonymousEd" as developer attribution
+
+**Implementation Notes:**  
+- Feature successfully protects developer privacy while maintaining code attribution
+- Essential for public release and professional pseudonymous identity management
+- Completed before any public code repository or app store publication
+- All project materials now use consistent pseudonymous identity
+- Ready for public release from privacy perspective
+
+---
+
 ## Feature Request Template
 
 When requesting new features, please use this template:
