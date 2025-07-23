@@ -109,6 +109,12 @@ class DashboardFragment : Fragment() {
         }
         
         viewModel.performanceSuggestions.observe(viewLifecycleOwner) { suggestions ->
+            // Debug logging
+            android.util.Log.d("DashboardFragment", "Performance suggestions: ${suggestions.size}")
+            suggestions.forEach { suggestion ->
+                android.util.Log.d("DashboardFragment", "Performance Suggestion: ${suggestion.piece.name} - Type: ${suggestion.suggestionType} - Reason: ${suggestion.suggestionReason}")
+            }
+            
             if (suggestions.isNotEmpty()) {
                 binding.performanceSuggestionsCard.visibility = View.VISIBLE
                 val suggestionText = suggestions.joinToString("\n") { suggestion ->

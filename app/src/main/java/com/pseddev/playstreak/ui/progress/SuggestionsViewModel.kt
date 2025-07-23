@@ -15,8 +15,14 @@ data class SuggestionItem(
     val piece: PieceOrTechnique,
     val lastActivityDate: Long?,
     val daysSinceLastActivity: Int,
-    val suggestionReason: String
+    val suggestionReason: String,
+    val suggestionType: SuggestionType = SuggestionType.PRACTICE
 )
+
+enum class SuggestionType {
+    PRACTICE,
+    PERFORMANCE
+}
 
 class SuggestionsViewModel(
     private val repository: PianoRepository,
@@ -44,6 +50,8 @@ class SuggestionsViewModel(
         repository.getAllPiecesAndTechniques()
             .combine(repository.getAllActivities()) { pieces, activities ->
                 val pieceActivities = activities.groupBy { it.pieceOrTechniqueId }
+                val performanceActivities = activities.filter { it.activityType == ActivityType.PERFORMANCE }
+                val piecePerformanceActivities = performanceActivities.groupBy { it.pieceOrTechniqueId }
                 
                 val favoriteSuggestions = mutableListOf<SuggestionItem>()
                 val nonFavoriteSuggestions = mutableListOf<SuggestionItem>()
@@ -211,8 +219,105 @@ class SuggestionsViewModel(
                     nonFavoriteSuggestions + fallbackNonFavorites
                 } else nonFavoriteSuggestions
                 
-                // Combine favorites first, then non-favorites (preserving the internal sort order of each category)
-                finalFavoriteSuggestions + finalNonFavoriteSuggestions
+                // PRACTICE SUGGESTIONS: Combine favorites first, then non-favorites
+                val practiceSuggestions = (finalFavoriteSuggestions + finalNonFavoriteSuggestions).map {
+                    it.copy(suggestionType = SuggestionType.PRACTICE)
+                }
+                
+                // PERFORMANCE SUGGESTIONS (Pro users only)
+                val performanceSuggestions = if (proUserManager.isProUser()) {
+                    val twentyEightDaysAgo = now - (28 * 24 * 60 * 60 * 1000L)
+                    
+                    val firstTierSuggestions = mutableListOf<SuggestionItem>()
+                    val secondTierSuggestions = mutableListOf<SuggestionItem>()
+                    
+                    pieces.filter { it.type == ItemType.PIECE }.forEach { piece ->
+                        val allPieceActivities = pieceActivities[piece.id] ?: emptyList()
+                        val piecePerformances = piecePerformanceActivities[piece.id] ?: emptyList()
+                        
+                        // Get practice activities in last 28 days
+                        val recentPractices = allPieceActivities.filter { 
+                            it.activityType == ActivityType.PRACTICE && it.timestamp >= twentyEightDaysAgo 
+                        }
+                        
+                        // Check if practiced at least 3 times in last 28 days AND has at least one Level 4 practice
+                        val hasLevel4Practice = recentPractices.any { it.level == 4 }
+                        if (recentPractices.size >= 3 && hasLevel4Practice) {
+                            val lastPerformance = piecePerformances.maxByOrNull { it.timestamp }
+                            val lastPerformanceDate = lastPerformance?.timestamp
+                            val lastPractice = recentPractices.maxByOrNull { it.timestamp }
+                            val lastPracticeDate = lastPractice?.timestamp
+                            
+                            val daysSinceLastPerformance = if (lastPerformanceDate != null) {
+                                ((now - lastPerformanceDate) / (24 * 60 * 60 * 1000)).toInt()
+                            } else {
+                                Int.MAX_VALUE
+                            }
+                            
+                            val daysSinceLastPractice = if (lastPracticeDate != null) {
+                                ((now - lastPracticeDate) / (24 * 60 * 60 * 1000)).toInt()
+                            } else {
+                                Int.MAX_VALUE
+                            }
+                            
+                            // First tier: Practiced ≥3 times in 28 days BUT not performed in 28 days
+                            if (lastPerformanceDate == null || lastPerformanceDate < twentyEightDaysAgo) {
+                                val favoritePrefix = if (piece.isFavorite) "⭐ " else ""
+                                firstTierSuggestions.add(
+                                    SuggestionItem(
+                                        piece = piece,
+                                        lastActivityDate = lastPracticeDate, // Use practice date for sorting
+                                        daysSinceLastActivity = daysSinceLastPractice,
+                                        suggestionReason = if (lastPerformanceDate == null) {
+                                            "${favoritePrefix}${recentPractices.size} practices, never performed"
+                                        } else {
+                                            "${favoritePrefix}${recentPractices.size} practices, last performance $daysSinceLastPerformance days ago"
+                                        },
+                                        suggestionType = SuggestionType.PERFORMANCE
+                                    )
+                                )
+                            } else {
+                                // Second tier: Practiced ≥3 times in 28 days (includes recent performances)
+                                val favoritePrefix = if (piece.isFavorite) "⭐ " else ""
+                                secondTierSuggestions.add(
+                                    SuggestionItem(
+                                        piece = piece,
+                                        lastActivityDate = lastPerformanceDate, // Use performance date for sorting
+                                        daysSinceLastActivity = daysSinceLastPerformance,
+                                        suggestionReason = "${favoritePrefix}${recentPractices.size} practices, last performance $daysSinceLastPerformance days ago",
+                                        suggestionType = SuggestionType.PERFORMANCE
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Sort first tier by most recent practice (lowest daysSinceLastPractice)
+                    val sortedFirstTier = firstTierSuggestions.sortedWith(
+                        compareBy<SuggestionItem> { it.daysSinceLastActivity } // Most recent practice first
+                        .thenBy { it.piece.name.lowercase() }
+                    )
+                    
+                    // Sort second tier by least recent performance (highest daysSinceLastPerformance)
+                    // For ties, prioritize pieces with more practices
+                    val sortedSecondTier = secondTierSuggestions.sortedWith(
+                        compareByDescending<SuggestionItem> { it.daysSinceLastActivity } // Least recent performance first
+                        .thenByDescending { suggestion -> 
+                            // Count practices for tiebreaker
+                            val allPieceActivities = pieceActivities[suggestion.piece.id] ?: emptyList()
+                            allPieceActivities.filter { 
+                                it.activityType == ActivityType.PRACTICE && it.timestamp >= twentyEightDaysAgo 
+                            }.size
+                        }
+                        .thenBy { it.piece.name.lowercase() }
+                    )
+                    
+                    // Combine tiers and take 5 total suggestions
+                    (sortedFirstTier + sortedSecondTier).take(5)
+                } else emptyList()
+                
+                // Combine practice suggestions first, then performance suggestions
+                practiceSuggestions + performanceSuggestions
             }
             .asLiveData()
 }

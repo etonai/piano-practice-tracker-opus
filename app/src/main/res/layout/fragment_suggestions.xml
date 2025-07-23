@@ -1,58 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Practice Suggestions"
-        android:textAppearance="?attr/textAppearanceHeadline6"
-        android:layout_marginBottom="16dp" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/suggestionsRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
     <LinearLayout
-        android:id="@+id/emptyView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="32dp"
-        android:visibility="gone">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
+        <!-- Practice Suggestions Section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No Practice Suggestions"
+            android:text="Practice Suggestions"
             android:textAppearance="?attr/textAppearanceHeadline6"
             android:layout_marginBottom="16dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/practiceRecyclerView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Suggestions appear based on:\n• Favorites not practiced in 1+ day\n• Other pieces not practiced in 7+ days"
+            android:nestedScrollingEnabled="false"
+            android:layout_marginBottom="24dp"
+            android:minHeight="480dp" />
+
+        <TextView
+            android:id="@+id/noPracticeSuggestionsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No practice suggestions available"
             android:textAppearance="?attr/textAppearanceBody1"
             android:textColor="?android:attr/textColorSecondary"
             android:gravity="center"
-            android:layout_marginBottom="24dp" />
+            android:padding="16dp"
+            android:layout_marginBottom="24dp"
+            android:visibility="gone" />
 
+        <!-- Performance Suggestions Section (Pro Only) -->
         <TextView
+            android:id="@+id/performanceSuggestionsHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="💡 Try adding some pieces or importing your practice history!"
-            android:textAppearance="?attr/textAppearanceBody2"
-            android:textColor="?attr/colorPrimary"
-            android:gravity="center" />
+            android:text="Performance Suggestions"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/performanceRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:layout_marginBottom="24dp"
+            android:visibility="gone"
+            android:minHeight="480dp" />
+
+        <TextView
+            android:id="@+id/noPerformanceSuggestionsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No performance suggestions available"
+            android:textAppearance="?attr/textAppearanceBody1"
+            android:textColor="?android:attr/textColorSecondary"
+            android:gravity="center"
+            android:padding="16dp"
+            android:layout_marginBottom="24dp"
+            android:visibility="gone" />
+
+        <!-- Empty State (when no suggestions at all) -->
+        <LinearLayout
+            android:id="@+id/emptyView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No Suggestions Available"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Suggestions appear based on:\n• Favorites not practiced in 1+ day\n• Other pieces not practiced in 7+ days\n• Performance suggestions for Pro users"
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="?android:attr/textColorSecondary"
+                android:gravity="center"
+                android:layout_marginBottom="24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💡 Try adding some pieces or importing your practice history!"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?attr/colorPrimary"
+                android:gravity="center" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</ScrollView>

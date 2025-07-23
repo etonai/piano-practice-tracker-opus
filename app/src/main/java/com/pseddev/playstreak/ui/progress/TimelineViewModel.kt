@@ -2,15 +2,18 @@ package com.pseddev.playstreak.ui.progress
 
 import androidx.lifecycle.*
 import com.pseddev.playstreak.data.repository.PianoRepository
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
 
-class TimelineViewModel(private val repository: PianoRepository) : ViewModel() {
+class TimelineViewModel(
+    private val repository: PianoRepository,
+    private val context: android.content.Context
+) : ViewModel() {
     
     val activitiesWithPieces: LiveData<List<ActivityWithPiece>> = 
         repository.getAllActivitiesWithPieces()
-            .map { list ->
-                list.sortedByDescending { it.activity.timestamp }
+            .map { activities ->
+                activities.sortedByDescending { it.activity.timestamp }
             }
             .asLiveData()
     
@@ -21,11 +24,14 @@ class TimelineViewModel(private val repository: PianoRepository) : ViewModel() {
     }
 }
 
-class TimelineViewModelFactory(private val repository: PianoRepository) : ViewModelProvider.Factory {
+class TimelineViewModelFactory(
+    private val repository: PianoRepository,
+    private val context: android.content.Context
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TimelineViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TimelineViewModel(repository) as T
+            return TimelineViewModel(repository, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

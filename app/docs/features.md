@@ -1924,22 +1924,26 @@ As a Pro user preparing for performances, I want intelligent suggestions for pie
 **Acceptance Criteria:**  
 - [x] Performance Suggestions section appears only for Pro users
 - [x] Section is positioned after Practice Suggestions in Dashboard tab
-- [x] Shows 3 least recently performed favorites that haven't been performed today
-- [x] Shows 3 least performed non-favorites that haven't been performed in last 7 days
+- [x] Shows up to 5 performance suggestions using two-tier algorithm with quality requirement
+- [x] Base requirement: Pieces practiced ≥3 times in 28 days with at least one Level 4 practice
+- [x] First tier: Qualified pieces not performed in 28 days (sorted by most recent practice)
+- [x] Second tier: All qualified pieces (sorted by least recent performance, ties broken by practice count)
 - [x] Each suggestion shows piece name and relevant performance timing info
 - [x] Section has clear "Performance Suggestions" heading
-- [ ] Suggestions are tappable and navigate to Add Activity for that piece
+- [x] Suggestions are tappable and navigate to Add Activity for that piece
 - [x] Section gracefully handles cases with insufficient data
 - [x] Performance suggestions update dynamically when activities are added
 - [x] Free users do not see this section at all
+- [x] Performance suggestions also appear in dedicated Suggestions tab
+- [x] Suggestions tab shows both Practice and Performance sections for Pro users
 
 **Technical Considerations:**  
-- Query database for performance activities (not practice activities)
-- Filter favorites that haven't been performed today
-- Filter non-favorites that haven't been performed in last 7 days
-- Sort by least recent performance date and least total performance count
+- Query database for both practice and performance activities to analyze practice frequency and quality
+- Two-tier algorithm based on practice frequency (≥3 times in 28 days) and quality (≥1 Level 4 practice)
+- Quality requirement ensures only performance-ready pieces are suggested
+- First tier prioritizes pieces ready for performance (practiced but not recently performed)
+- Second tier includes pieces with recent performances for continued performance rotation
 - Integrate with existing Pro user detection system
-- Add new repository methods for performance-specific queries
 - Update Dashboard ViewModel and Fragment to handle new suggestions
 - Consider performance impact of additional database queries
 
@@ -1947,27 +1951,37 @@ As a Pro user preparing for performances, I want intelligent suggestions for pie
 High priority Pro feature that adds significant value for performing musicians. Helps Pro users maintain active performance repertoire and ensures favorite pieces aren't neglected in performance rotation.
 
 **Implementation Approach:**
-- **Database Queries**: Add methods to PianoRepository for performance-specific filtering
+- **Database Queries**: Query both practice and performance activities for comprehensive analysis
 - **Pro User Check**: Use existing ProUserManager to show/hide section
 - **UI Integration**: Add new section to Dashboard fragment after Practice Suggestions
-- **Performance Logic**: 
-  - Favorites: Filter by no performances today, sort by least recent performance
-  - Non-favorites: Filter by no performances in 7 days, sort by least total performances
+- **Two-Tier Algorithm**: 
+  - **First Tier**: Pieces with ≥3 practices in 28 days but no performances in 28 days (sorted by most recent practice)
+  - **Second Tier**: Pieces with ≥3 practices in 28 days (sorted by least recent performance)
+  - **Combined**: Up to 5 suggestions total across both tiers
 - **Navigation**: Make suggestions tappable to add performance activities
 
 **Implementation Details:**
-- **DashboardViewModel Enhancement**: Added `performanceSuggestions` LiveData that filters for performance activities only
+- **Two-Tier Algorithm**: Implemented sophisticated algorithm based on practice frequency and performance history
+- **DashboardViewModel Enhancement**: Added `performanceSuggestions` LiveData using new two-tier algorithm
+- **SuggestionsViewModel Enhancement**: Extended to include both practice and performance suggestions with SuggestionType enum
 - **Pro User Logic**: Only shows Performance Suggestions section for Pro users using ProUserManager
-- **Performance-Specific Queries**: Filters activities by `ActivityType.PERFORMANCE` to focus on performance history
-- **Favorites Logic**: Shows 3 least recently performed favorites that haven't been performed today
-- **Non-Favorites Logic**: Shows 3 least performed non-favorites (by total count) that haven't been performed in last 7 days
-- **UI Integration**: Added new MaterialCardView section positioned after Practice Suggestions
-- **Dynamic Updates**: Uses reactive LiveData pattern to update suggestions when performance activities change
+- **Practice Frequency Analysis**: Filters pieces with ≥3 practice activities in last 28 days
+- **Performance History Analysis**: Tracks last performance date to determine tier placement
+- **First Tier Logic**: Prioritizes pieces practiced recently but not performed in 28 days (sorted by most recent practice)
+- **Second Tier Logic**: Includes pieces with recent performances for rotation (sorted by least recent performance)
+- **Dashboard Integration**: Added new MaterialCardView section positioned after Practice Suggestions
+- **Suggestions Tab Integration**: Modified Suggestions tab to show separate sections for Practice and Performance suggestions
+- **Dynamic Updates**: Uses reactive LiveData pattern to update suggestions when activities change
+- **Section-Based UI**: Suggestions tab now has two RecyclerViews with clear section headers
+- **Suggestion Reasons**: Shows practice count and performance history in user-friendly format
 
 **Files Modified:**
 - `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt` - Added performanceSuggestions LiveData
 - `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardFragment.kt` - Added observer for performance suggestions
 - `app/src/main/res/layout/fragment_dashboard.xml` - Added Performance Suggestions card section
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsViewModel.kt` - Enhanced with SuggestionType and performance logic
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/SuggestionsFragment.kt` - Updated to handle separate sections
+- `app/src/main/res/layout/fragment_suggestions.xml` - Modified layout for section-based display
 
 **Implementation Notes:**  
 - Feature successfully differentiates between practice and performance activities for targeted suggestions
@@ -1976,6 +1990,65 @@ High priority Pro feature that adds significant value for performing musicians. 
 - Ensures favorite pieces aren't neglected in performance planning
 - Provides balanced suggestions across different performance frequency patterns
 - Integrates seamlessly with existing Dashboard suggestions architecture
+- Available in both Dashboard tab (card format) and Suggestions tab (dedicated sections)
+- Suggestions tab shows clear separation between Practice and Performance suggestions for Pro users
+- Free users see only Practice suggestions, maintaining feature differentiation
+
+---
+
+### Feature #33: Filter Timeline by Performances (Pro Only)
+**Status:** Requested  
+**Date Requested:** 2025-07-23  
+**Priority:** Medium  
+**Requested By:** Pro User Experience Team  
+
+**Description:**  
+Add a filter option to the Timeline tab that allows Pro users to view only Performance activities, hiding Practice activities from the timeline view. This will help Pro users focus on their performance history and track their performance frequency and patterns.
+
+**User Story:**  
+As a Pro user tracking my performance activities, I want to filter the Timeline tab to show only performances, so that I can focus on my performance history without being distracted by practice activities and better analyze my performance patterns over time.
+
+**Acceptance Criteria:**  
+- [ ] Filter option appears only for Pro users in Timeline tab
+- [ ] Filter allows toggling between "All Activities" and "Performances Only" views
+- [ ] When "Performances Only" is selected, only Performance activities are displayed
+- [ ] Filter state is preserved when navigating away and returning to Timeline tab
+- [ ] Performance count and statistics update to reflect filtered view
+- [ ] Filter UI is intuitive and clearly labeled
+- [ ] Free users see no filter option and always see all activities
+- [ ] Filter works with existing timeline functionality (scrolling, date grouping, etc.)
+- [ ] Clear visual indication when filter is active
+- [ ] Easy way to return to "All Activities" view
+
+**Technical Considerations:**  
+- Add filter toggle UI to Timeline fragment header or toolbar
+- Modify Timeline ViewModel to support activity type filtering
+- Filter activities by `ActivityType.PERFORMANCE` when filter is active
+- Preserve filter state using SharedPreferences or ViewModel state
+- Update activity count displays to reflect filtered results
+- Ensure filtering works with existing timeline grouping and sorting logic
+- Consider performance impact of additional filtering operations
+- Integrate with existing Pro user detection system
+
+**Priority Justification:**  
+Medium priority Pro feature that adds value for performing musicians who want to focus specifically on their performance history. Helps Pro users analyze performance patterns and frequency without practice activity noise.
+
+**Implementation Approach:**
+- **UI Integration**: Add filter toggle in Timeline tab header (chip, toggle button, or dropdown)
+- **Pro User Check**: Use existing ProUserManager to show/hide filter option
+- **ViewModel Enhancement**: Add filtering logic to TimelineViewModel
+- **State Management**: Preserve filter selection across navigation
+- **Performance Filtering**: Filter activities by `ActivityType.PERFORMANCE` when active
+- **Visual Feedback**: Clear indication when filter is applied
+
+**Similar Features:**  
+This complements the existing Performance Suggestions feature by providing a focused view of historical performance data, helping Pro users make informed decisions about future performances.
+
+**Files to Modify:**
+- Timeline fragment layout for filter UI
+- TimelineViewModel for filtering logic
+- Timeline fragment for filter interaction handling
+- Possible shared preferences for state persistence
 
 ---
 

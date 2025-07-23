@@ -8,9 +8,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pseddev.playstreak.PlayStreakApplication
+import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentTimelineBinding
+import com.pseddev.playstreak.ui.progress.EditActivityStorage
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -21,7 +24,8 @@ class TimelineFragment : Fragment() {
     
     private val viewModel: TimelineViewModel by viewModels {
         TimelineViewModelFactory(
-            (requireActivity().application as PlayStreakApplication).repository
+            (requireActivity().application as PlayStreakApplication).repository,
+            requireContext()
         )
     }
     
@@ -39,6 +43,12 @@ class TimelineFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        setupRecyclerView()
+        setupFilterUI()
+        observeViewModel()
+    }
+    
+    private fun setupRecyclerView() {
         adapter = TimelineAdapter(
             onDeleteClick = { activityWithPiece ->
                 showDeleteConfirmationDialog(activityWithPiece)
@@ -52,16 +62,27 @@ class TimelineFragment : Fragment() {
         
         // Enable nested scrolling for proper interaction with ViewPager2
         binding.recyclerView.isNestedScrollingEnabled = true
-        
+    }
+    
+    private fun setupFilterUI() {
+        // No filter UI for now
+    }
+    
+    private fun observeViewModel() {
         viewModel.activitiesWithPieces.observe(viewLifecycleOwner) { activities ->
-            if (activities.isEmpty()) {
-                binding.emptyView.visibility = View.VISIBLE
-                binding.recyclerView.visibility = View.GONE
-            } else {
-                binding.emptyView.visibility = View.GONE
-                binding.recyclerView.visibility = View.VISIBLE
-                adapter.submitList(activities)
-            }
+            updateEmptyView(activities)
+            adapter.submitList(activities)
+        }
+    }
+    
+    private fun updateEmptyView(activities: List<ActivityWithPiece>) {
+        if (activities.isEmpty()) {
+            binding.emptyView.visibility = View.VISIBLE
+            binding.recyclerView.visibility = View.GONE
+            binding.emptyView.text = "No activities recorded yet"
+        } else {
+            binding.emptyView.visibility = View.GONE
+            binding.recyclerView.visibility = View.VISIBLE
         }
     }
     
@@ -74,13 +95,15 @@ class TimelineFragment : Fragment() {
         )
         
         // Navigate directly to select level fragment for editing
-        val action = ViewProgressFragmentDirections.actionViewProgressFragmentToSelectLevelFragment(
-            activityType = activityWithPiece.activity.activityType,
-            pieceId = activityWithPiece.activity.pieceOrTechniqueId,
-            pieceName = activityWithPiece.pieceOrTechnique.name,
-            itemType = activityWithPiece.pieceOrTechnique.type
+        findNavController().navigate(
+            R.id.action_viewProgressFragment_to_selectLevelFragment,
+            bundleOf(
+                "activityType" to activityWithPiece.activity.activityType,
+                "pieceId" to activityWithPiece.activity.pieceOrTechniqueId,
+                "pieceName" to activityWithPiece.pieceOrTechnique.name,
+                "itemType" to activityWithPiece.pieceOrTechnique.type
+            )
         )
-        findNavController().navigate(action)
     }
     
     private fun showDeleteConfirmationDialog(activityWithPiece: ActivityWithPiece) {

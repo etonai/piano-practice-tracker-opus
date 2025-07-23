@@ -13,6 +13,7 @@ import android.widget.Toast
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentPiecesBinding
+import com.pseddev.playstreak.ui.progress.QuickAddActivityDialogFragment
 import com.pseddev.playstreak.utils.ProUserManager
 
 class PiecesFragment : Fragment() {
