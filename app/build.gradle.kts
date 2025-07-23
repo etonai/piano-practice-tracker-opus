@@ -14,7 +14,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.8.9-beta"
+        versionName = "1.0.8.11-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,6 +50,15 @@ android {
                 "META-INF/NOTICE",
                 "META-INF/NOTICE.txt"
             )
+        }
+    }
+    
+    // Custom APK naming
+    applicationVariants.all {
+        outputs.all {
+            if (this is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
+                outputFileName = "PlayStreak_${defaultConfig.versionName}.apk"
+            }
         }
     }
 }

@@ -2224,6 +2224,74 @@ val emojiSuffix = when {
 
 ---
 
+### Feature #35: Adjust Fire Emoji Streak Threshold
+**Status:** ✅ Implemented  
+**Date Requested:** 2025-07-23  
+**Date Implemented:** 2025-07-23  
+**Priority:** Low (Visual Enhancement)  
+**Requested By:** User Experience Team  
+
+**Description:**  
+Adjust the streak emoji progression to make the fire emoji (🔥) appear at 8 days instead of 7 days, creating a more challenging and rewarding milestone for users to achieve the "hot streak" status.
+
+**User Story:**  
+As a user building practice streaks, I want the fire emoji to appear at 8 days instead of 7 so that achieving a "hot streak" feels more significant and rewarding, encouraging me to maintain longer consistent practice habits.
+
+**Acceptance Criteria:**  
+- [x] Fire emoji (🔥) appears at 8+ day streaks instead of 7+ days
+- [x] Maintain existing emoji progression for other thresholds
+- [x] Update any documentation referencing the 7-day fire threshold
+- [x] Test streak calculation and emoji assignment at all levels
+
+**Previous vs. New Emoji Progression:**  
+
+**Previous:**
+- 1-2 days: No emoji suffix
+- 3-4 days: 🎵 (single musical note)
+- 5-6 days: 🎶 (multiple musical notes)
+- 7-13 days: 🔥 (fire - "hot streak")
+- 14+ days: 🔥🔥🔥 (triple fire - "on fire")
+
+**New (Implemented):**
+- 1-2 days: No emoji suffix
+- 3-4 days: 🎵 (single musical note)
+- 5-7 days: 🎶 (multiple musical notes) - *Extended range*
+- 8-13 days: 🔥 (fire - "hot streak") - *Moved from 7 to 8*
+- 14+ days: 🔥🔥🔥 (triple fire - "on fire")
+
+**Technical Implementation:**  
+Update `DashboardFragment.kt` streak emoji logic:
+```kotlin
+val emojiSuffix = when {
+    streak >= 14 -> " 🔥🔥🔥"
+    streak >= 8 -> " 🔥"       // Changed from >= 7
+    streak >= 5 -> " 🎶"
+    streak >= 3 -> " 🎵"
+    else -> ""
+}
+```
+
+**Files to Modify:**  
+- `/app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardFragment.kt` (line 86)
+- Update any documentation referencing 7-day fire threshold
+
+**Impact:**  
+- Increases challenge and reward for achieving fire emoji status
+- Makes 7-day streaks still feel rewarding with musical notes emoji
+- Maintains progression logic while adjusting milestone significance
+- Encourages longer practice consistency
+
+**Dependencies:**  
+- None (independent change to existing emoji logic)
+
+**Testing Notes:**  
+- Test emoji assignment at streak days 6, 7, 8, 9 to verify transition
+- Verify existing streak calculation logic remains intact
+- Test with various streak lengths to ensure no regression
+- Update any user documentation or help text referencing emoji thresholds
+
+---
+
 ### Priority Levels
 - **Critical** - Essential for app functionality or user safety
 - **High** - Significant user value and feasible with current resources

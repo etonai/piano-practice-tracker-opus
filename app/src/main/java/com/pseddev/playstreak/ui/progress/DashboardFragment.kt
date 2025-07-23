@@ -83,7 +83,7 @@ class DashboardFragment : Fragment() {
             val streak = viewModel.calculateStreak()
             val emojiSuffix = when {
                 streak >= 14 -> " 🔥🔥🔥"
-                streak >= 7 -> " 🔥" 
+                streak >= 8 -> " 🔥" 
                 streak >= 5 -> " 🎶"
                 streak >= 3 -> " 🎵"
                 else -> ""

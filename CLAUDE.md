@@ -88,3 +88,27 @@ The project uses:
 2. Explicitly given permission to commit the changes
 
 Wait for user confirmation before using `git commit` commands.
+
+## Feature and Bug Fix Workflow
+
+### Status Progression Rules
+
+When implementing features or fixing bugs documented in `app/docs/features.md`:
+
+1. **💡 Requested** → **🔄 In Progress**: Mark when starting work
+2. **🔄 In Progress** → **🔍 Verifying**: Mark when code changes are complete
+3. **🔍 Verifying** → **✅ Implemented**: Mark ONLY after user verification
+
+**CRITICAL**: Never mark a feature or bug as "✅ Implemented" until the user has:
+- Tested the implementation
+- Confirmed it works as expected
+- Explicitly approved the fix
+
+### Correct Procedure
+1. Complete the code changes
+2. Update documentation status to "🔍 Verifying"
+3. Mark relevant acceptance criteria as completed
+4. **WAIT** for user verification
+5. Only mark as "✅ Implemented" after user confirmation
+
+This prevents premature marking of incomplete or unverified work.
