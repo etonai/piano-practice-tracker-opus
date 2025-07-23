@@ -84,7 +84,7 @@ class DashboardFragment : Fragment() {
             val emojiSuffix = when {
                 streak >= 14 -> " 🔥🔥🔥"
                 streak >= 7 -> " 🔥" 
-                streak >= 5 -> " 🎵🎵"
+                streak >= 5 -> " 🎶"
                 streak >= 3 -> " 🎵"
                 else -> ""
             }
