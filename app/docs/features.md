@@ -1908,6 +1908,77 @@ High priority for privacy and professional pseudonymous identity management. Ess
 
 ---
 
+### Feature #32: ✅ Performance Suggestions for Pro Users
+**Status:** Implemented  
+**Date Requested:** 2025-07-23  
+**Date Implemented:** 2025-07-23  
+**Priority:** High  
+**Requested By:** User Experience Team  
+
+**Description:**  
+Add a new "Performance Suggestions" section to the Dashboard tab's suggestions area, positioned after the existing Practice Suggestions section. This Pro-only feature will help users identify pieces they should consider performing by analyzing their performance history and favorite status.
+
+**User Story:**  
+As a Pro user preparing for performances, I want intelligent suggestions for pieces to perform based on my performance history and favorites, so that I can maintain a balanced performance repertoire and ensure I'm regularly performing my favorite pieces.
+
+**Acceptance Criteria:**  
+- [x] Performance Suggestions section appears only for Pro users
+- [x] Section is positioned after Practice Suggestions in Dashboard tab
+- [x] Shows 3 least recently performed favorites that haven't been performed today
+- [x] Shows 3 least performed non-favorites that haven't been performed in last 7 days
+- [x] Each suggestion shows piece name and relevant performance timing info
+- [x] Section has clear "Performance Suggestions" heading
+- [ ] Suggestions are tappable and navigate to Add Activity for that piece
+- [x] Section gracefully handles cases with insufficient data
+- [x] Performance suggestions update dynamically when activities are added
+- [x] Free users do not see this section at all
+
+**Technical Considerations:**  
+- Query database for performance activities (not practice activities)
+- Filter favorites that haven't been performed today
+- Filter non-favorites that haven't been performed in last 7 days
+- Sort by least recent performance date and least total performance count
+- Integrate with existing Pro user detection system
+- Add new repository methods for performance-specific queries
+- Update Dashboard ViewModel and Fragment to handle new suggestions
+- Consider performance impact of additional database queries
+
+**Priority Justification:**  
+High priority Pro feature that adds significant value for performing musicians. Helps Pro users maintain active performance repertoire and ensures favorite pieces aren't neglected in performance rotation.
+
+**Implementation Approach:**
+- **Database Queries**: Add methods to PianoRepository for performance-specific filtering
+- **Pro User Check**: Use existing ProUserManager to show/hide section
+- **UI Integration**: Add new section to Dashboard fragment after Practice Suggestions
+- **Performance Logic**: 
+  - Favorites: Filter by no performances today, sort by least recent performance
+  - Non-favorites: Filter by no performances in 7 days, sort by least total performances
+- **Navigation**: Make suggestions tappable to add performance activities
+
+**Implementation Details:**
+- **DashboardViewModel Enhancement**: Added `performanceSuggestions` LiveData that filters for performance activities only
+- **Pro User Logic**: Only shows Performance Suggestions section for Pro users using ProUserManager
+- **Performance-Specific Queries**: Filters activities by `ActivityType.PERFORMANCE` to focus on performance history
+- **Favorites Logic**: Shows 3 least recently performed favorites that haven't been performed today
+- **Non-Favorites Logic**: Shows 3 least performed non-favorites (by total count) that haven't been performed in last 7 days
+- **UI Integration**: Added new MaterialCardView section positioned after Practice Suggestions
+- **Dynamic Updates**: Uses reactive LiveData pattern to update suggestions when performance activities change
+
+**Files Modified:**
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardViewModel.kt` - Added performanceSuggestions LiveData
+- `app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardFragment.kt` - Added observer for performance suggestions
+- `app/src/main/res/layout/fragment_dashboard.xml` - Added Performance Suggestions card section
+
+**Implementation Notes:**  
+- Feature successfully differentiates between practice and performance activities for targeted suggestions
+- Pro-only feature enhances value proposition for paid users
+- Helps performing musicians maintain active performance repertoire rotation
+- Ensures favorite pieces aren't neglected in performance planning
+- Provides balanced suggestions across different performance frequency patterns
+- Integrates seamlessly with existing Dashboard suggestions architecture
+
+---
+
 ## Feature Request Template
 
 When requesting new features, please use this template:

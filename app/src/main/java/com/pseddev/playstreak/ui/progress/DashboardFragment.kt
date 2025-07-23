@@ -107,6 +107,19 @@ class DashboardFragment : Fragment() {
                 binding.suggestionsCard.visibility = View.GONE
             }
         }
+        
+        viewModel.performanceSuggestions.observe(viewLifecycleOwner) { suggestions ->
+            if (suggestions.isNotEmpty()) {
+                binding.performanceSuggestionsCard.visibility = View.VISIBLE
+                val suggestionText = suggestions.joinToString("\n") { suggestion ->
+                    val favoriteIndicator = if (suggestion.piece.isFavorite) "⭐ " else ""
+                    "• $favoriteIndicator${suggestion.piece.name} (${suggestion.suggestionReason})"
+                }
+                binding.performanceSuggestionsList.text = suggestionText
+            } else {
+                binding.performanceSuggestionsCard.visibility = View.GONE
+            }
+        }
     }
     
     private fun setupClickListeners() {

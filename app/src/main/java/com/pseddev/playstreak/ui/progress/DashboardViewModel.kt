@@ -89,6 +89,98 @@ class DashboardViewModel(
             }
             .asLiveData()
     
+    val performanceSuggestions: LiveData<List<SuggestionItem>> = 
+        repository.getAllPiecesAndTechniques()
+            .combine(repository.getAllActivities()) { pieces, activities ->
+                if (!proUserManager.isProUser()) {
+                    return@combine emptyList<SuggestionItem>()
+                }
+                
+                val now = System.currentTimeMillis()
+                val sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000L)
+                
+                // Calculate start of today (midnight) to exclude pieces performed today
+                val startOfToday = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+                
+                val performanceActivities = activities.filter { it.activityType == ActivityType.PERFORMANCE }
+                val piecePerformanceActivities = performanceActivities.groupBy { it.pieceOrTechniqueId }
+                
+                val favoriteSuggestions = mutableListOf<SuggestionItem>()
+                val nonFavoriteSuggestions = mutableListOf<SuggestionItem>()
+                
+                pieces.filter { it.type == ItemType.PIECE }.forEach { piece ->
+                    val piecePerformances = piecePerformanceActivities[piece.id] ?: emptyList()
+                    val lastPerformance = piecePerformances.maxByOrNull { it.timestamp }
+                    val lastPerformanceDate = lastPerformance?.timestamp
+                    
+                    val daysSinceLastPerformance = if (lastPerformanceDate != null) {
+                        ((now - lastPerformanceDate) / (24 * 60 * 60 * 1000)).toInt()
+                    } else {
+                        Int.MAX_VALUE
+                    }
+                    
+                    if (piece.isFavorite) {
+                        // Favorites that haven't been performed today
+                        if (lastPerformanceDate == null || lastPerformanceDate < startOfToday) {
+                            favoriteSuggestions.add(
+                                SuggestionItem(
+                                    piece = piece,
+                                    lastActivityDate = lastPerformanceDate,
+                                    daysSinceLastActivity = daysSinceLastPerformance,
+                                    suggestionReason = if (lastPerformanceDate == null) "Never performed" else {
+                                        val dayText = if (daysSinceLastPerformance == 1) "day" else "days"
+                                        "Last performance $daysSinceLastPerformance $dayText ago"
+                                    }
+                                )
+                            )
+                        }
+                    } else {
+                        // Non-favorites that haven't been performed in last 7 days
+                        if (lastPerformanceDate == null || lastPerformanceDate < sevenDaysAgo) {
+                            nonFavoriteSuggestions.add(
+                                SuggestionItem(
+                                    piece = piece,
+                                    lastActivityDate = lastPerformanceDate,
+                                    daysSinceLastActivity = daysSinceLastPerformance,
+                                    suggestionReason = if (lastPerformanceDate == null) "Never performed" else {
+                                        val dayText = if (daysSinceLastPerformance == 1) "day" else "days"
+                                        "Last performance $daysSinceLastPerformance $dayText ago"
+                                    }
+                                )
+                            )
+                        }
+                    }
+                }
+                
+                // Get 3 least recently performed favorites (highest daysSinceLastPerformance)
+                val sortedFavorites = favoriteSuggestions.sortedWith(
+                    compareByDescending<SuggestionItem> { it.daysSinceLastActivity }
+                    .thenBy { it.lastActivityDate ?: 0L }
+                    .thenBy { it.piece.name.lowercase() }
+                ).take(3)
+                
+                // Get 3 least performed non-favorites (by total performance count, then by least recent)
+                val nonFavoritesWithCounts = nonFavoriteSuggestions.map { suggestion ->
+                    val performanceCount = piecePerformanceActivities[suggestion.piece.id]?.size ?: 0
+                    suggestion to performanceCount
+                }
+                
+                val sortedNonFavorites = nonFavoritesWithCounts.sortedWith(
+                    compareBy<Pair<SuggestionItem, Int>> { it.second } // Least performed (lowest count)
+                    .thenByDescending { it.first.daysSinceLastActivity } // Then least recent
+                    .thenBy { it.first.lastActivityDate ?: 0L }
+                    .thenBy { it.first.piece.name.lowercase() }
+                ).take(3).map { it.first }
+                
+                sortedFavorites + sortedNonFavorites
+            }
+            .asLiveData()
+    
     val suggestions: LiveData<List<SuggestionItem>> = 
         repository.getAllPiecesAndTechniques()
             .combine(repository.getAllActivities()) { pieces, activities ->
