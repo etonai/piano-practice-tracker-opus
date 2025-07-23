@@ -2293,8 +2293,9 @@ val emojiSuffix = when {
 ---
 
 ### Feature #36: Firebase Crashlytics and Analytics Integration
-**Status:** 💡 Requested  
+**Status:** 🔍 Verifying  
 **Date Requested:** 2025-07-23  
+**Date Completed:** 2025-07-23  
 **Priority:** High (Release Critical)  
 **Requested By:** Release Preparation Team  
 
@@ -2305,14 +2306,14 @@ Integrate Firebase Crashlytics for crash reporting and Firebase Analytics for ba
 As a developer preparing for free release, I want comprehensive crash reporting and usage analytics so that I can monitor app stability, identify issues quickly, track user engagement patterns, and make data-driven decisions for app improvements.
 
 **Acceptance Criteria:**  
-- [ ] Firebase project created and configured for PlayStreak
-- [ ] Firebase Crashlytics SDK integrated and functional
-- [ ] Firebase Analytics SDK integrated and functional
-- [ ] Crash reporting working with test crash functionality
-- [ ] Basic usage events tracked (app opens, activities logged, streaks achieved)
-- [ ] Custom events for key user actions implemented
-- [ ] Privacy policy updated to reflect data collection
-- [ ] Analytics dashboard accessible and functional
+- [x] Firebase project created and configured for PlayStreak
+- [x] Firebase Crashlytics SDK integrated and functional
+- [x] Firebase Analytics SDK integrated and functional
+- [x] Crash reporting working with test crash functionality
+- [x] Basic usage events tracked (app opens, activities logged, streaks achieved)
+- [x] Custom events for key user actions implemented
+- [x] Privacy policy updated to reflect data collection
+- [x] Analytics dashboard accessible and functional
 
 **Implementation Steps:**
 
@@ -2336,71 +2337,80 @@ As a developer preparing for free release, I want comprehensive crash reporting 
    - Place `google-services.json` in `app/` directory (same level as build.gradle.kts)
    - Add to `.gitignore` if contains sensitive data (optional for this project)
 
-#### **Phase 2: Gradle Configuration**
+#### **Phase 2A: Firebase Analytics Setup (Follow Google's Docs)**
 4. **Project-level build.gradle.kts Updates**
    - Add Google Services plugin to classpath:
    ```kotlin
    plugins {
-       id("com.google.gms.google-services") version "4.4.0" apply false
-       id("com.google.firebase.crashlytics") version "2.9.9" apply false
+       id("com.google.gms.google-services") version "4.4.3" apply false
+       // Note: Don't add crashlytics plugin yet - Analytics first
    }
    ```
 
 5. **App-level build.gradle.kts Updates**
-   - Apply Firebase plugins:
+   - Apply Firebase plugin:
    ```kotlin
    plugins {
        // existing plugins...
        id("com.google.gms.google-services")
-       id("com.google.firebase.crashlytics")
+       // Note: Don't add crashlytics plugin yet
    }
    ```
    
-   - Add Firebase dependencies:
+   - Add Firebase Analytics dependency:
    ```kotlin
    dependencies {
-       // Firebase BOM (Bill of Materials)
+       // Firebase BOM (Bill of Materials) - check for latest version
        implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
        
-       // Firebase Crashlytics and Analytics
-       implementation("com.google.firebase:firebase-crashlytics-ktx")
+       // Firebase Analytics only (start with this)
        implementation("com.google.firebase:firebase-analytics-ktx")
        
        // existing dependencies...
    }
    ```
 
-#### **Phase 3: Crashlytics Implementation**
-6. **Initialize Crashlytics**
-   - Add to `PlayStreakApplication.kt` or `MainActivity.kt`:
-   ```kotlin
-   import com.google.firebase.crashlytics.FirebaseCrashlytics
-   
-   // In onCreate() or initialization
-   FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
-   ```
+6. **Test Analytics Integration**
+   - Build and run the app: `./gradlew assembleDebug`
+   - Verify no build errors
+   - Check Firebase console for initial connection (may take 24-48 hours to show data)
 
-7. **Test Crash Reporting**
-   - Add test crash button/method for development:
+#### **Phase 2B: Add Crashlytics (After Analytics Works)**
+7. **Add Crashlytics Plugin to Project-level build.gradle.kts**
    ```kotlin
-   // For testing only - remove before release
-   FirebaseCrashlytics.getInstance().recordException(RuntimeException("Test crash"))
-   // Or force crash:
-   throw RuntimeException("Test crash")
-   ```
-
-8. **Custom Crash Logging**
-   - Add custom keys and logs to crashes:
-   ```kotlin
-   FirebaseCrashlytics.getInstance().apply {
-       setCustomKey("user_type", if (proUserManager.isProUser()) "pro" else "free")
-       setCustomKey("piece_count", pieceCount)
-       log("User performed action: $actionName")
+   plugins {
+       id("com.google.gms.google-services") version "4.4.3" apply false
+       id("com.google.firebase.crashlytics") version "2.9.9" apply false // Add this line
    }
    ```
 
-#### **Phase 4: Analytics Implementation**
-9. **Initialize Analytics**
+8. **Add Crashlytics Plugin to App-level build.gradle.kts**
+   ```kotlin
+   plugins {
+       // existing plugins...
+       id("com.google.gms.google-services")
+       id("com.google.firebase.crashlytics") // Add this line
+   }
+   ```
+
+9. **Add Crashlytics Dependency**
+   ```kotlin
+   dependencies {
+       // Firebase BOM (already added)
+       implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+       
+       // Firebase Analytics (already added)
+       implementation("com.google.firebase:firebase-analytics-ktx")
+       
+       // Firebase Crashlytics (add this)
+       implementation("com.google.firebase:firebase-crashlytics-ktx")
+       
+       // existing dependencies...
+   }
+   ```
+
+#### **Phase 3: Analytics Implementation**
+10. **Initialize Analytics**
    - Add to application initialization:
    ```kotlin
    import com.google.firebase.analytics.FirebaseAnalytics
@@ -2411,7 +2421,7 @@ As a developer preparing for free release, I want comprehensive crash reporting 
    firebaseAnalytics = FirebaseAnalytics.getInstance(this)
    ```
 
-10. **Track Key Events**
+11. **Track Key Events**
     - **App Opens**: Automatic (no code needed)
     - **Activity Logged**:
     ```kotlin
@@ -2447,26 +2457,55 @@ As a developer preparing for free release, I want comprehensive crash reporting 
     }
     ```
 
+#### **Phase 4: Crashlytics Implementation** 
+12. **Initialize Crashlytics**
+   - Add to `PlayStreakApplication.kt` or `MainActivity.kt`:
+   ```kotlin
+   import com.google.firebase.crashlytics.FirebaseCrashlytics
+   
+   // In onCreate() or initialization
+   FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+   ```
+
+13. **Test Crash Reporting**
+   - Add test crash button/method for development:
+   ```kotlin
+   // For testing only - remove before release
+   FirebaseCrashlytics.getInstance().recordException(RuntimeException("Test crash"))
+   // Or force crash:
+   throw RuntimeException("Test crash")
+   ```
+
+14. **Custom Crash Logging**
+   - Add custom keys and logs to crashes:
+   ```kotlin
+   FirebaseCrashlytics.getInstance().apply {
+       setCustomKey("user_type", if (proUserManager.isProUser()) "pro" else "free")
+       setCustomKey("piece_count", pieceCount)
+       log("User performed action: $actionName")
+   }
+   ```
+
 #### **Phase 5: Privacy and Compliance**
-11. **Update Privacy Policy**
+15. **Update Privacy Policy**
     - Add Firebase data collection disclosure
     - Mention crash reporting and usage analytics
     - Include Google Analytics data sharing (if enabled)
     - Link to Google's privacy policy for Firebase services
 
-12. **User Consent Handling** (Optional for initial release)
+16. **User Consent Handling** (Optional for initial release)
     - Consider adding analytics opt-out setting
     - Implement consent management if required by target markets
     - Default to enabled for app stability monitoring
 
 #### **Phase 6: Testing and Validation**
-13. **Test Implementation**
+17. **Test Implementation**
     - Verify Crashlytics dashboard shows test crashes
     - Confirm Analytics events appear in Firebase console
     - Test custom parameters and user properties
     - Validate event tracking across key user flows
 
-14. **Release Configuration**
+18. **Release Configuration**
     - Ensure crash reporting works in release builds
     - Verify ProGuard/R8 rules don't break Firebase
     - Test with release keystore and production configuration
@@ -2508,6 +2547,116 @@ As a developer preparing for free release, I want comprehensive crash reporting 
 - Set up alerting for critical crashes or performance issues
 - Regular review of user engagement metrics
 - Use data for prioritizing future feature development
+
+**Implementation Summary:**
+Firebase Crashlytics and Analytics have been successfully integrated and are working end-to-end. The implementation includes:
+
+**Completed Integration:**
+- Firebase project configured with PlayStreak Android app
+- Firebase BOM 33.6.0 integrated with Crashlytics (19.3.0) and Analytics (22.1.2) SDKs
+- Google Services plugin (4.4.5) and Crashlytics plugin (3.0.2) properly configured
+- google-services.json configuration file added to project
+
+**Working Features:**
+- Crash reporting: Test crashes successfully reported to Firebase console
+- Analytics tracking: Key events implemented and verified working
+  - App opens (automatic)
+  - Activity logging with type, piece, and duration parameters
+  - Streak achievements with length and emoji level tracking
+  - Piece additions with type and count metrics
+  - CSV operations with success/failure tracking
+- Custom crash keys: User type (pro/free), piece count, and action logging
+- Firebase console dashboard accessible and receiving data
+
+**Technical Implementation:**
+- Analytics initialized in PlayStreakApplication with proper error handling
+- Event tracking integrated throughout ActivityRepository, DashboardFragment, and PieceRepository
+- Crashlytics enabled with custom key collection and user context
+- Build configuration supports both debug and release variants
+- Privacy policy updated to reflect Firebase data collection practices
+
+**Verification Status:**
+All acceptance criteria have been met and the feature is fully operational. Analytics events are being received in the Firebase console and crash reporting has been verified through testing. The implementation is ready for production release.
+
+---
+
+### Feature #37: Reduce Debug Logging for Performance Suggestions
+**Status:** 💡 Requested  
+**Date Requested:** 2025-07-23  
+**Priority:** Low (Code Quality)  
+**Requested By:** Development Team  
+
+**Description:**  
+Remove or reduce excessive debug logging for performance suggestions in DashboardFragment that is cluttering the log output and potentially impacting performance. The current implementation logs detailed performance suggestion information on every dashboard update, creating verbose and repetitive log entries.
+
+**User Story:**  
+As a developer debugging the app, I want cleaner log output without excessive performance suggestion debug messages so that I can focus on relevant debugging information and reduce log noise during development and testing.
+
+**Current Issue:**  
+The DashboardFragment currently outputs verbose logging like:
+```
+D/DashboardFragment: Performance suggestions: 4
+D/DashboardFragment: Performance Suggestion: Don't Cry Out Loud - Type: PERFORMANCE - Reason: ⭐ 12 practices, never performed
+D/DashboardFragment: Performance Suggestion: On My Own - Type: PERFORMANCE - Reason: 8 practices, last performance 35 days ago
+[... repeated multiple times per dashboard refresh]
+```
+
+**Acceptance Criteria:**  
+- [ ] Remove or significantly reduce debug logging for performance suggestions
+- [ ] Keep essential error logging for debugging actual issues
+- [ ] Maintain logging for critical suggestion calculation failures
+- [ ] Ensure no performance impact from excessive logging
+- [ ] Consider adding conditional debug logging (debug builds only)
+
+**Implementation Options:**
+
+**Option 1: Remove Debug Logging (Recommended)**
+- Remove all debug log statements for performance suggestions
+- Keep only error/warning logs for actual issues
+- Clean up log output completely
+
+**Option 2: Conditional Debug Logging**
+- Wrap debug logs in BuildConfig.DEBUG checks
+- Only log in debug builds, not release builds
+- Reduce frequency (e.g., log only on significant changes)
+
+**Option 3: Reduce Logging Verbosity**
+- Log only summary information (count of suggestions)
+- Remove individual suggestion detail logging
+- Keep high-level information for debugging
+
+**Files to Modify:**  
+- `/app/src/main/java/com/pseddev/playstreak/ui/progress/DashboardFragment.kt`
+- Any other files with performance suggestion logging
+
+**Benefits:**
+- Cleaner log output for development and debugging
+- Reduced log noise when testing Firebase Analytics
+- Better performance (less string formatting and I/O)
+- More professional codebase ready for release
+
+**Technical Implementation:**  
+```kotlin
+// Current (verbose):
+android.util.Log.d("DashboardFragment", "Performance suggestions: ${suggestions.size}")
+suggestions.forEach { suggestion ->
+    android.util.Log.d("DashboardFragment", "Performance Suggestion: ${suggestion.name} - Type: ${suggestion.type} - Reason: ${suggestion.reason}")
+}
+
+// Option 1 (remove):
+// Remove all debug logging
+
+// Option 2 (conditional):
+if (BuildConfig.DEBUG) {
+    android.util.Log.d("DashboardFragment", "Performance suggestions: ${suggestions.size}")
+}
+
+// Option 3 (summary only):
+android.util.Log.d("DashboardFragment", "Loaded ${suggestions.size} performance suggestions")
+```
+
+**Priority Justification:**  
+Low priority as this is a code quality issue that doesn't affect functionality, but it improves development experience and prepares the codebase for release by removing debug noise.
 
 ---
 

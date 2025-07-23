@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.pseddev.playstreak.crashlytics.CrashlyticsManager
 import com.pseddev.playstreak.data.models.SyncOperationResult
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.CsvHandler
@@ -30,6 +31,7 @@ class ImportExportViewModel(
     private val driveHelper = GoogleDriveHelper(context)
     private val syncManager = SyncManager(context, repository, driveHelper)
     private val proUserManager = ProUserManager.getInstance(context)
+    private val crashlyticsManager = CrashlyticsManager(context)
     private val sharedPrefs = context.getSharedPreferences("play_streak_export_prefs", Context.MODE_PRIVATE)
     
     private val _isLoading = MutableLiveData<Boolean>()
@@ -74,6 +76,8 @@ class ImportExportViewModel(
             _exportResult.value = Event(Result.success("Export successful!"))
         } catch (e: Exception) {
             Log.e("ExportDebug", "Exception in ViewModel: ${e.javaClass.simpleName} - ${e.message}", e)
+            // Record crash context for CSV export error
+            crashlyticsManager.recordCsvError("export", 0, e) // Activity count not available at this level
             // Add more detailed error information
             val errorMessage = "Export failed: ${e.javaClass.simpleName} - ${e.message}"
             _exportResult.value = Event(Result.failure(Exception(errorMessage, e)))
@@ -108,6 +112,8 @@ class ImportExportViewModel(
                 }
                 
             } catch (e: Exception) {
+                // Record crash context for CSV import error
+                crashlyticsManager.recordCsvError("import", 0, e) // Activity count not available at this level
                 _validationResult.value = Event(
                     CsvHandler.CsvValidationResult(
                         isValid = false,
@@ -132,6 +138,8 @@ class ImportExportViewModel(
                 }
                 _purgeResult.value = Event(Result.success("All data has been purged successfully."))
             } catch (e: Exception) {
+                // Record crash context for database purge error
+                crashlyticsManager.recordDatabaseError("purge_all_data", e)
                 _purgeResult.value = Event(Result.failure(e))
             } finally {
                 _isLoading.value = false

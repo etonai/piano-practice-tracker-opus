@@ -1,11 +1,14 @@
 package com.pseddev.playstreak.ui.addactivity
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.pseddev.playstreak.analytics.AnalyticsManager
+import com.pseddev.playstreak.crashlytics.CrashlyticsManager
 import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
@@ -15,7 +18,13 @@ import com.pseddev.playstreak.utils.TextNormalizer
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class AddActivityViewModel(private val repository: PianoRepository) : ViewModel() {
+class AddActivityViewModel(
+    private val repository: PianoRepository,
+    private val context: Context
+) : ViewModel() {
+    
+    private val analyticsManager = AnalyticsManager(context)
+    private val crashlyticsManager = CrashlyticsManager(context)
     
     private val _navigateToMain = MutableLiveData<Boolean>()
     val navigateToMain: LiveData<Boolean> = _navigateToMain
@@ -72,18 +81,42 @@ class AddActivityViewModel(private val repository: PianoRepository) : ViewModel(
         timestamp: Long
     ) {
         viewModelScope.launch {
-            repository.insertActivity(
-                Activity(
-                    timestamp = timestamp,
-                    pieceOrTechniqueId = pieceId,
-                    activityType = activityType,
-                    level = level,
-                    performanceType = performanceType,
-                    minutes = minutes,
-                    notes = TextNormalizer.normalizeUserInput(notes)
+            try {
+                // Get piece information for analytics
+                val piece = repository.getPieceOrTechniqueById(pieceId)
+                
+                repository.insertActivity(
+                    Activity(
+                        timestamp = timestamp,
+                        pieceOrTechniqueId = pieceId,
+                        activityType = activityType,
+                        level = level,
+                        performanceType = performanceType,
+                        minutes = minutes,
+                        notes = TextNormalizer.normalizeUserInput(notes)
+                    )
                 )
-            )
-            _navigateToMain.value = true
+                
+                // Track analytics event for activity logged
+                piece?.let {
+                    analyticsManager.trackActivityLogged(
+                        activityType = activityType,
+                        pieceType = it.type,
+                        hasDuration = minutes > 0
+                    )
+                }
+                
+                _navigateToMain.value = true
+            } catch (e: Exception) {
+                // Record crash context for activity creation error
+                crashlyticsManager.setCustomKey("activity_type", activityType.name)
+                crashlyticsManager.setCustomKey("piece_id", pieceId.toInt())
+                crashlyticsManager.setCustomKey("activity_level", level)
+                crashlyticsManager.setCustomKey("activity_minutes", minutes)
+                crashlyticsManager.recordDatabaseError("insert_activity", e)
+                // Re-throw to let UI handle the error
+                throw e
+            }
         }
     }
     
@@ -129,11 +162,14 @@ class AddActivityViewModel(private val repository: PianoRepository) : ViewModel(
     }
 }
 
-class AddActivityViewModelFactory(private val repository: PianoRepository) : ViewModelProvider.Factory {
+class AddActivityViewModelFactory(
+    private val repository: PianoRepository,
+    private val context: Context
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AddActivityViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return AddActivityViewModel(repository) as T
+            return AddActivityViewModel(repository, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

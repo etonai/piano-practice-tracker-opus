@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
+import com.pseddev.playstreak.crashlytics.CrashlyticsManager
 import com.pseddev.playstreak.databinding.FragmentMainBinding
 import com.pseddev.playstreak.utils.ProUserManager
 
@@ -23,6 +24,7 @@ class MainFragment : Fragment() {
     }
     
     private lateinit var proUserManager: ProUserManager
+    private lateinit var crashlyticsManager: CrashlyticsManager
     
     override fun onCreateView(
         inflater: LayoutInflater, 
@@ -37,14 +39,21 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         proUserManager = ProUserManager.getInstance(requireContext())
+        crashlyticsManager = CrashlyticsManager(requireContext())
         
         setupObservers()
         setupClickListeners()
         updateAppTitle()
         updateToggleButtonText(proUserManager.isProUser())
         
-        // Hide toggle button in production builds
+        // Hide debug buttons in production builds
         binding.buttonTogglePro.visibility = if (BuildConfig.DEBUG) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        
+        binding.buttonTestCrash.visibility = if (BuildConfig.DEBUG) {
             View.VISIBLE
         } else {
             View.GONE
@@ -94,6 +103,10 @@ class MainFragment : Fragment() {
             val newStatus = proUserManager.toggleProStatus()
             updateAppTitle()
             updateToggleButtonText(newStatus)
+        }
+        
+        binding.buttonTestCrash.setOnClickListener {
+            crashlyticsManager.forceCrashForTesting()
         }
     }
     

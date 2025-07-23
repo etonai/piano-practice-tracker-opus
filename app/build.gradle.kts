@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     id("androidx.navigation.safeargs.kotlin")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -14,7 +16,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.8.11-beta"
+        versionName = "1.0.8.12-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -64,6 +66,19 @@ android {
 }
 
 dependencies {
+
+    // Import the Firebase BoM (use latest stable version)
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+
+    // Firebase Analytics with Kotlin extensions
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    
+    // Firebase Crashlytics with Kotlin extensions
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
+
+
+    // Add the dependencies for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -106,4 +121,5 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
 }

@@ -23,7 +23,8 @@ class SelectPieceFragment : Fragment() {
     
     private val viewModel: AddActivityViewModel by activityViewModels {
         AddActivityViewModelFactory(
-            (requireActivity().application as PlayStreakApplication).repository
+            (requireActivity().application as PlayStreakApplication).repository,
+            requireContext()
         )
     }
     

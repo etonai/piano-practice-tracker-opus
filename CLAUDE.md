@@ -89,26 +89,37 @@ The project uses:
 
 Wait for user confirmation before using `git commit` commands.
 
-## Feature and Bug Fix Workflow
+## Feature, Bug Fix, and Ticket Workflow
 
 ### Status Progression Rules
 
-When implementing features or fixing bugs documented in `app/docs/features.md`:
-
+**For Features** (documented in `app/docs/features.md`):
 1. **💡 Requested** → **🔄 In Progress**: Mark when starting work
 2. **🔄 In Progress** → **🔍 Verifying**: Mark when code changes are complete
 3. **🔍 Verifying** → **✅ Implemented**: Mark ONLY after user verification
 
-**CRITICAL**: Never mark a feature or bug as "✅ Implemented" until the user has:
+**For Bugs** (documented in `app/docs/bugs.md`):
+1. **🐛 Open** → **🔄 In Progress**: Mark when starting work
+2. **🔄 In Progress** → **🔍 Verifying**: Mark when fix is complete
+3. **🔍 Verifying** → **✅ Fixed**: Mark ONLY after user verification
+
+**For Tickets** (documented in `app/docs/tickets.md`):
+1. **🎫 Open** → **🔄 In Progress**: Mark when starting work
+2. **🔄 In Progress** → **🔍 In Verification**: Mark when implementation is complete
+3. **🔍 In Verification** → **✅ Completed**: Mark ONLY after user verification
+
+### Critical Rules
+
+**NEVER** mark any item as complete/implemented/fixed until the user has:
 - Tested the implementation
 - Confirmed it works as expected
-- Explicitly approved the fix
+- Explicitly approved the work
 
 ### Correct Procedure
 1. Complete the code changes
-2. Update documentation status to "🔍 Verifying"
+2. Update documentation status to verification status ("🔍 Verifying", "🔍 Verifying", or "🔍 In Verification")
 3. Mark relevant acceptance criteria as completed
 4. **WAIT** for user verification
-5. Only mark as "✅ Implemented" after user confirmation
+5. Only mark as complete after user confirmation
 
-This prevents premature marking of incomplete or unverified work.
+This prevents premature marking of incomplete or unverified work across all documentation systems.
