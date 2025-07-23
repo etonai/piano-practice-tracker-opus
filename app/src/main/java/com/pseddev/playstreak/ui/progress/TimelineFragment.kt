@@ -69,6 +69,14 @@ class TimelineFragment : Fragment() {
         if (viewModel.isProUser) {
             binding.filterSection.visibility = View.VISIBLE
             binding.filterDivider.visibility = View.VISIBLE
+            
+            // Feature #33B-Safe: Set up simple switch listener
+            binding.performanceFilterSwitch.setOnCheckedChangeListener { _, isChecked ->
+                android.util.Log.d("TimelineFragment", "Feature #33B-Safe: Switch toggled to $isChecked")
+                if (isChecked != (viewModel.showPerformancesOnly.value ?: false)) {
+                    viewModel.toggleFilter()
+                }
+            }
         } else {
             binding.filterSection.visibility = View.GONE
             binding.filterDivider.visibility = View.GONE
@@ -80,13 +88,31 @@ class TimelineFragment : Fragment() {
             updateEmptyView(activities)
             adapter.submitList(activities)
         }
+        
+        // Feature #33B-Safe: Observe filter state changes
+        if (viewModel.isProUser) {
+            viewModel.showPerformancesOnly.observe(viewLifecycleOwner) { showPerformancesOnly ->
+                android.util.Log.d("TimelineFragment", "Feature #33B-Safe: Filter state changed to $showPerformancesOnly")
+                // Update switch to match ViewModel state (prevent listener loops)
+                if (binding.performanceFilterSwitch.isChecked != showPerformancesOnly) {
+                    binding.performanceFilterSwitch.isChecked = showPerformancesOnly
+                }
+            }
+        }
     }
     
     private fun updateEmptyView(activities: List<ActivityWithPiece>) {
         if (activities.isEmpty()) {
             binding.emptyView.visibility = View.VISIBLE
             binding.recyclerView.visibility = View.GONE
-            binding.emptyView.text = "No activities recorded yet"
+            
+            // Feature #33C: Update empty message based on filter state
+            val emptyMessage = if (viewModel.isProUser && (viewModel.showPerformancesOnly.value == true)) {
+                "No performance activities recorded yet"
+            } else {
+                "No activities recorded yet"
+            }
+            binding.emptyView.text = emptyMessage
         } else {
             binding.emptyView.visibility = View.GONE
             binding.recyclerView.visibility = View.VISIBLE

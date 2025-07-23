@@ -2039,21 +2039,27 @@ Add basic Pro user detection to Timeline and create minimal filter UI structure 
 
 ---
 
-### Feature #33B: Timeline Filter State Management
-**Status:** Planned  
+### Feature #33B: Timeline Filter State Management (Safe Implementation)
+**Status:** ✅ Implemented  
 **Priority:** High (Core Logic)  
 **Dependencies:** Feature #33A
 
 **Description:**  
-Add filter state management to TimelineViewModel without connecting it to actual data filtering.
+Add filter state management to TimelineViewModel without connecting it to actual data filtering. Uses simple Switch control instead of ChipGroup to avoid crashes.
 
 **Acceptance Criteria:**  
-- [ ] Add filter state LiveData in TimelineViewModel
-- [ ] Add methods to toggle filter state
-- [ ] Filter state responds to UI interactions
-- [ ] Filter state is logged for debugging
-- [ ] No actual data filtering occurs yet
-- [ ] App remains stable when toggling filter
+- [x] Add filter state LiveData in TimelineViewModel
+- [x] Add methods to toggle filter state
+- [x] Filter state responds to UI interactions
+- [x] Filter state is logged for debugging
+- [x] No actual data filtering occurs yet
+- [x] App remains stable when toggling filter
+
+**Safe Implementation Approach:**  
+- Uses simple `Switch` control instead of Material ChipGroup
+- Single toggle method instead of multiple state setters
+- Comprehensive logging for debugging
+- Pro user gating for all filter operations
 
 **Technical Focus:**
 - LiveData for filter state management
@@ -2067,7 +2073,7 @@ Add filter state management to TimelineViewModel without connecting it to actual
 ---
 
 ### Feature #33C: Timeline Data Filtering Logic
-**Status:** Planned  
+**Status:** ✅ Implemented  
 **Priority:** Medium (Filtering Implementation)  
 **Dependencies:** Feature #33B
 
@@ -2075,11 +2081,11 @@ Add filter state management to TimelineViewModel without connecting it to actual
 Implement actual activity filtering based on filter state, showing only Performance activities when filter is active.
 
 **Acceptance Criteria:**  
-- [ ] Activities are filtered by ActivityType.PERFORMANCE when filter is active
-- [ ] "All Activities" shows all activities (current behavior)
-- [ ] "Performances Only" shows only performance activities
-- [ ] Empty state updates appropriately for filtered view
-- [ ] Filtering works with existing sorting and display logic
+- [x] Activities are filtered by ActivityType.PERFORMANCE when filter is active
+- [x] "All Activities" shows all activities (current behavior)
+- [x] "Performances Only" shows only performance activities
+- [x] Empty state updates appropriately for filtered view
+- [x] Filtering works with existing sorting and display logic
 
 **Technical Focus:**
 - Activity filtering in ViewModel data flow
