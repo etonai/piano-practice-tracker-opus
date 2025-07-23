@@ -15,8 +15,20 @@ class TimelineViewModel(
     
     private val proUserManager = ProUserManager.getInstance(context)
     
-    // Feature #33B-Safe: Filter state management (no data filtering yet)
-    private val _showPerformancesOnly = MutableLiveData<Boolean>(false)
+    // Feature #33D: SharedPreferences for filter state persistence
+    private val sharedPrefs = context.getSharedPreferences("timeline_prefs", android.content.Context.MODE_PRIVATE)
+    private val PREF_SHOW_PERFORMANCES_ONLY = "show_performances_only"
+    
+    // Feature #33B-Safe & #33D: Filter state management with persistence
+    private val _showPerformancesOnly = MutableLiveData<Boolean>(
+        if (proUserManager.isProUser()) {
+            val savedState = sharedPrefs.getBoolean(PREF_SHOW_PERFORMANCES_ONLY, false)
+            android.util.Log.d("TimelineViewModel", "Feature #33D: Loaded saved filter state: $savedState")
+            savedState
+        } else {
+            false
+        }
+    )
     val showPerformancesOnly: LiveData<Boolean> = _showPerformancesOnly
     
     val activitiesWithPieces: LiveData<List<ActivityWithPiece>> = 
@@ -43,14 +55,18 @@ class TimelineViewModel(
     val isProUser: Boolean
         get() = proUserManager.isProUser()
     
-    // Feature #33B-Safe: Simple toggle method
+    // Feature #33B-Safe & #33D: Toggle method with state persistence
     fun toggleFilter() {
         if (proUserManager.isProUser()) {
             val newValue = !(_showPerformancesOnly.value ?: false)
-            android.util.Log.d("TimelineViewModel", "Feature #33B-Safe: Toggling filter from ${_showPerformancesOnly.value} to $newValue")
+            android.util.Log.d("TimelineViewModel", "Feature #33D: Toggling filter from ${_showPerformancesOnly.value} to $newValue")
             _showPerformancesOnly.value = newValue
+            
+            // Feature #33D: Save state to SharedPreferences
+            sharedPrefs.edit().putBoolean(PREF_SHOW_PERFORMANCES_ONLY, newValue).apply()
+            android.util.Log.d("TimelineViewModel", "Feature #33D: Saved filter state: $newValue")
         } else {
-            android.util.Log.d("TimelineViewModel", "Feature #33B-Safe: Toggle denied - user is not Pro")
+            android.util.Log.d("TimelineViewModel", "Feature #33D: Toggle denied - user is not Pro")
         }
     }
     
