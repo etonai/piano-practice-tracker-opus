@@ -19,10 +19,33 @@ This document tracks feature requests, enhancements, and larger development task
 **Details:** [ticket_1.md](ticketdetail/ticket_1.md)
 
 
+### Ticket #5: 🎫 Delete Piece with Trash Icon in Pieces Tab
+**Status:** Open  
+**Date Created:** 2025-07-24  
+**Priority:** Medium  
+**Description:** In the Pieces tab, add a trash icon for each piece so that the user can delete pieces. Deleting a piece should also delete all activities associated with that piece.  
+**Details:** [ticket_5.md](ticketdetail/ticket_5.md)
+
 
 ---
 
 ## Completed Tickets
+
+### Ticket #3: ✅ Reduce Debug Logging for Performance Suggestions
+**Status:** Completed  
+**Date Created:** 2025-07-24  
+**Date Completed:** 2025-07-24  
+**Priority:** Low  
+**Description:** Remove excessive debug logging for performance suggestions in DashboardFragment to clean up log output and improve development experience.  
+**Details:** [ticket_3.md](ticketdetail/ticket_3.md)
+
+### Ticket #4: ✅ Activity Limit Not Enforced on Manual Add
+**Status:** Completed  
+**Date Created:** 2025-07-24  
+**Date Completed:** 2025-07-24  
+**Priority:** High  
+**Description:** Adding a new activity does not stop if the user is beyond the activity limit. The activity limit only prevents importing more activities, not manual addition.  
+**Details:** [ticket_4.md](ticketdetail/ticket_4.md)
 
 ### Ticket #2: ✅ Bug - Practice Suggestions Auto-Add 30 Minutes Duration
 **Status:** Completed  

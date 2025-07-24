@@ -3,6 +3,7 @@ package com.pseddev.playstreak.ui.addactivity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
+import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -120,6 +121,13 @@ class SummaryFragment : Fragment() {
                     findNavController().popBackStack(com.pseddev.playstreak.R.id.addActivityFragment, true)
                 }
                 viewModel.doneNavigating()
+            }
+        }
+        
+        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
+            errorMessage?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+                viewModel.clearErrorMessage()
             }
         }
     }

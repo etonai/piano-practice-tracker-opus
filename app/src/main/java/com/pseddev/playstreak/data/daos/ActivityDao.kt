@@ -33,4 +33,7 @@ interface ActivityDao {
     
     @Query("SELECT COUNT(DISTINCT date(timestamp/1000, 'unixepoch', 'localtime')) as streak FROM activities WHERE timestamp >= :startTime")
     suspend fun getStreakCount(startTime: Long): Int
+    
+    @Query("SELECT COUNT(*) FROM activities")
+    suspend fun getActivityCount(): Int
 }

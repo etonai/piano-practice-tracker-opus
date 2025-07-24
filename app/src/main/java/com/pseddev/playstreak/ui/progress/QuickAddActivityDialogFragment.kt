@@ -23,7 +23,8 @@ class QuickAddActivityDialogFragment : DialogFragment() {
     
     private val viewModel: QuickAddActivityViewModel by viewModels {
         QuickAddActivityViewModelFactory(
-            (requireActivity().application as PlayStreakApplication).repository
+            (requireActivity().application as PlayStreakApplication).repository,
+            requireContext()
         )
     }
     

@@ -37,6 +37,7 @@ class ViewProgressFragment : Fragment() {
         proUserManager = ProUserManager.getInstance(requireContext())
         
         // Enable options menu for this fragment
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
         
         setupTabs()
@@ -68,11 +69,15 @@ class ViewProgressFragment : Fragment() {
         }.attach()
     }
     
+    @Suppress("DEPRECATION")
+    @Deprecated("Using deprecated Fragment menu API")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(com.pseddev.playstreak.R.menu.progress_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
     
+    @Suppress("DEPRECATION")
+    @Deprecated("Using deprecated Fragment menu API")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             com.pseddev.playstreak.R.id.action_settings -> {

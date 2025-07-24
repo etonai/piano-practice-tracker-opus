@@ -6,6 +6,7 @@ import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.ProUserManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -35,6 +36,7 @@ data class PieceDetails(
     val lastActivity: Activity?
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PiecesViewModel(
     private val repository: PianoRepository,
     private val context: android.content.Context

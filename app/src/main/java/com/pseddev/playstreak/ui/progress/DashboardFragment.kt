@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentDashboardBinding
@@ -109,10 +110,16 @@ class DashboardFragment : Fragment() {
         }
         
         viewModel.performanceSuggestions.observe(viewLifecycleOwner) { suggestions ->
-            // Debug logging
-            android.util.Log.d("DashboardFragment", "Performance suggestions: ${suggestions.size}")
-            suggestions.forEach { suggestion ->
-                android.util.Log.d("DashboardFragment", "Performance Suggestion: ${suggestion.piece.name} - Type: ${suggestion.suggestionType} - Reason: ${suggestion.suggestionReason}")
+            // Conditional debug logging for development builds only
+            if (BuildConfig.DEBUG) {
+                android.util.Log.d("DashboardFragment", "Performance suggestions: ${suggestions.size}")
+                if (suggestions.size <= 5) { // Limit detailed logging to avoid log spam
+                    suggestions.forEach { suggestion ->
+                        android.util.Log.d("DashboardFragment", "Performance Suggestion: ${suggestion.piece.name} - Type: ${suggestion.suggestionType} - Reason: ${suggestion.suggestionReason}")
+                    }
+                } else {
+                    android.util.Log.d("DashboardFragment", "Too many suggestions (${suggestions.size}) - detailed logging skipped to avoid spam")
+                }
             }
             
             if (suggestions.isNotEmpty()) {

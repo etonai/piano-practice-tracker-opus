@@ -100,10 +100,11 @@ class ProUserManager private constructor(context: Context) {
         private const val PREFS_NAME = "playstreak_pro_prefs"
         private const val KEY_IS_PRO_USER = "is_pro_user"
         const val FREE_USER_FAVORITE_LIMIT = 4
-        const val FREE_USER_PIECE_LIMIT = 50
-        const val PRO_USER_PIECE_LIMIT = 500
-        const val FREE_USER_ACTIVITY_LIMIT = 800
-        const val PRO_USER_ACTIVITY_LIMIT = 9000
+        // Update activity and piece limits
+        private const val FREE_USER_ACTIVITY_LIMIT = 3000
+        private const val PRO_USER_ACTIVITY_LIMIT = 4000
+        private const val FREE_USER_PIECE_LIMIT = 500
+        private const val PRO_USER_PIECE_LIMIT = 550
         
         @Volatile
         private var INSTANCE: ProUserManager? = null

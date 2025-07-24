@@ -110,10 +110,17 @@ Wait for user confirmation before using `git commit` commands.
 
 ### Critical Rules
 
-**NEVER** mark any item as complete/implemented/fixed until the user has:
+🚨 **NEVER** mark any item as complete/implemented/fixed until the user has:
 - Tested the implementation
 - Confirmed it works as expected
 - Explicitly approved the work
+
+🛑 **STOP AND ASK YOURSELF BEFORE MARKING COMPLETE:**
+- "Has the user tested this?"
+- "Did the user explicitly say it works?"
+- "Did I wait for their approval?"
+
+If any answer is NO, use verification status instead.
 
 ### Correct Procedure
 1. Complete the code changes
@@ -123,3 +130,26 @@ Wait for user confirmation before using `git commit` commands.
 5. Only mark as complete after user confirmation
 
 This prevents premature marking of incomplete or unverified work across all documentation systems.
+
+### Verification Request Template
+
+When implementation is complete, use this template:
+
+```
+## 🔍 READY FOR VERIFICATION
+
+**What I implemented:**
+- [Brief description of changes]
+
+**Files modified:**
+- [List of files]
+
+**What you need to verify:**
+1. [Specific test steps]
+2. [Expected behavior]
+3. [Confirmation needed]
+
+**Status:** 🔍 IN VERIFICATION (awaiting your approval)
+```
+
+Only mark as complete after user says "approved", "works", "looks good", etc.

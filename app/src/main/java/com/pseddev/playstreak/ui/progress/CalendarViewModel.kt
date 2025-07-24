@@ -3,6 +3,7 @@ package com.pseddev.playstreak.ui.progress
 import androidx.lifecycle.*
 import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.repository.PianoRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.combine
@@ -18,6 +19,7 @@ data class MonthlyActivitySummary(
     val dailyActivities: Map<Long, List<ActivityWithPiece>>
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CalendarViewModel(private val repository: PianoRepository) : ViewModel() {
     
     private val selectedDate = MutableStateFlow(System.currentTimeMillis())

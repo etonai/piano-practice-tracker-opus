@@ -16,19 +16,52 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.8.14-beta"
+        versionName = "1.0.8.15-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            // TODO: Create release keystore and configure these properties
+            // You will need to:
+            // 1. Generate keystore: keytool -genkey -v -keystore playstreak-release.keystore -alias playstreak -keyalg RSA -keysize 2048 -validity 10000
+            // 2. Store keystore in secure location
+            // 3. Configure keystore.properties file with:
+            //    storeFile=path/to/playstreak-release.keystore
+            //    storePassword=your_store_password
+            //    keyAlias=playstreak
+            //    keyPassword=your_key_password
+            // 4. Uncomment and configure the following:
+            /*
+            val keystorePropertiesFile = rootProject.file("keystore.properties")
+            if (keystorePropertiesFile.exists()) {
+                val keystoreProperties = java.util.Properties()
+                keystoreProperties.load(java.io.FileInputStream(keystorePropertiesFile))
+                
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            }
+            */
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            // Use release signing when keystore is configured, otherwise fall back to debug
+            signingConfig = if (signingConfigs.getByName("release").storeFile != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug") // Fallback for development
+            }
         }
     }
     compileOptions {

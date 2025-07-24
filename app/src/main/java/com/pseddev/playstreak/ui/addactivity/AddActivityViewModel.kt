@@ -14,8 +14,10 @@ import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
 import com.pseddev.playstreak.data.repository.PianoRepository
+import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.TextNormalizer
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class AddActivityViewModel(
@@ -25,9 +27,13 @@ class AddActivityViewModel(
     
     private val analyticsManager = AnalyticsManager(context)
     private val crashlyticsManager = CrashlyticsManager(context)
+    private val proUserManager = ProUserManager.getInstance(context)
     
     private val _navigateToMain = MutableLiveData<Boolean>()
     val navigateToMain: LiveData<Boolean> = _navigateToMain
+    
+    private val _errorMessage = MutableLiveData<String?>()
+    val errorMessage: LiveData<String?> = _errorMessage
     
     private val _editMode = MutableLiveData<Boolean>(false)
     val editMode: LiveData<Boolean> = _editMode
@@ -49,14 +55,26 @@ class AddActivityViewModel(
     
     fun insertPieceOrTechnique(name: String, type: ItemType, onComplete: (Long) -> Unit) {
         viewModelScope.launch {
-            val id = repository.insertPieceOrTechnique(
-                PieceOrTechnique(
-                    name = TextNormalizer.normalizePieceName(name),
-                    type = type,
-                    isFavorite = false
+            try {
+                // Check piece limit before adding
+                val currentPieceCount = repository.getAllPiecesAndTechniques().first().size
+                if (!proUserManager.canAddMorePieces(currentPieceCount)) {
+                    val limit = proUserManager.getPieceLimit()
+                    _errorMessage.value = "You have reached the piece limit of $limit pieces and techniques. Cannot add more pieces."
+                    return@launch
+                }
+                
+                val id = repository.insertPieceOrTechnique(
+                    PieceOrTechnique(
+                        name = TextNormalizer.normalizePieceName(name),
+                        type = type,
+                        isFavorite = false
+                    )
                 )
-            )
-            onComplete(id)
+                onComplete(id)
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to add piece: ${e.message}"
+            }
         }
     }
     
@@ -82,6 +100,15 @@ class AddActivityViewModel(
     ) {
         viewModelScope.launch {
             try {
+                // Check activity limit before adding
+                val currentActivityCount = repository.getActivityCount()
+                val activityLimit = proUserManager.getActivityLimit()
+                
+                if (currentActivityCount >= activityLimit) {
+                    _errorMessage.value = "You have reached the activity limit of $activityLimit activities. Cannot add more activities."
+                    return@launch
+                }
+                
                 // Get piece information for analytics
                 val piece = repository.getPieceOrTechniqueById(pieceId)
                 
@@ -159,6 +186,10 @@ class AddActivityViewModel(
     fun clearEditMode() {
         _editMode.value = false
         _editActivity.value = null
+    }
+    
+    fun clearErrorMessage() {
+        _errorMessage.value = null
     }
 }
 

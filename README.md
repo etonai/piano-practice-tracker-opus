@@ -2,7 +2,7 @@
 
 An Android application for tracking music practice activities, performances, and progress. Built using Kotlin and AndroidX libraries.
 
-**Current Version**: 1.0.7.6 (Development) - *Not yet released on Google Play Store*
+**Current Version**: 1.0.8.15-beta
 
 **AI-Assisted Development**: This project was developed collaboratively with Claude Opus (initial development), Claude Sonnet (bug fixes & refinements), ChatGPT and Cursor (design consultation).
 
@@ -60,6 +60,9 @@ An Android application for tracking music practice activities, performances, and
 - **CSV Import**: Import existing practice data with Unicode normalization
 - **Favorites Preservation**: Maintains favorite status during import/export
 - Last export time tracking
+- **User Limits**:
+  - Free users: Up to 3000 activities and 500 pieces
+  - Pro users: Up to 4000 activities and 550 pieces
 
 ## Screenshots
 
@@ -147,6 +150,10 @@ app/src/main/java/com/pseddev/practicetracker/
 - **Add Notes**: Include observations about technique, problem areas, or breakthroughs
 - **Review Calendar**: Use the visual calendar to identify practice patterns and gaps
 
+### User Limits
+- Free users are limited to 3000 activities and 500 pieces
+- Pro users are limited to 4000 activities and 550 pieces
+
 ## Data Import/Export
 
 ### CSV Format
@@ -154,6 +161,7 @@ The app supports CSV import/export with the following format:
 - Timestamp, Piece Name, Activity Type, Level, Performance Type, Minutes, Notes
 - Automatic Unicode normalization handles different apostrophe characters
 - Preserves favorites during import operations
+- Import will respect user limits (3000/4000 activities, 500/550 pieces depending on account type)
 
 ### Backup Strategy
 - Regular CSV exports for data backup

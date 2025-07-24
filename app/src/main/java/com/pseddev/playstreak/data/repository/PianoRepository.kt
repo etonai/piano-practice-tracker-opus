@@ -93,6 +93,9 @@ class PianoRepository(
     suspend fun getStreakCount(startTime: Long): Int = 
         activityDao.getStreakCount(startTime)
     
+    suspend fun getActivityCount(): Int = 
+        activityDao.getActivityCount()
+    
     fun getAllActivitiesWithPieces(): Flow<List<ActivityWithPiece>> {
         return combine(
             getAllActivities(),
