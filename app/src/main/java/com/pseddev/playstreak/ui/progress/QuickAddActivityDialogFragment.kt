@@ -170,7 +170,7 @@ class QuickAddActivityDialogFragment : DialogFragment() {
             activityType = activityType,
             timestamp = System.currentTimeMillis(),
             level = level,
-            minutes = if (activityType == ActivityType.PRACTICE) 30 else 0, // Default 30 minutes for practice
+            minutes = if (activityType == ActivityType.PRACTICE) -1 else 0, // No default duration for practice
             notes = "",
             performanceType = performanceType
         )

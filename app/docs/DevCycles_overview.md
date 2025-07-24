@@ -72,6 +72,7 @@ Each development cycle document should include:
 
 **Final Build Version:** [e.g., 1.0.8.15-beta]  
 **Completion Date:** YYYY-MM-DD  
+**Git Commit Status:** [All changes committed / Commit hash if applicable]
 
 **Accomplishments:**
 - [Major feature/bug/ticket completed]
@@ -88,6 +89,7 @@ Each development cycle document should include:
 - [Key learnings or insights]
 - [Challenges encountered and solutions]
 - [Impact on app functionality or performance]
+- [Version control status and commit details]
 ```
 
 ## Cycle Management Process
@@ -113,6 +115,8 @@ Each development cycle document should include:
 
 ### 4. Cycle Completion
 - Verify all work items are complete or properly transitioned
+- **Ensure all code changes are committed to version control**
+- **Confirm completion date and time with user before marking cycle complete**
 - Update final status to "Completed"
 - Document cycle accomplishments summary
 - Record final build version number for the cycle
@@ -186,9 +190,12 @@ Each development cycle document should include:
 - Mark items complete only when fully implemented
 - Follow verification requirements before final completion
 - Update source documents consistently
+- **Confirm completion timing with user before finalizing cycle status**
 
 ### Cycle Transitions
 - Complete current cycle documentation before starting new cycle
+- **Ensure all code changes are committed before marking cycle complete**
+- **Confirm completion date/time with user before finalizing cycle**
 - Move completed cycle to `devcycles/` directory for archival
 - Ensure clear handoff documentation
 - Plan subsequent cycles based on previous cycle outcomes

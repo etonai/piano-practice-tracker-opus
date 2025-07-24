@@ -99,4 +99,14 @@ class AnalyticsManager(private val context: Context) {
             else -> "none"
         }
     }
+    
+    /**
+     * Force Analytics to sync immediately for testing purposes (DEBUG ONLY)
+     * This should only be used during development testing
+     */
+    fun forceAnalyticsSyncForTesting() {
+        // Set a very short session timeout to force immediate event sending
+        firebaseAnalytics.setSessionTimeoutDuration(1000) // 1 second
+        // This will cause analytics to send batched events immediately
+    }
 }

@@ -79,6 +79,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonTogglePro" />
 
+    <Button
+        android:id="@+id/buttonForceAnalyticsSync"
+        style="@style/RoundedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Force Analytics Sync (Testing)"
+        android:backgroundTint="@android:color/holo_orange_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonTestCrash" />
+
     <TextView
         android:id="@+id/textAppTitle"
         android:layout_width="wrap_content"
@@ -90,7 +102,7 @@
         android:textColor="?android:attr/textColorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonTestCrash" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonForceAnalyticsSync" />
 
     <TextView
         android:id="@+id/textSubtitle"

@@ -18,11 +18,19 @@ This document tracks feature requests, enhancements, and larger development task
 **Description:** Expand current Firebase Analytics to track additional event types beyond basic activity logging for deeper user behavior insights.  
 **Details:** [ticket_1.md](ticketdetail/ticket_1.md)
 
+
+
 ---
 
 ## Completed Tickets
 
-*No completed tickets yet*
+### Ticket #2: ✅ Bug - Practice Suggestions Auto-Add 30 Minutes Duration
+**Status:** Completed  
+**Date Created:** 2025-07-23  
+**Date Completed:** 2025-07-23  
+**Priority:** High  
+**Description:** Quick-add from practice suggestions automatically sets 30 minutes duration instead of leaving field empty for user input.  
+**Details:** [ticket_2.md](ticketdetail/ticket_2.md)
 
 ---
 

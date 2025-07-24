@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
+import com.pseddev.playstreak.analytics.AnalyticsManager
 import com.pseddev.playstreak.crashlytics.CrashlyticsManager
 import com.pseddev.playstreak.databinding.FragmentMainBinding
 import com.pseddev.playstreak.utils.ProUserManager
@@ -25,6 +26,7 @@ class MainFragment : Fragment() {
     
     private lateinit var proUserManager: ProUserManager
     private lateinit var crashlyticsManager: CrashlyticsManager
+    private lateinit var analyticsManager: AnalyticsManager
     
     override fun onCreateView(
         inflater: LayoutInflater, 
@@ -40,6 +42,7 @@ class MainFragment : Fragment() {
         
         proUserManager = ProUserManager.getInstance(requireContext())
         crashlyticsManager = CrashlyticsManager(requireContext())
+        analyticsManager = AnalyticsManager(requireContext())
         
         setupObservers()
         setupClickListeners()
@@ -54,6 +57,12 @@ class MainFragment : Fragment() {
         }
         
         binding.buttonTestCrash.visibility = if (BuildConfig.DEBUG) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        
+        binding.buttonForceAnalyticsSync.visibility = if (BuildConfig.DEBUG) {
             View.VISIBLE
         } else {
             View.GONE
@@ -107,6 +116,10 @@ class MainFragment : Fragment() {
         
         binding.buttonTestCrash.setOnClickListener {
             crashlyticsManager.forceCrashForTesting()
+        }
+        
+        binding.buttonForceAnalyticsSync.setOnClickListener {
+            analyticsManager.forceAnalyticsSyncForTesting()
         }
     }
     
