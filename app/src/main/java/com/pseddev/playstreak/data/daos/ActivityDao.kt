@@ -36,4 +36,7 @@ interface ActivityDao {
     
     @Query("SELECT COUNT(*) FROM activities")
     suspend fun getActivityCount(): Int
+    
+    @Query("DELETE FROM activities WHERE pieceOrTechniqueId = :pieceId")
+    suspend fun deleteActivitiesForPiece(pieceId: Long)
 }

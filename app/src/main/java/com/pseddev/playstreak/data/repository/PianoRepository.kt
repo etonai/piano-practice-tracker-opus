@@ -39,6 +39,17 @@ class PianoRepository(
     suspend fun updatePieceOrTechnique(item: PieceOrTechnique) = 
         pieceOrTechniqueDao.update(item)
     
+    suspend fun deletePieceOrTechnique(item: PieceOrTechnique) = 
+        pieceOrTechniqueDao.delete(item)
+    
+    suspend fun deletePieceAndActivities(pieceId: Long) {
+        // First delete all activities for this piece
+        activityDao.deleteActivitiesForPiece(pieceId)
+        // Then delete the piece itself
+        val piece = pieceOrTechniqueDao.getById(pieceId)
+        piece?.let { pieceOrTechniqueDao.delete(it) }
+    }
+    
     suspend fun deleteAllPiecesAndTechniques() = 
         pieceOrTechniqueDao.deleteAll()
     

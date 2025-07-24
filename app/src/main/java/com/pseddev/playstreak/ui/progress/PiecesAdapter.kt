@@ -15,6 +15,7 @@ class PiecesAdapter(
     private val onPieceClick: (PieceWithStats) -> Unit,
     private val onFavoriteToggle: (PieceWithStats) -> Unit,
     private val onAddActivityClick: (PieceWithStats) -> Unit,
+    private val onDeleteClick: (PieceWithStats) -> Unit,
     private val proUserManager: ProUserManager
 ) : ListAdapter<PieceWithStats, PiecesAdapter.ViewHolder>(DiffCallback()) {
     
@@ -22,7 +23,7 @@ class PiecesAdapter(
         val binding = ItemPieceStatsBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return ViewHolder(binding, onPieceClick, onFavoriteToggle, onAddActivityClick, proUserManager)
+        return ViewHolder(binding, onPieceClick, onFavoriteToggle, onAddActivityClick, onDeleteClick, proUserManager)
     }
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -34,6 +35,7 @@ class PiecesAdapter(
         private val onPieceClick: (PieceWithStats) -> Unit,
         private val onFavoriteToggle: (PieceWithStats) -> Unit,
         private val onAddActivityClick: (PieceWithStats) -> Unit,
+        private val onDeleteClick: (PieceWithStats) -> Unit,
         private val proUserManager: ProUserManager
     ) : RecyclerView.ViewHolder(binding.root) {
         
@@ -72,6 +74,10 @@ class PiecesAdapter(
             
             binding.addActivityIcon.setOnClickListener {
                 onAddActivityClick(item)
+            }
+            
+            binding.deleteIcon.setOnClickListener {
+                onDeleteClick(item)
             }
             
             // Show add activity icon only for Pro users

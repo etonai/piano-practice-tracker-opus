@@ -19,17 +19,19 @@ This document tracks feature requests, enhancements, and larger development task
 **Details:** [ticket_1.md](ticketdetail/ticket_1.md)
 
 
-### Ticket #5: 🎫 Delete Piece with Trash Icon in Pieces Tab
-**Status:** Open  
-**Date Created:** 2025-07-24  
-**Priority:** Medium  
-**Description:** In the Pieces tab, add a trash icon for each piece so that the user can delete pieces. Deleting a piece should also delete all activities associated with that piece.  
-**Details:** [ticket_5.md](ticketdetail/ticket_5.md)
 
 
 ---
 
 ## Completed Tickets
+
+### Ticket #5: ✅ Delete Piece with Trash Icon in Pieces Tab
+**Status:** Completed  
+**Date Created:** 2025-07-24  
+**Date Completed:** 2025-07-24  
+**Priority:** Medium  
+**Description:** In the Pieces tab, add a trash icon for each piece so that the user can delete pieces. Deleting a piece should also delete all activities associated with that piece.  
+**Details:** [ticket_5.md](ticketdetail/ticket_5.md)
 
 ### Ticket #3: ✅ Reduce Debug Logging for Performance Suggestions
 **Status:** Completed  

@@ -66,6 +66,9 @@ class PiecesFragment : Fragment() {
                 )
                 dialog.show(parentFragmentManager, "QuickAddActivityDialog")
             },
+            onDeleteClick = { pieceWithStats ->
+                showDeleteConfirmationDialog(pieceWithStats)
+            },
             proUserManager
         )
         
@@ -170,6 +173,27 @@ class PiecesFragment : Fragment() {
             .setTitle("Favorite Limit")
             .setMessage("You can have up to ${ProUserManager.FREE_USER_FAVORITE_LIMIT} favorite pieces.")
             .setPositiveButton("OK", null)
+            .show()
+    }
+    
+    private fun showDeleteConfirmationDialog(pieceWithStats: PieceWithStats) {
+        val activityText = if (pieceWithStats.activityCount == 1) {
+            "1 activity"
+        } else {
+            "${pieceWithStats.activityCount} activities"
+        }
+        
+        val message = "Delete \"${pieceWithStats.piece.name}\" and all its $activityText?\n\n" +
+                "This action cannot be undone."
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Piece")
+            .setMessage(message)
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deletePiece(pieceWithStats)
+                Toast.makeText(requireContext(), "Piece deleted", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
             .show()
     }
     

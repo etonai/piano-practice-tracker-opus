@@ -151,6 +151,12 @@ class PiecesViewModel(
         
         return true // Toggle was allowed and performed
     }
+    
+    fun deletePiece(pieceWithStats: PieceWithStats) {
+        viewModelScope.launch {
+            repository.deletePieceAndActivities(pieceWithStats.piece.id)
+        }
+    }
 }
 
 class PiecesViewModelFactory(

@@ -300,7 +300,10 @@ The application represents a mature, professionally-developed music practice tra
    - Keep debug features in debug builds for development and testing
    - Configure ProGuard/R8 for code obfuscation and optimization
    - Set up APK signing with release keystore
-   - Update version from beta to stable release (1.0.0)
+   - **Keep version as beta (e.g., 1.0.8.15-beta) until Final Quality Assurance is complete**
+   - **Update version from beta to stable release (1.0.0) only after successful Final Quality Assurance**
+
+_Note: The version number should remain as a beta (e.g., 1.0.8.15-beta) during all release build configuration and initial testing. Only after passing all Final Quality Assurance checks should you update the version to 1.0.0 and proceed with Play Store submission. This ensures the public release is fully verified and stable._
 
 3. [ ] **App Store Listing Materials**
    - Create app screenshots (phone + tablet sizes)
@@ -314,7 +317,12 @@ The application represents a mature, professionally-developed music practice tra
    - Performance testing with ProGuard optimizations
    - Content rating assessment (likely Everyone)
 
-2. [ ] **Google Play Store Submission**
+2. [ ] **Update Version for Release**
+   - Change versionName from beta (e.g., 1.0.8.15-beta) to stable release (1.0.0) in build.gradle.kts
+   - Confirm version update in all documentation and app UI if displayed
+   - Ensure this is done only after all QA is complete and before Play Store submission
+
+3. [ ] **Google Play Store Submission**
    - Submit to Google Play Console
    - Monitor submission and review process
    - Prepare launch monitoring and support processes

@@ -17,10 +17,10 @@ As a user, I want to be able to delete pieces I no longer need, and have all rel
 - The UI updates to reflect the removal.
 
 ## Acceptance Criteria
-- [ ] Add a trash icon to each piece in the Pieces tab.
-- [ ] Tapping the icon prompts for confirmation ("Delete this piece and all its activities?").
-- [ ] On confirmation, delete the piece and all associated activities from the database.
-- [ ] The Pieces tab and Timeline update to reflect the deletion.
+- [x] Add a trash icon to each piece in the Pieces tab.
+- [x] Tapping the icon prompts for confirmation ("Delete this piece and all its activities?").
+- [x] On confirmation, delete the piece and all associated activities from the database.
+- [x] The Pieces tab and Timeline update to reflect the deletion.
 - [ ] Add tests to verify correct deletion and data integrity.
 
 ## Technical Notes
