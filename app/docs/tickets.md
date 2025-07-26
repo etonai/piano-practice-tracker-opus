@@ -11,6 +11,20 @@ This document tracks feature requests, enhancements, and larger development task
 
 ## Open Tickets
 
+### Ticket #10: 🎫 Toggle Verbose Calendar Mode
+**Status:** Open  
+**Date Created:** 2025-07-26  
+**Priority:** Medium  
+**Description:** Add toggle for verbose calendar mode showing detailed daily activities with edit/delete functionality, potentially replacing the Timeline tab.  
+**Details:** [ticket_10.md](ticketdetail/ticket_10.md)
+
+### Ticket #9: 🎫 Independently Store Piece Information
+**Status:** Open  
+**Date Created:** 2025-07-26  
+**Priority:** High  
+**Description:** Store piece information separately instead of calculating from activities. Include performance/practice counts and last activity timestamps to reduce database queries.  
+**Details:** [ticket_9.md](ticketdetail/ticket_9.md)
+
 ### Ticket #1: 🎫 Expand Firebase Analytics Event Types
 **Status:** Open  
 **Date Created:** 2025-07-23  
