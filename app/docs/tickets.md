@@ -18,6 +18,20 @@ This document tracks feature requests, enhancements, and larger development task
 **Description:** Expand current Firebase Analytics to track additional event types beyond basic activity logging for deeper user behavior insights.  
 **Details:** [ticket_1.md](ticketdetail/ticket_1.md)
 
+### Ticket #6: 🔍 Revise Practice Level Descriptions
+**Status:** In Verification  
+**Date Created:** 2025-07-25  
+**Priority:** Medium  
+**Description:** Update practice level descriptions: Level 3 to "Complete with Issues" and Level 4 to "Complete and Satisfactory".  
+**Details:** [ticket_6.md](ticketdetail/ticket_6.md)
+
+### Ticket #7: 🔍 Practice Duration Default Shows 15 But Doesn't Save
+**Status:** In Verification  
+**Date Created:** 2025-07-25  
+**Priority:** High  
+**Description:** When adding practice, duration field shows "15" as placeholder but saves empty value if not edited. Change default to 5 minutes and save that value.  
+**Details:** [ticket_7.md](ticketdetail/ticket_7.md)
+
 
 
 
