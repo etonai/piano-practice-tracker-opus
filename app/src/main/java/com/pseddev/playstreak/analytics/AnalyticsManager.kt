@@ -13,6 +13,9 @@ import com.pseddev.playstreak.data.entities.ItemType
  */
 class AnalyticsManager(private val context: Context) {
     
+    // Firebase Analytics enabled (performance issue was emulator-related)
+    private val analyticsEnabled = true
+    
     private val firebaseAnalytics: FirebaseAnalytics by lazy {
         (context.applicationContext as PlayStreakApplication).firebaseAnalytics
     }
@@ -44,6 +47,7 @@ class AnalyticsManager(private val context: Context) {
         pieceType: ItemType,
         hasDuration: Boolean
     ) {
+        if (!analyticsEnabled) return
         firebaseAnalytics.logEvent(EVENT_ACTIVITY_LOGGED) {
             param(PARAM_ACTIVITY_TYPE, activityType.name)
             param(PARAM_PIECE_TYPE, pieceType.name)
@@ -55,6 +59,7 @@ class AnalyticsManager(private val context: Context) {
      * Track when user achieves a practice streak milestone
      */
     fun trackStreakAchieved(streakLength: Int, emojiLevel: String) {
+        if (!analyticsEnabled) return
         firebaseAnalytics.logEvent(EVENT_STREAK_ACHIEVED) {
             param(PARAM_STREAK_LENGTH, streakLength.toLong())
             param(PARAM_EMOJI_LEVEL, emojiLevel)
@@ -65,6 +70,7 @@ class AnalyticsManager(private val context: Context) {
      * Track when user adds a new piece or technique
      */
     fun trackPieceAdded(pieceType: ItemType, totalPieceCount: Int) {
+        if (!analyticsEnabled) return
         firebaseAnalytics.logEvent(EVENT_PIECE_ADDED) {
             param(PARAM_PIECE_TYPE, pieceType.name)
             param(PARAM_TOTAL_PIECES, totalPieceCount.toLong())
@@ -79,6 +85,7 @@ class AnalyticsManager(private val context: Context) {
         activityCount: Int,
         success: Boolean
     ) {
+        if (!analyticsEnabled) return
         firebaseAnalytics.logEvent(EVENT_CSV_OPERATION) {
             param(PARAM_OPERATION_TYPE, operationType)
             param(PARAM_ACTIVITY_COUNT, activityCount.toLong())
@@ -105,6 +112,7 @@ class AnalyticsManager(private val context: Context) {
      * This should only be used during development testing
      */
     fun forceAnalyticsSyncForTesting() {
+        if (!analyticsEnabled) return
         // Set a very short session timeout to force immediate event sending
         firebaseAnalytics.setSessionTimeoutDuration(1000) // 1 second
         // This will cause analytics to send batched events immediately

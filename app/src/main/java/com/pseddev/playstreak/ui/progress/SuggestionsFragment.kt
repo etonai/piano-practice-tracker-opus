@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentSuggestionsBinding
-import com.pseddev.playstreak.utils.ProUserManager
 
 class SuggestionsFragment : Fragment() {
     
@@ -26,8 +25,6 @@ class SuggestionsFragment : Fragment() {
     }
     
     private lateinit var practiceAdapter: SuggestionsAdapter
-    private lateinit var performanceAdapter: SuggestionsAdapter
-    private lateinit var proUserManager: ProUserManager
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,8 +38,6 @@ class SuggestionsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        proUserManager = ProUserManager.getInstance(requireContext())
-        
         val onAddActivityClick = { suggestionItem: SuggestionItem ->
             // Show quick add activity dialog with piece pre-filled
             val dialog = QuickAddActivityDialogFragment.newInstance(
@@ -52,32 +47,17 @@ class SuggestionsFragment : Fragment() {
             dialog.show(parentFragmentManager, "QuickAddActivityDialog")
         }
         
-        practiceAdapter = SuggestionsAdapter(onAddActivityClick, proUserManager)
-        performanceAdapter = SuggestionsAdapter(onAddActivityClick, proUserManager)
+        practiceAdapter = SuggestionsAdapter(onAddActivityClick)
         
         binding.practiceRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.practiceRecyclerView.adapter = practiceAdapter
         binding.practiceRecyclerView.setHasFixedSize(false)
         binding.practiceRecyclerView.isNestedScrollingEnabled = false
         
-        binding.performanceRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.performanceRecyclerView.adapter = performanceAdapter
-        
-        // Force RecyclerView to measure properly inside ScrollView
-        binding.performanceRecyclerView.setHasFixedSize(false)
-        binding.performanceRecyclerView.isNestedScrollingEnabled = false
         
         viewModel.suggestions.observe(viewLifecycleOwner) { suggestions ->
+            // Only show practice suggestions (no Pro features)
             val practiceSuggestions = suggestions.filter { it.suggestionType == SuggestionType.PRACTICE }
-            val performanceSuggestions = suggestions.filter { it.suggestionType == SuggestionType.PERFORMANCE }
-            
-            // Debug logging
-            android.util.Log.d("SuggestionsFragment", "Total suggestions: ${suggestions.size}")
-            android.util.Log.d("SuggestionsFragment", "Practice suggestions: ${practiceSuggestions.size}")
-            android.util.Log.d("SuggestionsFragment", "Performance suggestions: ${performanceSuggestions.size}")
-            suggestions.forEach { suggestion ->
-                android.util.Log.d("SuggestionsFragment", "Suggestion: ${suggestion.piece.name} - Type: ${suggestion.suggestionType} - Reason: ${suggestion.suggestionReason}")
-            }
             
             // Update practice suggestions
             practiceAdapter.submitList(practiceSuggestions)
@@ -89,25 +69,13 @@ class SuggestionsFragment : Fragment() {
                 binding.noPracticeSuggestionsText.visibility = View.GONE
             }
             
-            // Update performance suggestions (Pro only)
-            if (proUserManager.isProUser() && performanceSuggestions.isNotEmpty()) {
-                android.util.Log.d("SuggestionsFragment", "Submitting ${performanceSuggestions.size} performance suggestions to adapter")
-                binding.performanceSuggestionsHeader.visibility = View.VISIBLE
-                binding.performanceRecyclerView.visibility = View.VISIBLE
-                binding.noPerformanceSuggestionsText.visibility = View.GONE
-                performanceAdapter.submitList(performanceSuggestions)
-            } else if (proUserManager.isProUser()) {
-                binding.performanceSuggestionsHeader.visibility = View.VISIBLE
-                binding.performanceRecyclerView.visibility = View.GONE
-                binding.noPerformanceSuggestionsText.visibility = View.VISIBLE
-            } else {
-                binding.performanceSuggestionsHeader.visibility = View.GONE
-                binding.performanceRecyclerView.visibility = View.GONE
-                binding.noPerformanceSuggestionsText.visibility = View.GONE
-            }
+            // Hide performance suggestions section completely (no Pro features)
+            binding.performanceSuggestionsHeader.visibility = View.GONE
+            binding.performanceRecyclerView.visibility = View.GONE
+            binding.noPerformanceSuggestionsText.visibility = View.GONE
             
-            // Show empty state only if no suggestions at all
-            if (suggestions.isEmpty()) {
+            // Show empty state only if no practice suggestions
+            if (practiceSuggestions.isEmpty()) {
                 binding.emptyView.visibility = View.VISIBLE
             } else {
                 binding.emptyView.visibility = View.GONE

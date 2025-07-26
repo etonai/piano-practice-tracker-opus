@@ -3,7 +3,7 @@ package com.pseddev.playstreak.utils
 import android.content.Context
 import android.os.Build
 import android.util.Log
-// BuildConfig import removed - using hardcoded version
+import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.data.models.BackupMetadata
 import com.pseddev.playstreak.data.models.SyncData
 import com.pseddev.playstreak.data.models.SyncOperationResult
@@ -36,7 +36,9 @@ class SyncManager(
     
     suspend fun performSync(): SyncOperationResult {
         return try {
-            Log.d(TAG, "Starting sync operation")
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Starting sync operation")
+            }
             
             // Get current data from local database
             val activities = repository.getAllActivities().first()
@@ -69,7 +71,9 @@ class SyncManager(
                 // Update sync preferences
                 updateSyncPreferences(syncCount + 1)
                 
-                Log.d(TAG, "Sync completed successfully")
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "Sync completed successfully")
+                }
                 SyncOperationResult(
                     success = true,
                     message = "Sync completed successfully",
@@ -95,7 +99,9 @@ class SyncManager(
     
     suspend fun restoreFromDrive(): SyncOperationResult {
         return try {
-            Log.d(TAG, "Starting restore operation")
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Starting restore operation")
+            }
             
             // Download from Drive
             val downloadResult = driveHelper.downloadDataFromDrive()
@@ -120,7 +126,9 @@ class SyncManager(
                         repository.insertActivity(activity)
                     }
                     
-                    Log.d(TAG, "Restore completed successfully")
+                    if (BuildConfig.DEBUG) {
+                        Log.d(TAG, "Restore completed successfully")
+                    }
                     SyncOperationResult(
                         success = true,
                         message = "Data restored successfully",
@@ -161,16 +169,22 @@ class SyncManager(
                 
                 // If no Drive data or local is newer, upload
                 if (driveTime == null || (localTime > 0 && localTime > driveTime.time)) {
-                    Log.d(TAG, "Local data is newer, performing upload")
+                    if (BuildConfig.DEBUG) {
+                        Log.d(TAG, "Local data is newer, performing upload")
+                    }
                     performSync()
                 } else {
                     // Drive data is newer, ask user or auto-download
-                    Log.d(TAG, "Drive data is newer, performing download")
+                    if (BuildConfig.DEBUG) {
+                        Log.d(TAG, "Drive data is newer, performing download")
+                    }
                     restoreFromDrive()
                 }
             } else {
                 // Error getting Drive sync time, default to upload
-                Log.d(TAG, "Could not get Drive sync time, performing upload")
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "Could not get Drive sync time, performing upload")
+                }
                 performSync()
             }
             

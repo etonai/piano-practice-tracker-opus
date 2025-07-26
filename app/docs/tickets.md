@@ -18,19 +18,6 @@ This document tracks feature requests, enhancements, and larger development task
 **Description:** Expand current Firebase Analytics to track additional event types beyond basic activity logging for deeper user behavior insights.  
 **Details:** [ticket_1.md](ticketdetail/ticket_1.md)
 
-### Ticket #6: 🔍 Revise Practice Level Descriptions
-**Status:** In Verification  
-**Date Created:** 2025-07-25  
-**Priority:** Medium  
-**Description:** Update practice level descriptions: Level 3 to "Complete with Issues" and Level 4 to "Complete and Satisfactory".  
-**Details:** [ticket_6.md](ticketdetail/ticket_6.md)
-
-### Ticket #7: 🔍 Practice Duration Default Shows 15 But Doesn't Save
-**Status:** In Verification  
-**Date Created:** 2025-07-25  
-**Priority:** High  
-**Description:** When adding practice, duration field shows "15" as placeholder but saves empty value if not edited. Change default to 5 minutes and save that value.  
-**Details:** [ticket_7.md](ticketdetail/ticket_7.md)
 
 
 
@@ -38,6 +25,30 @@ This document tracks feature requests, enhancements, and larger development task
 ---
 
 ## Completed Tickets
+
+### Ticket #8: ✅ Fix Empty Suggestions Screen Text and Remove Pro References
+**Status:** Completed  
+**Date Created:** 2025-07-26  
+**Date Completed:** 2025-07-26  
+**Priority:** High  
+**Description:** When no suggestions appear, the empty state text contains incorrect explanations and mentions "Pro users" which should not appear in the free version.  
+**Details:** [ticket_8.md](ticketdetail/ticket_8.md)
+
+### Ticket #7: ✅ Practice Duration Default Shows 15 But Doesn't Save
+**Status:** Completed  
+**Date Created:** 2025-07-25  
+**Date Completed:** 2025-07-26  
+**Priority:** High  
+**Description:** When adding practice, duration field shows "15" as placeholder but saves empty value if not edited. Change default to 5 minutes and save that value.  
+**Details:** [ticket_7.md](ticketdetail/ticket_7.md)
+
+### Ticket #6: ✅ Revise Practice Level Descriptions
+**Status:** Completed  
+**Date Created:** 2025-07-25  
+**Date Completed:** 2025-07-26  
+**Priority:** Medium  
+**Description:** Update practice level descriptions: Level 3 to "Complete with Issues" and Level 4 to "Complete and Satisfactory".  
+**Details:** [ticket_6.md](ticketdetail/ticket_6.md)
 
 ### Ticket #5: ✅ Delete Piece with Trash Icon in Pieces Tab
 **Status:** Completed  

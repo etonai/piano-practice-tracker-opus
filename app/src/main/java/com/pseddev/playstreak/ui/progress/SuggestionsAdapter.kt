@@ -7,18 +7,15 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.pseddev.playstreak.databinding.ItemSuggestionBinding
-import com.pseddev.playstreak.utils.ProUserManager
-
 class SuggestionsAdapter(
-    private val onAddActivityClick: (SuggestionItem) -> Unit,
-    private val proUserManager: ProUserManager
+    private val onAddActivityClick: (SuggestionItem) -> Unit
 ) : ListAdapter<SuggestionItem, SuggestionsAdapter.ViewHolder>(DiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemSuggestionBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return ViewHolder(binding, onAddActivityClick, proUserManager)
+        return ViewHolder(binding, onAddActivityClick)
     }
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -27,8 +24,7 @@ class SuggestionsAdapter(
     
     class ViewHolder(
         private val binding: ItemSuggestionBinding,
-        private val onAddActivityClick: (SuggestionItem) -> Unit,
-        private val proUserManager: ProUserManager
+        private val onAddActivityClick: (SuggestionItem) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
         
         private var currentItem: SuggestionItem? = null
@@ -51,12 +47,8 @@ class SuggestionsAdapter(
                 binding.favoriteIcon.visibility = View.GONE
             }
             
-            // Show add activity icon only for Pro users
-            if (proUserManager.isProUser()) {
-                binding.addActivityIcon.visibility = View.VISIBLE
-            } else {
-                binding.addActivityIcon.visibility = View.GONE
-            }
+            // Show add activity icon for all users
+            binding.addActivityIcon.visibility = View.VISIBLE
         }
     }
     

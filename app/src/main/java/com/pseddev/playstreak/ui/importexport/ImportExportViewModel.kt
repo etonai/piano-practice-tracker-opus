@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.LiveData
+import com.pseddev.playstreak.BuildConfig
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -61,16 +62,14 @@ class ImportExportViewModel(
     }
     
     suspend fun exportToCsv(writer: Writer) {
-        Log.d("ExportDebug", "ViewModel.exportToCsv called")
+        if (BuildConfig.DEBUG) {
+            Log.d("ExportDebug", "Starting CSV export")
+        }
         _isLoading.value = true
         try {
-            Log.d("ExportDebug", "Starting suspend function")
             withContext(Dispatchers.IO) {
-                Log.d("ExportDebug", "Switched to IO dispatcher, calling repository.exportToCsv")
                 repository.exportToCsv(writer)
-                Log.d("ExportDebug", "repository.exportToCsv completed")
             }
-            Log.d("ExportDebug", "Back on main dispatcher, setting success result")
             // Update last export time
             sharedPrefs.edit().putLong("last_export_time", System.currentTimeMillis()).apply()
             _exportResult.value = Event(Result.success("Export successful!"))
@@ -82,7 +81,6 @@ class ImportExportViewModel(
             val errorMessage = "Export failed: ${e.javaClass.simpleName} - ${e.message}"
             _exportResult.value = Event(Result.failure(Exception(errorMessage, e)))
         } finally {
-            Log.d("ExportDebug", "ViewModel.exportToCsv finally block")
             _isLoading.value = false
         }
     }

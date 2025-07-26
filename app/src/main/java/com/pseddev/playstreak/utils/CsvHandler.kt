@@ -1,6 +1,7 @@
 package com.pseddev.playstreak.utils
 
 import android.util.Log
+import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
@@ -16,6 +17,8 @@ import java.util.*
 class CsvHandler {
     
     companion object {
+        // Enable detailed logging only when needed for debugging
+        private const val ENABLE_DETAILED_LOGGING = false
         private const val DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss"
         private val datetimeFormatter = SimpleDateFormat(DATETIME_FORMAT, Locale.US)
         
@@ -34,15 +37,15 @@ class CsvHandler {
             activities: List<Activity>,
             pieces: Map<Long, PieceOrTechnique>
         ) {
-            Log.d("ExportDebug", "CsvHandler.exportActivitiesToCsv called with ${activities.size} activities")
+            if (BuildConfig.DEBUG && ENABLE_DETAILED_LOGGING) {
+                Log.d("ExportDebug", "CsvHandler.exportActivitiesToCsv called with ${activities.size} activities")
+            }
             
             try {
                 // Write CSV manually to avoid OpenCSV issues
-                Log.d("ExportDebug", "Creating buffered writer")
                 val bufferedWriter = writer.buffered()
                 
                 // Write header
-                Log.d("ExportDebug", "Writing CSV header")
                 val header = listOf(
                     HEADER_DATE,
                     HEADER_LENGTH,
@@ -55,10 +58,8 @@ class CsvHandler {
                 )
                 bufferedWriter.write(header.joinToString(",") { escapeCSVField(it) })
                 bufferedWriter.write("\n")
-                Log.d("ExportDebug", "CSV header written")
                 
                 // Write activities
-                Log.d("ExportDebug", "Writing ${activities.size} activity rows")
                 var rowCount = 0
                 activities.forEach { activity ->
                     val piece = pieces[activity.pieceOrTechniqueId]
@@ -78,17 +79,18 @@ class CsvHandler {
                         bufferedWriter.write("\n")
                         rowCount++
                         
-                        if (rowCount % 10 == 0) {
+                        if (BuildConfig.DEBUG && ENABLE_DETAILED_LOGGING && rowCount % 50 == 0) {
                             Log.d("ExportDebug", "Written $rowCount rows so far")
                         }
                     }
                 }
-                Log.d("ExportDebug", "Finished writing $rowCount activity rows")
                 
                 // Just flush, don't close
-                Log.d("ExportDebug", "Flushing buffered writer")
                 bufferedWriter.flush()
-                Log.d("ExportDebug", "CsvHandler.exportActivitiesToCsv completed successfully")
+                
+                if (BuildConfig.DEBUG && ENABLE_DETAILED_LOGGING) {
+                    Log.d("ExportDebug", "CsvHandler.exportActivitiesToCsv completed successfully with $rowCount rows")
+                }
                 
             } catch (e: Exception) {
                 Log.e("ExportDebug", "Exception in CsvHandler.exportActivitiesToCsv: ${e.javaClass.simpleName} - ${e.message}", e)
@@ -164,9 +166,9 @@ class CsvHandler {
                         val originalName = row[3]
                         val pieceName = TextNormalizer.normalizePieceName(originalName)
                         
-                        Log.d("CsvImport", "Line $lineNumber: Original='$originalName', Normalized='$pieceName'")
-                        Log.d("CsvImport", "Line $lineNumber: Original bytes: ${originalName.toByteArray().joinToString { it.toString() }}")
-                        Log.d("CsvImport", "Line $lineNumber: Normalized bytes: ${pieceName.toByteArray().joinToString { it.toString() }}")
+                        if (BuildConfig.DEBUG && ENABLE_DETAILED_LOGGING) {
+                            Log.d("CsvImport", "Line $lineNumber: Original='$originalName', Normalized='$pieceName'")
+                        }
                             
                         if (pieceName.isEmpty()) {
                             errors.add("Line $lineNumber: Empty piece name")
@@ -223,20 +225,11 @@ class CsvHandler {
                         
                         // Explicitly check for duplicates to work around Set issues
                         val alreadyExists = uniquePieces.any { existing ->
-                            val isEqual = existing == pieceName
-                            Log.d("CsvImport", "Comparing existing '$existing' == new '$pieceName': $isEqual")
-                            if (!isEqual) {
-                                Log.d("CsvImport", "Existing bytes: ${existing.toByteArray().joinToString { it.toString() }}")
-                                Log.d("CsvImport", "New bytes: ${pieceName.toByteArray().joinToString { it.toString() }}")
-                            }
-                            isEqual
+                            existing == pieceName
                         }
                         
                         if (!alreadyExists) {
                             uniquePieces.add(pieceName)
-                            Log.d("CsvImport", "Added new piece '$pieceName' to set")
-                        } else {
-                            Log.d("CsvImport", "Piece '$pieceName' already exists, skipping")
                         }
                         
                         importedActivities.add(
@@ -263,8 +256,9 @@ class CsvHandler {
                 csvReader.close()
             }
             
-            Log.d("CsvImport", "Final results: ${importedActivities.size} activities, ${uniquePieces.size} unique pieces")
-            Log.d("CsvImport", "Unique pieces: ${uniquePieces.toList()}")
+            if (BuildConfig.DEBUG) {
+                Log.d("CsvImport", "Import completed: ${importedActivities.size} activities, ${uniquePieces.size} unique pieces")
+            }
             
             return ImportResult(importedActivities, uniquePieces, errors)
         }

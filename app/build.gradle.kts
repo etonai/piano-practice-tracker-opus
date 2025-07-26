@@ -74,17 +74,14 @@ android {
                 "META-INF/LICENSE",
                 "META-INF/LICENSE.txt",
                 "META-INF/NOTICE",
-                "META-INF/NOTICE.txt"
+                "META-INF/NOTICE.txt",
+                // Disable baseline profiles to fix installation issues
+                "META-INF/com/android/build/gradle/app-metadata.properties",
+                "baseline-prof.txt",
+                "baseline.prof",
+                "baseline.profm"
             )
         }
-    }
-    
-    // Disable baseline profiles to fix installation issues
-    packagingOptions {
-        resources.excludes.add("META-INF/com/android/build/gradle/app-metadata.properties")
-        resources.excludes.add("baseline-prof.txt")
-        resources.excludes.add("baseline.prof")
-        resources.excludes.add("baseline.profm")
     }
     
     // Custom APK naming

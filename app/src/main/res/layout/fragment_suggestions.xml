@@ -38,7 +38,7 @@
             android:layout_marginBottom="24dp"
             android:visibility="gone" />
 
-        <!-- Performance Suggestions Section (Pro Only) -->
+        <!-- Performance Suggestions Section -->
         <TextView
             android:id="@+id/performanceSuggestionsHeader"
             android:layout_width="wrap_content"
@@ -89,7 +89,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Suggestions appear based on:\n• Favorites not practiced in 1+ day\n• Other pieces not practiced in 7+ days\n• Performance suggestions for Pro users"
+                android:text="Suggestions appear based on practice and performance history."
                 android:textAppearance="?attr/textAppearanceBody1"
                 android:textColor="?android:attr/textColorSecondary"
                 android:gravity="center"
@@ -98,7 +98,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="💡 Try adding some pieces or importing your practice history!"
+                android:text="💡 Try adding some pieces to get started!"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textColor="?attr/colorPrimary"
                 android:gravity="center" />
