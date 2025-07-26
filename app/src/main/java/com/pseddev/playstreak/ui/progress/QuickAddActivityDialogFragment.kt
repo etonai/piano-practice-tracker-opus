@@ -112,8 +112,8 @@ class QuickAddActivityDialogFragment : DialogFragment() {
             listOf(
                 "Level 1 - Essentials",
                 "Level 2 - Incomplete",
-                "Level 3 - Complete with Review",
-                "Level 4 - Perfect Complete"
+                "Level 3 - Complete with Issues",
+                "Level 4 - Complete and Satisfactory"
             )
         }
         

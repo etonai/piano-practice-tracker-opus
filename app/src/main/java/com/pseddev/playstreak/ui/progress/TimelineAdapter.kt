@@ -52,8 +52,8 @@ class TimelineAdapter(
                     val level = when (activity.level) {
                         1 -> "Level 1 - Essentials"
                         2 -> "Level 2 - Incomplete"
-                        3 -> "Level 3 - Complete with Review"
-                        4 -> "Level 4 - Perfect Complete"
+                        3 -> "Level 3 - Complete with Issues"
+                        4 -> "Level 4 - Complete and Satisfactory"
                         else -> "Level ${activity.level}"
                     }
                     "Practice - $level"

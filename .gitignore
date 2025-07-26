@@ -22,3 +22,8 @@ app/docs/signing-certificates.md
 
 # Firebase configuration
 app/google-services.json
+
+# Keystore files
+keystore/
+keystore.properties
+*.keystore

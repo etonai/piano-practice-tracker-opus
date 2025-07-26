@@ -67,7 +67,7 @@ class TimeInputFragment : Fragment() {
                     return@setOnClickListener
                 }
             } else {
-                -1
+                5 // Default to 5 minutes if no input provided
             }
             
             navigateToSummary(minutes)

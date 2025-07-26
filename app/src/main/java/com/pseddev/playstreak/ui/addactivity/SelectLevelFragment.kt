@@ -139,9 +139,9 @@ class SelectLevelFragment : Fragment() {
             binding.textLevelLabel.text = "Practice Level:"
             binding.radioLevel1.text = "Level 1 - Essentials"
             binding.radioLevel2.text = "Level 2 - Incomplete"
-            binding.radioLevel3.text = "Level 3 - Complete with Review"
+            binding.radioLevel3.text = "Level 3 - Complete with Issues"
             binding.radioLevel4.apply {
-                text = "Level 4 - Perfect Complete"
+                text = "Level 4 - Complete and Satisfactory"
                 visibility = View.VISIBLE
             }
             binding.performanceTypeGroup.visibility = View.GONE
