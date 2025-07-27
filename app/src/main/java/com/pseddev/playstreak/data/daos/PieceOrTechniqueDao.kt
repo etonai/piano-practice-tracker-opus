@@ -34,4 +34,24 @@ interface PieceOrTechniqueDao {
     
     @Query("SELECT * FROM pieces_techniques WHERE id = :id")
     suspend fun getById(id: Long): PieceOrTechnique?
+    
+    // Synchronous methods for migration
+    @Query("SELECT * FROM pieces_techniques ORDER BY name COLLATE NOCASE ASC")
+    fun getAllPiecesAndTechniquesSync(): List<PieceOrTechnique>
+    
+    // Statistics-based query methods
+    @Query("SELECT * FROM pieces_techniques WHERE practiceCount > 0 ORDER BY lastPracticeDate DESC")
+    fun getPiecesWithPracticeHistory(): Flow<List<PieceOrTechnique>>
+    
+    @Query("SELECT * FROM pieces_techniques WHERE performanceCount > 0 ORDER BY lastPerformanceDate DESC")
+    fun getPiecesWithPerformanceHistory(): Flow<List<PieceOrTechnique>>
+    
+    @Query("SELECT * FROM pieces_techniques WHERE lastPracticeDate IS NOT NULL ORDER BY lastPracticeDate DESC LIMIT :limit")
+    fun getRecentlyPracticedPieces(limit: Int = 10): Flow<List<PieceOrTechnique>>
+    
+    @Query("SELECT * FROM pieces_techniques WHERE lastPerformanceDate IS NOT NULL ORDER BY lastPerformanceDate DESC LIMIT :limit")
+    fun getRecentlyPerformedPieces(limit: Int = 10): Flow<List<PieceOrTechnique>>
+    
+    @Query("SELECT * FROM pieces_techniques WHERE lastSatisfactoryPractice IS NOT NULL ORDER BY lastSatisfactoryPractice DESC")
+    fun getPiecesWithSatisfactoryPractice(): Flow<List<PieceOrTechnique>>
 }

@@ -39,4 +39,8 @@ interface ActivityDao {
     
     @Query("DELETE FROM activities WHERE pieceOrTechniqueId = :pieceId")
     suspend fun deleteActivitiesForPiece(pieceId: Long)
+    
+    // Synchronous methods for migration
+    @Query("SELECT * FROM activities WHERE pieceOrTechniqueId = :pieceId ORDER BY timestamp DESC")
+    fun getActivitiesForPieceSync(pieceId: Long): List<Activity>
 }

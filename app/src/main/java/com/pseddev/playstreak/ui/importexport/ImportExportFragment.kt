@@ -46,10 +46,22 @@ class ImportExportFragment : Fragment() {
         uri?.let { exportToCsv(it) }
     }
     
+    private val exportJsonLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri?.let { exportToJson(it) }
+    }
+    
     private val importCsvLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
-        uri?.let { showImportConfirmation(it) }
+        uri?.let { showImportConfirmation(it, "CSV") }
+    }
+    
+    private val importJsonLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { showImportConfirmation(it, "JSON") }
     }
     
     private val googleSignInLauncher = registerForActivityResult(
@@ -82,14 +94,11 @@ class ImportExportFragment : Fragment() {
     
     private fun setupButtons() {
         binding.exportToCsvButton.setOnClickListener {
-            val timestamp = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.US).format(Date())
-            val fileName = "PlayStreak_activities_export_$timestamp.csv"
-            exportCsvLauncher.launch(fileName)
+            showExportFormatDialog()
         }
         
         binding.importFromCsvButton.setOnClickListener {
-            binding.warningTextView.visibility = View.VISIBLE
-            importCsvLauncher.launch("text/*")
+            showImportFormatDialog()
         }
         
         binding.syncWithDriveButton.setOnClickListener {
@@ -145,18 +154,43 @@ class ImportExportFragment : Fragment() {
                 result.fold(
                     onSuccess = { importResult ->
                         if (importResult.errors.isEmpty()) {
-                            val message = "Import successful! Imported ${importResult.activities.size} activities."
+                            val message = "CSV import successful! Imported ${importResult.activities.size} activities."
                             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                             // Navigate back to main screen
                             findNavController().navigateUp()
                         } else {
-                            showImportErrors(importResult)
+                            showCsvImportErrors(importResult)
                         }
                     },
                     onFailure = { exception ->
                         Toast.makeText(
                             context,
-                            "Import failed: ${exception.message}",
+                            "CSV import failed: ${exception.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                )
+                binding.warningTextView.visibility = View.GONE
+            }
+        }
+        
+        viewModel.jsonImportResult.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { result ->
+                result.fold(
+                    onSuccess = { importResult ->
+                        if (importResult.success) {
+                            val message = "JSON import successful! Imported ${importResult.activitiesImported} activities and ${importResult.piecesImported} pieces."
+                            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                            // Navigate back to main screen
+                            findNavController().navigateUp()
+                        } else {
+                            showJsonImportErrors(importResult)
+                        }
+                    },
+                    onFailure = { exception ->
+                        Toast.makeText(
+                            context,
+                            "JSON import failed: ${exception.message}",
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -174,7 +208,22 @@ class ImportExportFragment : Fragment() {
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 } else {
                     // Show rejection dialog
-                    showValidationErrorDialog(validationResult)
+                    showCsvValidationErrorDialog(validationResult)
+                }
+                binding.warningTextView.visibility = View.GONE
+            }
+        }
+        
+        viewModel.jsonValidationResult.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { validationResult ->
+                if (validationResult.isValid) {
+                    // Show success message with counts
+                    val message = "JSON file is valid!\n" +
+                            "Contains: ${validationResult.activityCount} activities, ${validationResult.pieceCount} pieces"
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                } else {
+                    // Show rejection dialog
+                    showJsonValidationErrorDialog(validationResult)
                 }
                 binding.warningTextView.visibility = View.GONE
             }
@@ -244,19 +293,50 @@ class ImportExportFragment : Fragment() {
                 Log.e("ExportDebug", "Exception in exportToCsv: ${e.javaClass.simpleName} - ${e.message}", e)
                 Toast.makeText(
                     context,
-                    "Failed to create file: ${e.message}",
+                    "Failed to create CSV file: ${e.message}",
                     Toast.LENGTH_LONG
                 ).show()
             }
         }
     }
     
-    private fun showImportConfirmation(uri: Uri) {
+    private fun exportToJson(uri: Uri) {
+        Log.d("JsonExport", "Starting exportToJson with URI: $uri")
+        
+        // Launch coroutine that will wait for the export to complete
+        lifecycleScope.launch {
+            try {
+                Log.d("JsonExport", "Opening output stream...")
+                requireContext().contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    Log.d("JsonExport", "Output stream opened successfully")
+                    OutputStreamWriter(outputStream).use { writer ->
+                        Log.d("JsonExport", "OutputStreamWriter created, calling viewModel.exportToJson")
+                        viewModel.exportToJson(writer) // This will now wait for completion
+                        Log.d("JsonExport", "viewModel.exportToJson completed")
+                    }
+                    Log.d("JsonExport", "OutputStreamWriter closed")
+                }
+                Log.d("JsonExport", "Output stream closed")
+            } catch (e: Exception) {
+                Log.e("JsonExport", "Exception in exportToJson: ${e.javaClass.simpleName} - ${e.message}", e)
+                Toast.makeText(
+                    context,
+                    "Failed to create JSON file: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+    
+    private fun showImportConfirmation(uri: Uri, format: String) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Import CSV Data")
+            .setTitle("Import $format Data")
             .setMessage("This will replace all existing data in the app. Are you sure you want to continue?")
             .setPositiveButton("Import") { _, _ ->
-                importFromCsv(uri)
+                when (format) {
+                    "CSV" -> importFromCsv(uri)
+                    "JSON" -> importFromJson(uri)
+                }
             }
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
@@ -274,16 +354,32 @@ class ImportExportFragment : Fragment() {
         } catch (e: Exception) {
             Toast.makeText(
                 context,
-                "Failed to read file: ${e.message}",
+                "Failed to read CSV file: ${e.message}",
                 Toast.LENGTH_LONG
             ).show()
             binding.warningTextView.visibility = View.GONE
         }
     }
     
-    private fun showImportErrors(importResult: com.pseddev.playstreak.utils.CsvHandler.ImportResult) {
+    private fun importFromJson(uri: Uri) {
+        try {
+            requireContext().contentResolver.openInputStream(uri)?.use { inputStream ->
+                val jsonContent = InputStreamReader(inputStream).readText()
+                viewModel.importFromJson(jsonContent)
+            }
+        } catch (e: Exception) {
+            Toast.makeText(
+                context,
+                "Failed to read JSON file: ${e.message}",
+                Toast.LENGTH_LONG
+            ).show()
+            binding.warningTextView.visibility = View.GONE
+        }
+    }
+    
+    private fun showCsvImportErrors(importResult: com.pseddev.playstreak.utils.CsvHandler.ImportResult) {
         val message = buildString {
-            appendLine("Import completed with errors:")
+            appendLine("CSV import completed with errors:")
             appendLine("Imported ${importResult.activities.size} activities successfully.")
             appendLine()
             appendLine("Errors:")
@@ -296,7 +392,40 @@ class ImportExportFragment : Fragment() {
         }
         
         AlertDialog.Builder(requireContext())
-            .setTitle("Import Errors")
+            .setTitle("CSV Import Errors")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+    
+    private fun showJsonImportErrors(importResult: com.pseddev.playstreak.data.models.JsonImportResult) {
+        val message = buildString {
+            appendLine("JSON import completed with errors:")
+            appendLine("Imported ${importResult.activitiesImported} activities and ${importResult.piecesImported} pieces.")
+            appendLine()
+            if (importResult.errors.isNotEmpty()) {
+                appendLine("Errors:")
+                importResult.errors.take(10).forEach { error ->
+                    appendLine("• $error")
+                }
+                if (importResult.errors.size > 10) {
+                    appendLine("... and ${importResult.errors.size - 10} more errors")
+                }
+            }
+            if (importResult.warnings.isNotEmpty()) {
+                appendLine()
+                appendLine("Warnings:")
+                importResult.warnings.take(5).forEach { warning ->
+                    appendLine("• $warning")
+                }
+                if (importResult.warnings.size > 5) {
+                    appendLine("... and ${importResult.warnings.size - 5} more warnings")
+                }
+            }
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("JSON Import Errors")
             .setMessage(message)
             .setPositiveButton("OK", null)
             .show()
@@ -416,7 +545,7 @@ class ImportExportFragment : Fragment() {
             .show()
     }
     
-    private fun showValidationErrorDialog(validationResult: com.pseddev.playstreak.utils.CsvHandler.CsvValidationResult) {
+    private fun showCsvValidationErrorDialog(validationResult: com.pseddev.playstreak.utils.CsvHandler.CsvValidationResult) {
         val message = buildString {
             appendLine("CSV File Rejected")
             appendLine()
@@ -431,10 +560,72 @@ class ImportExportFragment : Fragment() {
         }
         
         AlertDialog.Builder(requireContext())
-            .setTitle("Import Not Allowed")
+            .setTitle("CSV Import Not Allowed")
             .setMessage(message)
             .setPositiveButton("OK") { dialog, _ ->
                 dialog.dismiss()
+            }
+            .show()
+    }
+    
+    private fun showJsonValidationErrorDialog(validationResult: com.pseddev.playstreak.data.models.JsonValidationResult) {
+        val message = buildString {
+            appendLine("JSON File Rejected")
+            appendLine()
+            appendLine("File contents:")
+            appendLine("• ${validationResult.activityCount} activities")
+            appendLine("• ${validationResult.pieceCount} pieces")
+            validationResult.formatVersion?.let { version ->
+                appendLine("• Format version: $version")
+            }
+            appendLine()
+            appendLine("Validation errors:")
+            validationResult.errors.forEach { error ->
+                appendLine("• $error")
+            }
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("JSON Import Not Allowed")
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+    
+    private fun showExportFormatDialog() {
+        val options = arrayOf("CSV Format", "JSON Format")
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Choose Export Format")
+            .setItems(options) { _, which ->
+                val timestamp = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.US).format(Date())
+                when (which) {
+                    0 -> {
+                        val fileName = "PlayStreak_activities_export_$timestamp.csv"
+                        exportCsvLauncher.launch(fileName)
+                    }
+                    1 -> {
+                        val fileName = "PlayStreak_combined_export_$timestamp.json"
+                        exportJsonLauncher.launch(fileName)
+                    }
+                }
+            }
+            .show()
+    }
+    
+    private fun showImportFormatDialog() {
+        val options = arrayOf("CSV Format", "JSON Format")
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Choose Import Format")
+            .setItems(options) { _, which ->
+                binding.warningTextView.visibility = View.VISIBLE
+                when (which) {
+                    0 -> importCsvLauncher.launch("text/*")
+                    1 -> importJsonLauncher.launch("application/json")
+                }
             }
             .show()
     }

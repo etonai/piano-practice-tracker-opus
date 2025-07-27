@@ -8,7 +8,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -24,6 +23,10 @@ import com.pseddev.playstreak.R
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.databinding.FragmentCalendarBinding
 import com.pseddev.playstreak.utils.ProUserManager
+import com.pseddev.playstreak.utils.PreferencesManager
+import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
@@ -44,6 +47,7 @@ class CalendarFragment : Fragment() {
     private var monthlyActivities: Map<LocalDate, List<ActivityWithPiece>> = emptyMap()
     private var currentDisplayMonth: YearMonth = YearMonth.now()
     private lateinit var proUserManager: ProUserManager
+    private lateinit var preferencesManager: PreferencesManager
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,6 +62,7 @@ class CalendarFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         proUserManager = ProUserManager.getInstance(requireContext())
+        preferencesManager = PreferencesManager.getInstance(requireContext())
         
         setupClickListeners()
         setupCalendar()
@@ -186,6 +191,85 @@ class CalendarFragment : Fragment() {
         }
     }
     
+    private fun populateActivityList(activities: List<ActivityWithPiece>) {
+        binding.linearLayoutSelectedDateActivities.removeAllViews()
+        
+        for (activityWithPiece in activities) {
+            val itemBinding = com.pseddev.playstreak.databinding.ItemTimelineActivityBinding.inflate(
+                layoutInflater, 
+                binding.linearLayoutSelectedDateActivities, 
+                false
+            )
+            
+            // Bind the activity data using the same logic as TimelineAdapter
+            bindActivityView(itemBinding, activityWithPiece)
+            
+            binding.linearLayoutSelectedDateActivities.addView(itemBinding.root)
+        }
+    }
+    
+    private fun bindActivityView(itemBinding: com.pseddev.playstreak.databinding.ItemTimelineActivityBinding, item: ActivityWithPiece) {
+        val activity = item.activity
+        val piece = item.pieceOrTechnique
+        val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
+        val timeFormat = SimpleDateFormat("h:mm a", Locale.US)
+        
+        itemBinding.dateText.text = dateFormat.format(Date(activity.timestamp))
+        itemBinding.timeText.text = timeFormat.format(Date(activity.timestamp))
+        
+        // Show technique emoji indicator for techniques
+        val displayName = if (piece.type == com.pseddev.playstreak.data.entities.ItemType.TECHNIQUE) {
+            "🎼 ${piece.name}"
+        } else {
+            piece.name
+        }
+        itemBinding.pieceNameText.text = displayName
+        
+        val typeText = when (activity.activityType) {
+            ActivityType.PRACTICE -> {
+                val level = when (activity.level) {
+                    1 -> "Level 1 - Essentials"
+                    2 -> "Level 2 - Incomplete"
+                    3 -> "Level 3 - Complete with Issues"
+                    4 -> "Level 4 - Complete and Satisfactory"
+                    else -> "Level ${activity.level}"
+                }
+                "Practice - $level"
+            }
+            ActivityType.PERFORMANCE -> {
+                val level = when (activity.level) {
+                    1 -> "Level 1 - Failed"
+                    2 -> "Level 2 - Unsatisfactory"
+                    3 -> "Level 3 - Satisfactory"
+                    else -> "Level ${activity.level}"
+                }
+                val type = if (activity.performanceType == "online") "Online" else "Live"
+                "Performance - $type - $level"
+            }
+        }
+        itemBinding.activityTypeText.text = typeText
+        
+        if (activity.minutes > 0) {
+            itemBinding.durationText.text = "${activity.minutes} minutes"
+        } else {
+            itemBinding.durationText.text = ""
+        }
+        
+        if (activity.notes.isNotEmpty()) {
+            itemBinding.notesText.text = activity.notes
+        } else {
+            itemBinding.notesText.text = ""
+        }
+        
+        itemBinding.deleteButton.setOnClickListener {
+            showDeleteConfirmationDialog(item)
+        }
+        
+        itemBinding.editButton.setOnClickListener {
+            editActivity(item)
+        }
+    }
+    
     private fun updateSelectedDateView(activities: List<ActivityWithPiece>) {
         // Update color indicator with larger, more prominent display
         val color = getCalendarColorForActivities(activities)
@@ -207,24 +291,49 @@ class CalendarFragment : Fragment() {
             }
         } ?: "Selected Date"
         
+        // Check if detail mode is enabled
+        val isDetailModeEnabled = preferencesManager.isCalendarDetailModeEnabled()
+        
         if (activities.isEmpty()) {
             binding.selectedDateText.text = "$dateText: No activities on this date"
-            binding.selectedDateActivities.text = ""
             binding.activityColorIndicator.visibility = View.GONE
+            
+            // Hide both displays when no activities
+            binding.selectedDateActivities.text = ""
+            binding.selectedDateActivities.visibility = View.VISIBLE
+            binding.linearLayoutSelectedDateActivities.visibility = View.GONE
+            binding.linearLayoutSelectedDateActivities.removeAllViews()
         } else {
             val activityTypeText = getActivityTypeDescription(activities)
             val activityWord = if (activities.size == 1) "activity" else "activities"
             binding.selectedDateText.text = "$dateText: ${activities.size} $activityWord ($activityTypeText)"
             binding.activityColorIndicator.visibility = View.VISIBLE
             
-            val summary = activities.joinToString("\n") { item ->
-                val time = android.text.format.DateFormat.format("h:mm a", item.activity.timestamp)
-                val type = item.activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }
-                val level = "(${item.activity.level})"
-                val minutes = if (item.activity.minutes > 0) " - ${item.activity.minutes} min" else ""
-                "$time - ${item.pieceOrTechnique.name} - $type $level$minutes"
+            if (isDetailModeEnabled) {
+                // Detail mode: Show LinearLayout with Timeline-style cards
+                binding.selectedDateActivities.visibility = View.GONE
+                binding.linearLayoutSelectedDateActivities.visibility = View.VISIBLE
+                populateActivityList(activities)
+            } else {
+                // Regular mode: Show simple text summary
+                binding.selectedDateActivities.visibility = View.VISIBLE
+                binding.linearLayoutSelectedDateActivities.visibility = View.GONE
+                binding.linearLayoutSelectedDateActivities.removeAllViews()
+                
+                val summary = activities.joinToString("\n") { item ->
+                    val time = android.text.format.DateFormat.format("h:mm a", item.activity.timestamp)
+                    val type = item.activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }
+                    val level = "(${item.activity.level})"
+                    val minutes = if (item.activity.minutes > 0) " - ${item.activity.minutes} min" else ""
+                    "$time - ${item.pieceOrTechnique.name} - $type $level$minutes"
+                }
+                binding.selectedDateActivities.text = summary
             }
-            binding.selectedDateActivities.text = summary
+        }
+        
+        // Scroll to top of the details section when date changes
+        binding.scrollViewCalendarDetails.post {
+            binding.scrollViewCalendarDetails.smoothScrollTo(0, 0)
         }
     }
     
@@ -298,6 +407,11 @@ class CalendarFragment : Fragment() {
     
     private fun setupClickListeners() {
         binding.buttonAddActivity.setOnClickListener {
+            // Pre-populate with selected calendar date
+            selectedDate?.let { date ->
+                val timestamp = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                EditActivityStorage.setPrePopulatedDate(timestamp)
+            }
             findNavController().navigate(R.id.action_viewProgressFragment_to_addActivityFragment)
         }
         
@@ -345,11 +459,52 @@ class CalendarFragment : Fragment() {
         binding.calendarView.notifyCalendarChanged()
     }
     
+    private fun editActivity(activityWithPiece: ActivityWithPiece) {
+        // Store the activity data for edit mode
+        EditActivityStorage.setEditActivity(
+            activityWithPiece.activity, 
+            activityWithPiece.pieceOrTechnique.name,
+            activityWithPiece.pieceOrTechnique.type
+        )
+        
+        // Navigate directly to select level fragment for editing
+        findNavController().navigate(
+            R.id.action_viewProgressFragment_to_selectLevelFragment,
+            bundleOf(
+                "activityType" to activityWithPiece.activity.activityType,
+                "pieceId" to activityWithPiece.activity.pieceOrTechniqueId,
+                "pieceName" to activityWithPiece.pieceOrTechnique.name,
+                "itemType" to activityWithPiece.pieceOrTechnique.type
+            )
+        )
+    }
+    
+    private fun showDeleteConfirmationDialog(activityWithPiece: ActivityWithPiece) {
+        val dateFormat = SimpleDateFormat("MMM d, yyyy h:mm a", Locale.US)
+        val dateString = dateFormat.format(Date(activityWithPiece.activity.timestamp))
+        val pieceName = activityWithPiece.pieceOrTechnique.name
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Activity")
+            .setMessage("Are you sure you want to delete this activity?\n\n$pieceName\n$dateString")
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteActivity(activityWithPiece)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
     override fun onResume() {
         super.onResume()
         // Refresh calendar and color guide in case Pro status changed while away from this fragment
+        // Also refresh in case detail mode preference changed
         binding.calendarView.notifyCalendarChanged()
         updateColorGuideVisibility()
+        
+        // Refresh selected date view in case detail mode preference changed
+        viewModel.selectedDateActivities.value?.let { activities ->
+            updateSelectedDateView(activities)
+        }
     }
     
     override fun onDestroyView() {

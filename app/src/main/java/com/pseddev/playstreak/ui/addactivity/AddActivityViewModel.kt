@@ -14,6 +14,7 @@ import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
 import com.pseddev.playstreak.data.repository.PianoRepository
+import com.pseddev.playstreak.ui.progress.EditActivityStorage
 import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.TextNormalizer
 import kotlinx.coroutines.flow.map
@@ -86,7 +87,11 @@ class AddActivityViewModel(
         minutes: Int,
         notes: String
     ) {
-        saveActivity(pieceId, activityType, level, performanceType, minutes, notes, System.currentTimeMillis())
+        // Use pre-populated date from calendar if available, otherwise use current time
+        val timestamp = EditActivityStorage.getPrePopulatedDate() ?: System.currentTimeMillis()
+        // Clear pre-populated date after using it
+        EditActivityStorage.clearPrePopulatedDate()
+        saveActivity(pieceId, activityType, level, performanceType, minutes, notes, timestamp)
     }
     
     fun saveActivity(

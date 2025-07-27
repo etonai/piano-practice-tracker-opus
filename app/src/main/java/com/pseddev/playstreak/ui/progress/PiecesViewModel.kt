@@ -57,11 +57,18 @@ class PiecesViewModel(
         ) { pieces, activities, currentSortType, currentSortDirection ->
             val piecesWithStats = pieces
                 .map { piece ->
+                    // Use Phase 1 statistics for performance, but keep legacy calculation for comparison
                     val pieceActivities = activities.filter { it.pieceOrTechniqueId == piece.id }
+                    val totalStatisticsCount = piece.practiceCount + piece.performanceCount
+                    val lastStatisticsDate = maxOf(
+                        piece.lastPracticeDate ?: 0L,
+                        piece.lastPerformanceDate ?: 0L
+                    ).takeIf { it > 0L }
+                    
                     PieceWithStats(
                         piece = piece,
-                        activityCount = pieceActivities.size,
-                        lastActivityDate = pieceActivities.maxByOrNull { it.timestamp }?.timestamp
+                        activityCount = totalStatisticsCount, // Use Phase 1 statistics for better performance
+                        lastActivityDate = lastStatisticsDate // Use Phase 1 statistics for better performance
                     )
                 }
             
@@ -86,17 +93,20 @@ class PiecesViewModel(
             if (pieceId == null) {
                 kotlinx.coroutines.flow.flowOf(null)
             } else {
-                repository.getActivitiesForPiece(pieceId)
-                    .map { activities ->
-                        val piece = repository.getPieceOrTechniqueById(pieceId)
-                        piece?.let {
-                            PieceDetails(
-                                piece = it,
-                                activities = activities,
-                                lastActivity = activities.maxByOrNull { it.timestamp }
-                            )
-                        }
+                // Combine piece data and activities to ensure we get the latest statistics
+                combine(
+                    repository.getAllPiecesAndTechniques(),
+                    repository.getActivitiesForPiece(pieceId)
+                ) { allPieces, activities ->
+                    val piece = allPieces.find { it.id == pieceId }
+                    piece?.let {
+                        PieceDetails(
+                            piece = it,
+                            activities = activities,
+                            lastActivity = activities.maxByOrNull { it.timestamp }
+                        )
                     }
+                }
             }
         }
         .asLiveData()

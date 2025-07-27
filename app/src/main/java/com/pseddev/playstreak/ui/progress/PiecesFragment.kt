@@ -15,6 +15,7 @@ import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentPiecesBinding
 import com.pseddev.playstreak.ui.progress.QuickAddActivityDialogFragment
 import com.pseddev.playstreak.utils.ProUserManager
+import com.pseddev.playstreak.utils.DateFormatter
 
 class PiecesFragment : Fragment() {
     
@@ -101,29 +102,52 @@ class PiecesFragment : Fragment() {
     
     private fun showPieceDetails(details: PieceDetails) {
         binding.pieceDetailsCard.visibility = View.VISIBLE
-        binding.pieceNameText.text = details.piece.name
-        binding.totalActivitiesText.text = "Total activities: ${details.activities.size}"
+        val piece = details.piece
         
-        val practiceCount = details.activities.count { it.activityType == com.pseddev.playstreak.data.entities.ActivityType.PRACTICE }
-        val performanceCount = details.activities.count { it.activityType == com.pseddev.playstreak.data.entities.ActivityType.PERFORMANCE }
+        // Header
+        binding.pieceNameText.text = piece.name
         
-        binding.practiceCountText.text = "Practice activities: $practiceCount"
-        binding.performanceCountText.text = "Performances: $performanceCount"
+        // Basic Information Section
+        binding.pieceTypeText.text = "Type: ${piece.type.name.lowercase().replaceFirstChar { it.uppercase() }}"
+        binding.isFavoriteText.text = "Favorite: ${if (piece.isFavorite) "Yes" else "No"}"
+        binding.dateCreatedText.text = "Created: ${DateFormatter.formatDateOnly(piece.dateCreated)}"
+        
+        // Practice Statistics Section (from Phase 1 statistics)
+        binding.practiceCountText.text = "Total Practices: ${piece.practiceCount}"
+        binding.lastPracticeText.text = "Last Practice: ${DateFormatter.formatDate(piece.lastPracticeDate)}"
+        binding.secondLastPracticeText.text = "2nd Last Practice: ${DateFormatter.formatDateWithFallback(piece.secondLastPracticeDate)}"
+        binding.thirdLastPracticeText.text = "3rd Last Practice: ${DateFormatter.formatDateWithFallback(piece.thirdLastPracticeDate)}"
+        binding.lastSatisfactoryPracticeText.text = "Last Satisfactory Practice: ${DateFormatter.formatDate(piece.lastSatisfactoryPractice)}"
+        
+        // Performance Statistics Section (from Phase 1 statistics)
+        binding.performanceCountText.text = "Total Performances: ${piece.performanceCount}"
+        binding.lastPerformanceText.text = "Last Performance: ${DateFormatter.formatDate(piece.lastPerformanceDate)}"
+        binding.secondLastPerformanceText.text = "2nd Last Performance: ${DateFormatter.formatDateWithFallback(piece.secondLastPerformanceDate)}"
+        binding.thirdLastPerformanceText.text = "3rd Last Performance: ${DateFormatter.formatDateWithFallback(piece.thirdLastPerformanceDate)}"
+        binding.lastSatisfactoryPerformanceText.text = "Last Satisfactory Performance: ${DateFormatter.formatDate(piece.lastSatisfactoryPerformance)}"
+        
+        // Legacy Activity Data Section (calculated from activities for comparison)
+        val practiceCountLegacy = details.activities.count { it.activityType == com.pseddev.playstreak.data.entities.ActivityType.PRACTICE }
+        val performanceCountLegacy = details.activities.count { it.activityType == com.pseddev.playstreak.data.entities.ActivityType.PERFORMANCE }
+        binding.totalActivitiesText.text = "Total Activities: ${details.activities.size} (P:$practiceCountLegacy, F:$performanceCountLegacy)"
         
         val totalMinutes = details.activities.filter { it.minutes > 0 }.sumOf { it.minutes }
         if (totalMinutes > 0) {
-            binding.totalTimeText.text = "Total tracked time: $totalMinutes minutes"
+            binding.totalTimeText.text = "Total Tracked Time: $totalMinutes minutes"
             binding.totalTimeText.visibility = View.VISIBLE
         } else {
-            binding.totalTimeText.visibility = View.GONE
+            binding.totalTimeText.text = "Total Tracked Time: No time data"
+            binding.totalTimeText.visibility = View.VISIBLE
         }
         
         if (details.lastActivity != null) {
-            val dateStr = android.text.format.DateFormat.format("MMM d, yyyy", details.lastActivity.timestamp)
-            binding.lastActivityText.text = "Last activity: $dateStr"
+            binding.lastActivityText.text = "Last Activity (Legacy): ${DateFormatter.formatDate(details.lastActivity.timestamp)}"
         } else {
-            binding.lastActivityText.text = "No activities recorded"
+            binding.lastActivityText.text = "Last Activity (Legacy): No activities recorded"
         }
+        
+        // System Information Section
+        binding.lastUpdatedText.text = "Last Updated: ${DateFormatter.formatDateTime(piece.lastUpdated)}"
         
         binding.closeDetailsButton.setOnClickListener {
             binding.pieceDetailsCard.visibility = View.GONE
