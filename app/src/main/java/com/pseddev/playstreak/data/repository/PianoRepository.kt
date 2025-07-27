@@ -4,6 +4,7 @@ import android.util.Log
 import com.pseddev.playstreak.data.daos.ActivityDao
 import com.pseddev.playstreak.data.daos.PieceOrTechniqueDao
 import com.pseddev.playstreak.data.entities.Activity
+import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
 import com.pseddev.playstreak.ui.progress.ActivityWithPiece
@@ -89,14 +90,21 @@ class PianoRepository(
         return getActivitiesForDateRange(startTime, endTime)
     }
     
-    suspend fun insertActivity(activity: Activity) = 
+    suspend fun insertActivity(activity: Activity) {
         activityDao.insert(activity)
+        updatePieceStatistics(activity.pieceOrTechniqueId)
+    }
     
-    suspend fun updateActivity(activity: Activity) = 
+    suspend fun updateActivity(activity: Activity) {
         activityDao.update(activity)
+        updatePieceStatistics(activity.pieceOrTechniqueId)
+    }
     
-    suspend fun deleteActivity(activity: Activity) = 
+    suspend fun deleteActivity(activity: Activity) {
+        val pieceId = activity.pieceOrTechniqueId
         activityDao.delete(activity)
+        updatePieceStatistics(pieceId)
+    }
     
     suspend fun deleteAllActivities() = 
         activityDao.deleteAll()
@@ -127,6 +135,22 @@ class PianoRepository(
     suspend fun getPieceOrTechniqueById(id: Long): PieceOrTechnique? {
         return pieceOrTechniqueDao.getById(id)
     }
+    
+    // Statistics-based query methods for improved performance
+    fun getPiecesWithPracticeHistory(): Flow<List<PieceOrTechnique>> = 
+        pieceOrTechniqueDao.getPiecesWithPracticeHistory()
+    
+    fun getPiecesWithPerformanceHistory(): Flow<List<PieceOrTechnique>> = 
+        pieceOrTechniqueDao.getPiecesWithPerformanceHistory()
+    
+    fun getRecentlyPracticedPieces(limit: Int = 10): Flow<List<PieceOrTechnique>> = 
+        pieceOrTechniqueDao.getRecentlyPracticedPieces(limit)
+    
+    fun getRecentlyPerformedPieces(limit: Int = 10): Flow<List<PieceOrTechnique>> = 
+        pieceOrTechniqueDao.getRecentlyPerformedPieces(limit)
+    
+    fun getPiecesWithSatisfactoryPractice(): Flow<List<PieceOrTechnique>> = 
+        pieceOrTechniqueDao.getPiecesWithSatisfactoryPractice()
     
     suspend fun exportToCsv(writer: Writer) {
         Log.d("ExportDebug", "Repository.exportToCsv called")
@@ -216,6 +240,57 @@ class PianoRepository(
         }
         
         return result
+    }
+    
+    private suspend fun updatePieceStatistics(pieceId: Long) {
+        try {
+            val piece = pieceOrTechniqueDao.getById(pieceId) ?: return
+            val activities = getActivitiesForPiece(pieceId).first()
+            
+            // Separate activities by type
+            val practices = activities.filter { it.activityType == ActivityType.PRACTICE }
+                .sortedByDescending { it.timestamp }
+            val performances = activities.filter { it.activityType == ActivityType.PERFORMANCE }
+                .sortedByDescending { it.timestamp }
+            
+            // Calculate statistics
+            val practiceCount = practices.size
+            val performanceCount = performances.size
+            
+            // Get last dates for practices
+            val lastPracticeDate = practices.getOrNull(0)?.timestamp
+            val secondLastPracticeDate = practices.getOrNull(1)?.timestamp
+            val thirdLastPracticeDate = practices.getOrNull(2)?.timestamp
+            
+            // Get last dates for performances
+            val lastPerformanceDate = performances.getOrNull(0)?.timestamp
+            val secondLastPerformanceDate = performances.getOrNull(1)?.timestamp
+            val thirdLastPerformanceDate = performances.getOrNull(2)?.timestamp
+            
+            // Find last satisfactory activities (level 4 for practice, level 3 for performance)
+            val lastSatisfactoryPractice = practices.firstOrNull { it.level >= 4 }?.timestamp
+            val lastSatisfactoryPerformance = performances.firstOrNull { it.level >= 3 }?.timestamp
+            
+            // Update piece with calculated statistics
+            val updatedPiece = piece.copy(
+                practiceCount = practiceCount,
+                performanceCount = performanceCount,
+                lastPracticeDate = lastPracticeDate,
+                secondLastPracticeDate = secondLastPracticeDate,
+                thirdLastPracticeDate = thirdLastPracticeDate,
+                lastPerformanceDate = lastPerformanceDate,
+                secondLastPerformanceDate = secondLastPerformanceDate,
+                thirdLastPerformanceDate = thirdLastPerformanceDate,
+                lastSatisfactoryPractice = lastSatisfactoryPractice,
+                lastSatisfactoryPerformance = lastSatisfactoryPerformance,
+                lastUpdated = System.currentTimeMillis()
+            )
+            
+            pieceOrTechniqueDao.update(updatedPiece)
+            Log.d("PieceStats", "Updated statistics for piece ${piece.name}: practices=$practiceCount, performances=$performanceCount")
+        } catch (e: Exception) {
+            Log.e("PieceStats", "Error updating piece statistics for piece $pieceId", e)
+        }
     }
     
 }
