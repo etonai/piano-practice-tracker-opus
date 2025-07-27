@@ -8,7 +8,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -27,7 +26,6 @@ import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.PreferencesManager
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
-import androidx.recyclerview.widget.LinearLayoutManager
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.YearMonth
@@ -50,7 +48,6 @@ class CalendarFragment : Fragment() {
     private var currentDisplayMonth: YearMonth = YearMonth.now()
     private lateinit var proUserManager: ProUserManager
     private lateinit var preferencesManager: PreferencesManager
-    private lateinit var calendarActivitiesAdapter: CalendarActivitiesAdapter
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,7 +64,6 @@ class CalendarFragment : Fragment() {
         proUserManager = ProUserManager.getInstance(requireContext())
         preferencesManager = PreferencesManager.getInstance(requireContext())
         
-        setupCalendarActivitiesAdapter()
         setupClickListeners()
         setupCalendar()
         updateMonthDisplay()
@@ -195,24 +191,82 @@ class CalendarFragment : Fragment() {
         }
     }
     
-    private fun setupCalendarActivitiesAdapter() {
-        calendarActivitiesAdapter = CalendarActivitiesAdapter(
-            onDeleteClick = { activityWithPiece ->
-                showDeleteConfirmationDialog(activityWithPiece)
-            },
-            onEditClick = { activityWithPiece ->
-                editActivity(activityWithPiece)
-            }
-        )
+    private fun populateActivityList(activities: List<ActivityWithPiece>) {
+        binding.linearLayoutSelectedDateActivities.removeAllViews()
         
-        binding.recyclerViewSelectedDateActivities.apply {
-            adapter = calendarActivitiesAdapter
-            layoutManager = object : LinearLayoutManager(requireContext()) {
-                override fun canScrollVertically(): Boolean {
-                    return false // Disable scrolling since we're inside a ScrollView
+        for (activityWithPiece in activities) {
+            val itemBinding = com.pseddev.playstreak.databinding.ItemTimelineActivityBinding.inflate(
+                layoutInflater, 
+                binding.linearLayoutSelectedDateActivities, 
+                false
+            )
+            
+            // Bind the activity data using the same logic as TimelineAdapter
+            bindActivityView(itemBinding, activityWithPiece)
+            
+            binding.linearLayoutSelectedDateActivities.addView(itemBinding.root)
+        }
+    }
+    
+    private fun bindActivityView(itemBinding: com.pseddev.playstreak.databinding.ItemTimelineActivityBinding, item: ActivityWithPiece) {
+        val activity = item.activity
+        val piece = item.pieceOrTechnique
+        val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
+        val timeFormat = SimpleDateFormat("h:mm a", Locale.US)
+        
+        itemBinding.dateText.text = dateFormat.format(Date(activity.timestamp))
+        itemBinding.timeText.text = timeFormat.format(Date(activity.timestamp))
+        
+        // Show technique emoji indicator for techniques
+        val displayName = if (piece.type == com.pseddev.playstreak.data.entities.ItemType.TECHNIQUE) {
+            "🎼 ${piece.name}"
+        } else {
+            piece.name
+        }
+        itemBinding.pieceNameText.text = displayName
+        
+        val typeText = when (activity.activityType) {
+            ActivityType.PRACTICE -> {
+                val level = when (activity.level) {
+                    1 -> "Level 1 - Essentials"
+                    2 -> "Level 2 - Incomplete"
+                    3 -> "Level 3 - Complete with Issues"
+                    4 -> "Level 4 - Complete and Satisfactory"
+                    else -> "Level ${activity.level}"
                 }
+                "Practice - $level"
             }
-            isNestedScrollingEnabled = false // Ensure nested scrolling is disabled
+            ActivityType.PERFORMANCE -> {
+                val level = when (activity.level) {
+                    1 -> "Level 1 - Failed"
+                    2 -> "Level 2 - Unsatisfactory"
+                    3 -> "Level 3 - Satisfactory"
+                    else -> "Level ${activity.level}"
+                }
+                val type = if (activity.performanceType == "online") "Online" else "Live"
+                "Performance - $type - $level"
+            }
+        }
+        itemBinding.activityTypeText.text = typeText
+        
+        if (activity.minutes > 0) {
+            itemBinding.durationText.text = "${activity.minutes} minutes"
+        } else {
+            itemBinding.durationText.text = ""
+        }
+        
+        if (activity.notes.isNotEmpty()) {
+            itemBinding.notesText.text = activity.notes
+        } else {
+            itemBinding.notesText.text = ""
+        }
+        
+        itemBinding.deleteButton.setOnClickListener {
+            showDeleteConfirmationDialog(item)
+        }
+        
+        itemBinding.editButton.setOnClickListener {
+            editActivity(item)
         }
     }
     
@@ -247,8 +301,8 @@ class CalendarFragment : Fragment() {
             // Hide both displays when no activities
             binding.selectedDateActivities.text = ""
             binding.selectedDateActivities.visibility = View.VISIBLE
-            binding.recyclerViewSelectedDateActivities.visibility = View.GONE
-            calendarActivitiesAdapter.submitList(emptyList())
+            binding.linearLayoutSelectedDateActivities.visibility = View.GONE
+            binding.linearLayoutSelectedDateActivities.removeAllViews()
         } else {
             val activityTypeText = getActivityTypeDescription(activities)
             val activityWord = if (activities.size == 1) "activity" else "activities"
@@ -256,15 +310,15 @@ class CalendarFragment : Fragment() {
             binding.activityColorIndicator.visibility = View.VISIBLE
             
             if (isDetailModeEnabled) {
-                // Detail mode: Show RecyclerView with Timeline-style cards
+                // Detail mode: Show LinearLayout with Timeline-style cards
                 binding.selectedDateActivities.visibility = View.GONE
-                binding.recyclerViewSelectedDateActivities.visibility = View.VISIBLE
-                calendarActivitiesAdapter.submitList(activities)
+                binding.linearLayoutSelectedDateActivities.visibility = View.VISIBLE
+                populateActivityList(activities)
             } else {
                 // Regular mode: Show simple text summary
                 binding.selectedDateActivities.visibility = View.VISIBLE
-                binding.recyclerViewSelectedDateActivities.visibility = View.GONE
-                calendarActivitiesAdapter.submitList(emptyList())
+                binding.linearLayoutSelectedDateActivities.visibility = View.GONE
+                binding.linearLayoutSelectedDateActivities.removeAllViews()
                 
                 val summary = activities.joinToString("\n") { item ->
                     val time = android.text.format.DateFormat.format("h:mm a", item.activity.timestamp)
@@ -275,6 +329,11 @@ class CalendarFragment : Fragment() {
                 }
                 binding.selectedDateActivities.text = summary
             }
+        }
+        
+        // Scroll to top of the details section when date changes
+        binding.scrollViewCalendarDetails.post {
+            binding.scrollViewCalendarDetails.smoothScrollTo(0, 0)
         }
     }
     

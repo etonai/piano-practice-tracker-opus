@@ -58,7 +58,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Show detailed activity cards below calendar (like Timeline view)"
+                            android:text="Show detailed activity cards below calendar with edit and delete options"
                             android:textAppearance="?attr/textAppearanceBody2"
                             android:textColor="?android:attr/textColorSecondary"
                             android:layout_marginTop="4dp" />
@@ -76,7 +76,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="When enabled, selected calendar dates will show activities in detailed cards with edit and delete options, similar to the Timeline view."
+                    android:text="When enabled, selected calendar dates will show activities as individual cards with full details, edit buttons, and delete buttons instead of a simple text summary."
                     android:textAppearance="?attr/textAppearanceCaption"
                     android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginTop="12dp" />

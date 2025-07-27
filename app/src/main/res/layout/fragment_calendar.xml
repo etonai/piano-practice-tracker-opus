@@ -58,6 +58,7 @@
         app:cv_dayViewResource="@layout/calendar_day_layout" />
 
     <ScrollView
+        android:id="@+id/scrollViewCalendarDetails"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -173,15 +174,14 @@
                 android:layout_marginTop="8dp"
                 android:textAppearance="?attr/textAppearanceBody2" />
 
-            <!-- Detailed mode: RecyclerView with Timeline-style cards -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewSelectedDateActivities"
+            <!-- Detailed mode: LinearLayout with Timeline-style cards -->
+            <LinearLayout
+                android:id="@+id/linearLayoutSelectedDateActivities"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:visibility="gone"
-                android:nestedScrollingEnabled="false"
-                android:clipToPadding="false" />
+                android:orientation="vertical"
+                android:visibility="gone" />
 
             <!-- Color Legend -->
             <TextView
