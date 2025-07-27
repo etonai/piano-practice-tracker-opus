@@ -77,14 +77,17 @@ class MainFragment : Fragment() {
                 "Manage Favorites"
             }
             binding.buttonManageFavorites.text = buttonText
+            binding.favoritesCountText.text = "Favorites: $count"
         }
         
         viewModel.piecesCount.observe(viewLifecycleOwner) { count ->
             binding.buttonAddPiece.text = "Add Piece ($count)"
+            binding.piecesCountText.text = "Pieces: $count"
         }
         
         viewModel.activitiesCount.observe(viewLifecycleOwner) { count ->
             binding.buttonAddActivity.text = "Add Activity ($count)"
+            binding.activitiesCountText.text = "Activities: $count"
         }
         
         // Set version text
