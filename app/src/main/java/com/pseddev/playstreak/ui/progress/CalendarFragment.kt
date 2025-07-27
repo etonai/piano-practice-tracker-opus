@@ -24,6 +24,11 @@ import com.pseddev.playstreak.R
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.databinding.FragmentCalendarBinding
 import com.pseddev.playstreak.utils.ProUserManager
+import com.pseddev.playstreak.utils.PreferencesManager
+import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
+import androidx.recyclerview.widget.LinearLayoutManager
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
@@ -44,6 +49,8 @@ class CalendarFragment : Fragment() {
     private var monthlyActivities: Map<LocalDate, List<ActivityWithPiece>> = emptyMap()
     private var currentDisplayMonth: YearMonth = YearMonth.now()
     private lateinit var proUserManager: ProUserManager
+    private lateinit var preferencesManager: PreferencesManager
+    private lateinit var calendarActivitiesAdapter: CalendarActivitiesAdapter
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,7 +65,9 @@ class CalendarFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         proUserManager = ProUserManager.getInstance(requireContext())
+        preferencesManager = PreferencesManager.getInstance(requireContext())
         
+        setupCalendarActivitiesAdapter()
         setupClickListeners()
         setupCalendar()
         updateMonthDisplay()
@@ -186,6 +195,27 @@ class CalendarFragment : Fragment() {
         }
     }
     
+    private fun setupCalendarActivitiesAdapter() {
+        calendarActivitiesAdapter = CalendarActivitiesAdapter(
+            onDeleteClick = { activityWithPiece ->
+                showDeleteConfirmationDialog(activityWithPiece)
+            },
+            onEditClick = { activityWithPiece ->
+                editActivity(activityWithPiece)
+            }
+        )
+        
+        binding.recyclerViewSelectedDateActivities.apply {
+            adapter = calendarActivitiesAdapter
+            layoutManager = object : LinearLayoutManager(requireContext()) {
+                override fun canScrollVertically(): Boolean {
+                    return false // Disable scrolling since we're inside a ScrollView
+                }
+            }
+            isNestedScrollingEnabled = false // Ensure nested scrolling is disabled
+        }
+    }
+    
     private fun updateSelectedDateView(activities: List<ActivityWithPiece>) {
         // Update color indicator with larger, more prominent display
         val color = getCalendarColorForActivities(activities)
@@ -207,24 +237,44 @@ class CalendarFragment : Fragment() {
             }
         } ?: "Selected Date"
         
+        // Check if detail mode is enabled
+        val isDetailModeEnabled = preferencesManager.isCalendarDetailModeEnabled()
+        
         if (activities.isEmpty()) {
             binding.selectedDateText.text = "$dateText: No activities on this date"
-            binding.selectedDateActivities.text = ""
             binding.activityColorIndicator.visibility = View.GONE
+            
+            // Hide both displays when no activities
+            binding.selectedDateActivities.text = ""
+            binding.selectedDateActivities.visibility = View.VISIBLE
+            binding.recyclerViewSelectedDateActivities.visibility = View.GONE
+            calendarActivitiesAdapter.submitList(emptyList())
         } else {
             val activityTypeText = getActivityTypeDescription(activities)
             val activityWord = if (activities.size == 1) "activity" else "activities"
             binding.selectedDateText.text = "$dateText: ${activities.size} $activityWord ($activityTypeText)"
             binding.activityColorIndicator.visibility = View.VISIBLE
             
-            val summary = activities.joinToString("\n") { item ->
-                val time = android.text.format.DateFormat.format("h:mm a", item.activity.timestamp)
-                val type = item.activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }
-                val level = "(${item.activity.level})"
-                val minutes = if (item.activity.minutes > 0) " - ${item.activity.minutes} min" else ""
-                "$time - ${item.pieceOrTechnique.name} - $type $level$minutes"
+            if (isDetailModeEnabled) {
+                // Detail mode: Show RecyclerView with Timeline-style cards
+                binding.selectedDateActivities.visibility = View.GONE
+                binding.recyclerViewSelectedDateActivities.visibility = View.VISIBLE
+                calendarActivitiesAdapter.submitList(activities)
+            } else {
+                // Regular mode: Show simple text summary
+                binding.selectedDateActivities.visibility = View.VISIBLE
+                binding.recyclerViewSelectedDateActivities.visibility = View.GONE
+                calendarActivitiesAdapter.submitList(emptyList())
+                
+                val summary = activities.joinToString("\n") { item ->
+                    val time = android.text.format.DateFormat.format("h:mm a", item.activity.timestamp)
+                    val type = item.activity.activityType.name.lowercase().replaceFirstChar { it.uppercase() }
+                    val level = "(${item.activity.level})"
+                    val minutes = if (item.activity.minutes > 0) " - ${item.activity.minutes} min" else ""
+                    "$time - ${item.pieceOrTechnique.name} - $type $level$minutes"
+                }
+                binding.selectedDateActivities.text = summary
             }
-            binding.selectedDateActivities.text = summary
         }
     }
     
@@ -298,6 +348,11 @@ class CalendarFragment : Fragment() {
     
     private fun setupClickListeners() {
         binding.buttonAddActivity.setOnClickListener {
+            // Pre-populate with selected calendar date
+            selectedDate?.let { date ->
+                val timestamp = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                EditActivityStorage.setPrePopulatedDate(timestamp)
+            }
             findNavController().navigate(R.id.action_viewProgressFragment_to_addActivityFragment)
         }
         
@@ -345,11 +400,52 @@ class CalendarFragment : Fragment() {
         binding.calendarView.notifyCalendarChanged()
     }
     
+    private fun editActivity(activityWithPiece: ActivityWithPiece) {
+        // Store the activity data for edit mode
+        EditActivityStorage.setEditActivity(
+            activityWithPiece.activity, 
+            activityWithPiece.pieceOrTechnique.name,
+            activityWithPiece.pieceOrTechnique.type
+        )
+        
+        // Navigate directly to select level fragment for editing
+        findNavController().navigate(
+            R.id.action_viewProgressFragment_to_selectLevelFragment,
+            bundleOf(
+                "activityType" to activityWithPiece.activity.activityType,
+                "pieceId" to activityWithPiece.activity.pieceOrTechniqueId,
+                "pieceName" to activityWithPiece.pieceOrTechnique.name,
+                "itemType" to activityWithPiece.pieceOrTechnique.type
+            )
+        )
+    }
+    
+    private fun showDeleteConfirmationDialog(activityWithPiece: ActivityWithPiece) {
+        val dateFormat = SimpleDateFormat("MMM d, yyyy h:mm a", Locale.US)
+        val dateString = dateFormat.format(Date(activityWithPiece.activity.timestamp))
+        val pieceName = activityWithPiece.pieceOrTechnique.name
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Activity")
+            .setMessage("Are you sure you want to delete this activity?\n\n$pieceName\n$dateString")
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteActivity(activityWithPiece)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
     override fun onResume() {
         super.onResume()
         // Refresh calendar and color guide in case Pro status changed while away from this fragment
+        // Also refresh in case detail mode preference changed
         binding.calendarView.notifyCalendarChanged()
         updateColorGuideVisibility()
+        
+        // Refresh selected date view in case detail mode preference changed
+        viewModel.selectedDateActivities.value?.let { activities ->
+            updateSelectedDateView(activities)
+        }
     }
     
     override fun onDestroyView() {

@@ -4,13 +4,15 @@ import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.entities.ItemType
 
 /**
- * Temporary storage for activity data during edit mode.
- * This allows passing activity data between Timeline and Add Activity fragments.
+ * Temporary storage for activity data during edit mode and calendar pre-population.
+ * This allows passing activity data between Timeline and Add Activity fragments,
+ * and pre-populating date from Calendar tab.
  */
 object EditActivityStorage {
     private var editActivity: Activity? = null
     private var pieceName: String? = null
     private var itemType: ItemType? = null
+    private var prePopulatedDate: Long? = null
     
     fun setEditActivity(activity: Activity, pieceName: String = "", itemType: ItemType = ItemType.PIECE) {
         editActivity = activity
@@ -34,9 +36,22 @@ object EditActivityStorage {
         editActivity = null
         pieceName = null
         itemType = null
+        prePopulatedDate = null
     }
     
     fun isEditMode(): Boolean {
         return editActivity != null
+    }
+    
+    fun setPrePopulatedDate(timestamp: Long) {
+        prePopulatedDate = timestamp
+    }
+    
+    fun getPrePopulatedDate(): Long? {
+        return prePopulatedDate
+    }
+    
+    fun clearPrePopulatedDate() {
+        prePopulatedDate = null
     }
 }

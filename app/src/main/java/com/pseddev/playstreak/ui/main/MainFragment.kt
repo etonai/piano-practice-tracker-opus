@@ -108,6 +108,10 @@ class MainFragment : Fragment() {
             findNavController().navigate(R.id.action_mainFragment_to_syncFragment)
         }
         
+        binding.buttonConfiguration.setOnClickListener {
+            findNavController().navigate(R.id.action_mainFragment_to_configurationFragment)
+        }
+        
         binding.buttonTogglePro.setOnClickListener {
             val newStatus = proUserManager.toggleProStatus()
             updateAppTitle()

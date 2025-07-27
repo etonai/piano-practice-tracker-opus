@@ -7,6 +7,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import java.util.*
 
 data class DayActivitySummary(
@@ -103,6 +104,12 @@ class CalendarViewModel(private val repository: PianoRepository) : ViewModel() {
         val startTime = calendar.timeInMillis
         val endTime = calendar.apply { add(Calendar.MONTH, 1) }.timeInMillis
         return Pair(startTime, endTime)
+    }
+    
+    fun deleteActivity(activityWithPiece: ActivityWithPiece) {
+        viewModelScope.launch {
+            repository.deleteActivity(activityWithPiece.activity)
+        }
     }
 }
 

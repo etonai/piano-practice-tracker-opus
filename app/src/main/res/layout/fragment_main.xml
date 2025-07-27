@@ -56,6 +56,17 @@
         app:layout_constraintTop_toBottomOf="@+id/buttonManageFavorites" />
 
     <Button
+        android:id="@+id/buttonConfiguration"
+        style="@style/RoundedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Configuration"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonImportExport" />
+
+    <Button
         android:id="@+id/buttonTogglePro"
         style="@style/RoundedButton"
         android:layout_width="0dp"
@@ -65,7 +76,7 @@
         android:backgroundTint="?attr/colorSecondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonImportExport" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonConfiguration" />
 
     <Button
         android:id="@+id/buttonTestCrash"

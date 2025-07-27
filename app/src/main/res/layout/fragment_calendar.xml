@@ -165,12 +165,23 @@
 
             </LinearLayout>
 
+            <!-- Regular mode: Simple text display -->
             <TextView
                 android:id="@+id/selectedDateActivities"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textAppearance="?attr/textAppearanceBody2" />
+
+            <!-- Detailed mode: RecyclerView with Timeline-style cards -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewSelectedDateActivities"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false" />
 
             <!-- Color Legend -->
             <TextView

@@ -30,6 +30,10 @@
         <action
             android:id="@+id/action_mainFragment_to_addPieceFragment"
             app:destination="@id/addPieceFragment" />
+            
+        <action
+            android:id="@+id/action_mainFragment_to_configurationFragment"
+            app:destination="@id/configurationFragment" />
     </fragment>
 
     <fragment
@@ -235,6 +239,12 @@
         android:name="com.pseddev.playstreak.ui.importexport.ImportExportFragment"
         android:label="Import/Export Data"
         tools:layout="@layout/fragment_import_export" />
+        
+    <fragment
+        android:id="@+id/configurationFragment"
+        android:name="com.pseddev.playstreak.ui.configuration.ConfigurationFragment"
+        android:label="Configuration"
+        tools:layout="@layout/fragment_configuration" />
         
     <dialog
         android:id="@+id/syncDialogFragment"
