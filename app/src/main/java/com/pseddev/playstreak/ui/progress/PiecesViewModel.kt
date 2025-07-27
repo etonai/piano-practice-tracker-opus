@@ -27,7 +27,8 @@ enum class SortDirection {
 data class PieceWithStats(
     val piece: PieceOrTechnique,
     val activityCount: Int,
-    val lastActivityDate: Long?
+    val lastActivityDate: Long?,
+    val isFavorite: Boolean = false
 )
 
 data class PieceDetails(
@@ -50,18 +51,20 @@ class PiecesViewModel(
     
     val piecesWithStats: LiveData<List<PieceWithStats>> = 
         combine(
-            repository.getAllPiecesAndTechniques(),
+            repository.getPiecesWithFavoriteStatus(),
             repository.getAllActivities(),
             sortType,
             sortDirection
-        ) { pieces, activities, currentSortType, currentSortDirection ->
-            val piecesWithStats = pieces
-                .map { piece ->
+        ) { piecesWithFavorites, activities, currentSortType, currentSortDirection ->
+            val piecesWithStats = piecesWithFavorites
+                .map { pieceWithFavorite ->
+                    val piece = pieceWithFavorite.piece
                     val pieceActivities = activities.filter { it.pieceOrTechniqueId == piece.id }
                     PieceWithStats(
                         piece = piece,
                         activityCount = pieceActivities.size,
-                        lastActivityDate = pieceActivities.maxByOrNull { it.timestamp }?.timestamp
+                        lastActivityDate = pieceActivities.maxByOrNull { it.timestamp }?.timestamp,
+                        isFavorite = pieceWithFavorite.isFavorite
                     )
                 }
             
@@ -130,13 +133,13 @@ class PiecesViewModel(
     fun getCurrentSortType(): SortType = sortType.value
     fun getCurrentSortDirection(): SortDirection = sortDirection.value
     
-    fun toggleFavorite(pieceWithStats: PieceWithStats): Boolean {
-        val currentlyFavorite = pieceWithStats.piece.isFavorite
+    suspend fun toggleFavorite(pieceWithStats: PieceWithStats): Boolean {
+        val currentlyFavorite = repository.isFavorite(pieceWithStats.piece.id)
         
         // If trying to add a favorite (not currently favorite), check limits for Free users
         if (!currentlyFavorite) {
-            // Get current favorite count from the live data
-            val currentFavoriteCount = piecesWithStats.value?.count { it.piece.isFavorite } ?: 0
+            // Get current favorite count from repository
+            val currentFavoriteCount = repository.getFavoriteCount()
             
             if (!proUserManager.canAddMoreFavorites(currentFavoriteCount)) {
                 return false // Cannot add more favorites - caller should show upgrade prompt
@@ -144,9 +147,10 @@ class PiecesViewModel(
         }
         
         // Proceed with toggle (either removing favorite or adding within limits)
-        viewModelScope.launch {
-            val updatedPiece = pieceWithStats.piece.copy(isFavorite = !currentlyFavorite)
-            repository.updatePieceOrTechnique(updatedPiece)
+        if (currentlyFavorite) {
+            repository.removeFavorite(pieceWithStats.piece.id)
+        } else {
+            repository.addFavorite(pieceWithStats.piece.id)
         }
         
         return true // Toggle was allowed and performed

@@ -67,8 +67,7 @@ class AddActivityViewModel(
                 val id = repository.insertPieceOrTechnique(
                     PieceOrTechnique(
                         name = TextNormalizer.normalizePieceName(name),
-                        type = type,
-                        isFavorite = false
+                        type = type
                     )
                 )
                 onComplete(id)

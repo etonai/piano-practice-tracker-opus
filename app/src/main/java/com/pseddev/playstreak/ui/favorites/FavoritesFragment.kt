@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.appcompat.app.AlertDialog
@@ -14,6 +15,7 @@ import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.databinding.FragmentFavoritesBinding
 import com.pseddev.playstreak.utils.ProUserManager
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
 
 class FavoritesFragment : Fragment() {
     
@@ -48,16 +50,15 @@ class FavoritesFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = FavoritesAdapter(
             onFavoriteToggle = { pieceOrTechnique ->
-                val success = viewModel.toggleFavorite(pieceOrTechnique)
-                if (!success) {
-                    showFavoriteLimitPrompt()
-                } else {
-                    val message = if (pieceOrTechnique.isFavorite) {
-                        "${pieceOrTechnique.name} removed from favorites"
+                lifecycleScope.launch {
+                    val success = viewModel.toggleFavorite(pieceOrTechnique)
+                    if (!success) {
+                        showFavoriteLimitPrompt()
                     } else {
-                        "${pieceOrTechnique.name} added to favorites"
+                        // In favorites list, pieces are always favorites, so clicking removes them
+                        val message = "${pieceOrTechnique.name} removed from favorites"
+                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                     }
-                    Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                 }
             }
         )

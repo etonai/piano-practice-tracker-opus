@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.appcompat.app.AlertDialog
@@ -15,6 +16,7 @@ import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentPiecesBinding
 import com.pseddev.playstreak.ui.progress.QuickAddActivityDialogFragment
 import com.pseddev.playstreak.utils.ProUserManager
+import kotlinx.coroutines.launch
 
 class PiecesFragment : Fragment() {
     
@@ -53,9 +55,11 @@ class PiecesFragment : Fragment() {
                 viewModel.selectPiece(pieceWithStats.piece.id)
             },
             onFavoriteToggle = { pieceWithStats ->
-                val success = viewModel.toggleFavorite(pieceWithStats)
-                if (!success) {
-                    showFavoriteLimitPrompt()
+                lifecycleScope.launch {
+                    val success = viewModel.toggleFavorite(pieceWithStats)
+                    if (!success) {
+                        showFavoriteLimitPrompt()
+                    }
                 }
             },
             onAddActivityClick = { pieceWithStats ->

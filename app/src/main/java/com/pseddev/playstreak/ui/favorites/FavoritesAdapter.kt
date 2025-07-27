@@ -45,8 +45,8 @@ class FavoritesAdapter(
                 }
             }
             
-            // Set favorite state
-            updateFavoriteIcon(item.isFavorite)
+            // Set favorite state (all items in favorites list are favorites)
+            updateFavoriteIcon(true)
             
             // Handle favorite toggle click
             binding.favoriteButton.setOnClickListener {

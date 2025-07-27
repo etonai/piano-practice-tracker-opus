@@ -16,13 +16,13 @@ class FavoritesViewModel(
     val allPiecesAndTechniques: LiveData<List<PieceOrTechnique>> = 
         repository.getAllPiecesAndTechniques().asLiveData()
     
-    fun toggleFavorite(piece: PieceOrTechnique): Boolean {
-        val currentlyFavorite = piece.isFavorite
+    suspend fun toggleFavorite(piece: PieceOrTechnique): Boolean {
+        val currentlyFavorite = repository.isFavorite(piece.id)
         
         // If trying to add a favorite (not currently favorite), check limits for Free users
         if (!currentlyFavorite) {
-            // Get current favorite count from the live data
-            val currentFavoriteCount = allPiecesAndTechniques.value?.count { it.isFavorite } ?: 0
+            // Get current favorite count from repository
+            val currentFavoriteCount = repository.getFavoriteCount()
             
             if (!proUserManager.canAddMoreFavorites(currentFavoriteCount)) {
                 return false // Cannot add more favorites - caller should show upgrade prompt
@@ -30,9 +30,10 @@ class FavoritesViewModel(
         }
         
         // Proceed with toggle (either removing favorite or adding within limits)
-        viewModelScope.launch {
-            val updatedPiece = piece.copy(isFavorite = !currentlyFavorite)
-            repository.updatePieceOrTechnique(updatedPiece)
+        if (currentlyFavorite) {
+            repository.removeFavorite(piece.id)
+        } else {
+            repository.addFavorite(piece.id)
         }
         
         return true // Toggle was allowed and performed

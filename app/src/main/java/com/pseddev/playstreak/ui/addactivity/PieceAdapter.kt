@@ -12,7 +12,7 @@ import com.pseddev.playstreak.databinding.ItemPieceBinding
 
 sealed class PieceAdapterItem {
     data class Header(val title: String) : PieceAdapterItem()
-    data class Item(val piece: PieceOrTechnique) : PieceAdapterItem()
+    data class Item(val piece: PieceOrTechnique, val isFavorite: Boolean = false) : PieceAdapterItem()
 }
 
 class PieceAdapter(
@@ -47,7 +47,7 @@ class PieceAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val item = getItem(position)) {
             is PieceAdapterItem.Header -> (holder as HeaderViewHolder).bind(item.title)
-            is PieceAdapterItem.Item -> (holder as PieceViewHolder).bind(item.piece)
+            is PieceAdapterItem.Item -> (holder as PieceViewHolder).bind(item.piece, item.isFavorite)
         }
     }
     
@@ -63,9 +63,9 @@ class PieceAdapter(
         private val binding: ItemPieceBinding,
         private val onItemClick: (PieceOrTechnique) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(piece: PieceOrTechnique) {
+        fun bind(piece: PieceOrTechnique, isFavorite: Boolean = false) {
             val icon = if (piece.type == ItemType.PIECE) "🎵" else "⚙️"
-            val favoriteIcon = if (piece.isFavorite) " ⭐" else ""
+            val favoriteIcon = if (isFavorite) " ⭐" else ""
             binding.textPieceName.text = "$icon ${piece.name}$favoriteIcon"
             binding.root.setOnClickListener { onItemClick(piece) }
         }

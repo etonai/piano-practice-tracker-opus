@@ -90,8 +90,8 @@ class DashboardViewModel(
             .asLiveData()
     
     val performanceSuggestions: LiveData<List<SuggestionItem>> = 
-        repository.getAllPiecesAndTechniques()
-            .combine(repository.getAllActivities()) { pieces, activities ->
+        repository.getPiecesWithFavoriteStatus()
+            .combine(repository.getAllActivities()) { piecesWithFavorites, activities ->
                 if (!proUserManager.isProUser()) {
                     return@combine emptyList<SuggestionItem>()
                 }
@@ -114,7 +114,9 @@ class DashboardViewModel(
                 val firstTierSuggestions = mutableListOf<SuggestionItem>()
                 val secondTierSuggestions = mutableListOf<SuggestionItem>()
                 
-                pieces.filter { it.type == ItemType.PIECE }.forEach { piece ->
+                piecesWithFavorites.filter { it.piece.type == ItemType.PIECE }.forEach { pieceWithFavorite ->
+                    val piece = pieceWithFavorite.piece
+                    val isFavorite = pieceWithFavorite.isFavorite
                     val allPieceActivities = pieceActivities[piece.id] ?: emptyList()
                     val piecePerformances = piecePerformanceActivities[piece.id] ?: emptyList()
                     
@@ -145,7 +147,7 @@ class DashboardViewModel(
                         
                         // First tier: Practiced ≥3 times in 28 days BUT not performed in 28 days
                         if (lastPerformanceDate == null || lastPerformanceDate < twentyEightDaysAgo) {
-                            val favoritePrefix = if (piece.isFavorite) "⭐ " else ""
+                            val favoritePrefix = if (isFavorite) "⭐ " else ""
                             firstTierSuggestions.add(
                                 SuggestionItem(
                                     piece = piece,
@@ -156,19 +158,21 @@ class DashboardViewModel(
                                     } else {
                                         "${favoritePrefix}${recentPractices.size} practices, last performance $daysSinceLastPerformance days ago"
                                     },
-                                    suggestionType = SuggestionType.PERFORMANCE
+                                    suggestionType = SuggestionType.PERFORMANCE,
+                                    isFavorite = isFavorite
                                 )
                             )
                         } else if (lastPerformanceDate!! < startOfToday) {
                             // Second tier: Practiced ≥3 times in 28 days AND performed in 28 days BUT not today
-                            val favoritePrefix = if (piece.isFavorite) "⭐ " else ""
+                            val favoritePrefix = if (isFavorite) "⭐ " else ""
                             secondTierSuggestions.add(
                                 SuggestionItem(
                                     piece = piece,
                                     lastActivityDate = lastPerformanceDate, // Use performance date for sorting
                                     daysSinceLastActivity = daysSinceLastPerformance,
                                     suggestionReason = "${favoritePrefix}${recentPractices.size} practices, last performance $daysSinceLastPerformance days ago",
-                                    suggestionType = SuggestionType.PERFORMANCE
+                                    suggestionType = SuggestionType.PERFORMANCE,
+                                    isFavorite = isFavorite
                                 )
                             )
                         }
@@ -201,8 +205,8 @@ class DashboardViewModel(
             .asLiveData()
     
     val suggestions: LiveData<List<SuggestionItem>> = 
-        repository.getAllPiecesAndTechniques()
-            .combine(repository.getAllActivities()) { pieces, activities ->
+        repository.getPiecesWithFavoriteStatus()
+            .combine(repository.getAllActivities()) { piecesWithFavorites, activities ->
                 val now = System.currentTimeMillis()
                 val twoDaysAgo = now - (2 * 24 * 60 * 60 * 1000L)
                 val sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000L)
@@ -221,7 +225,9 @@ class DashboardViewModel(
                 val favoriteSuggestions = mutableListOf<SuggestionItem>()
                 val nonFavoriteSuggestions = mutableListOf<SuggestionItem>()
                 
-                pieces.filter { it.type == ItemType.PIECE }.forEach { piece ->
+                piecesWithFavorites.filter { it.piece.type == ItemType.PIECE }.forEach { pieceWithFavorite ->
+                    val piece = pieceWithFavorite.piece
+                    val isFavorite = pieceWithFavorite.isFavorite
                     val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
                     val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
                     val lastActivityDate = lastActivity?.timestamp
@@ -232,7 +238,7 @@ class DashboardViewModel(
                         Int.MAX_VALUE
                     }
                     
-                    if (piece.isFavorite) {
+                    if (isFavorite) {
                         // Favorites that haven't been practiced in 2+ days AND haven't been practiced today
                         if ((lastActivityDate == null || lastActivityDate < twoDaysAgo) && 
                             (lastActivityDate == null || lastActivityDate < startOfToday)) {
@@ -248,7 +254,8 @@ class DashboardViewModel(
                                     }
                                     val dayText = if (daysSince == 1) "day" else "days"
                                     "$activityTypeText $daysSince $dayText ago"
-                                }
+                                },
+                                    isFavorite = isFavorite
                                 )
                             )
                         }
@@ -266,7 +273,8 @@ class DashboardViewModel(
                                             ActivityType.PERFORMANCE -> "Last performance"
                                         }
                                         "$activityTypeText $daysSince days ago"
-                                    }()
+                                    }(),
+                                    isFavorite = isFavorite
                                 )
                             )
                         }
@@ -288,9 +296,10 @@ class DashboardViewModel(
                     val usedPieceIds = regularFavorites.map { it.piece.id }.toSet()
                     
                     // Get fallback favorites (excluding already used pieces and pieces practiced today)
-                    val allFavorites = pieces.filter { it.type == ItemType.PIECE && it.isFavorite && it.id !in usedPieceIds }
+                    val allFavorites = piecesWithFavorites.filter { it.piece.type == ItemType.PIECE && it.isFavorite && it.piece.id !in usedPieceIds }
                     val fallbackFavorites = if (allFavorites.isNotEmpty()) {
-                        val favoritesWithActivity = allFavorites.mapNotNull { piece ->
+                        val favoritesWithActivity = allFavorites.mapNotNull { pieceWithFavorite ->
+                            val piece = pieceWithFavorite.piece
                             val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
                             val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
                             val lastActivityDate = lastActivity?.timestamp
@@ -317,7 +326,8 @@ class DashboardViewModel(
                                     }
                                     val dayText = if (daysSince == 1) "day" else "days"
                                     "$activityTypeText $daysSince $dayText ago"
-                                }
+                                },
+                                isFavorite = true // This is in the favorites fallback section
                             )
                         }
                         // Get the least recently practiced favorites (highest daysSince)
@@ -349,9 +359,10 @@ class DashboardViewModel(
                     val usedPieceIds = regularNonFavorites.map { it.piece.id }.toSet()
                     
                     // Get fallback non-favorites (excluding already used pieces)
-                    val allNonFavorites = pieces.filter { it.type == ItemType.PIECE && !it.isFavorite && it.id !in usedPieceIds }
+                    val allNonFavorites = piecesWithFavorites.filter { it.piece.type == ItemType.PIECE && !it.isFavorite && it.piece.id !in usedPieceIds }
                     val fallbackNonFavorites = if (allNonFavorites.isNotEmpty()) {
-                        val nonFavoritesWithActivity = allNonFavorites.mapNotNull { piece ->
+                        val nonFavoritesWithActivity = allNonFavorites.mapNotNull { pieceWithFavorite ->
+                            val piece = pieceWithFavorite.piece
                             val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
                             val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
                             val lastActivityDate = lastActivity?.timestamp
@@ -375,7 +386,8 @@ class DashboardViewModel(
                                         }
                                         val dayText = if (daysSince == 1) "day" else "days"
                                         "$activityTypeText $daysSince $dayText ago"
-                                    }
+                                    },
+                                    isFavorite = false // This is in the non-favorites fallback section
                                 )
                             } else null
                         }

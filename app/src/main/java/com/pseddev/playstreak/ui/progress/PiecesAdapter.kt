@@ -58,7 +58,7 @@ class PiecesAdapter(
             }
             
             // Set favorite icon based on favorite status
-            if (item.piece.isFavorite) {
+            if (item.isFavorite) {
                 binding.favoriteIcon.setImageResource(com.pseddev.playstreak.R.drawable.ic_star_filled)
             } else {
                 binding.favoriteIcon.setImageResource(com.pseddev.playstreak.R.drawable.ic_star_outline)

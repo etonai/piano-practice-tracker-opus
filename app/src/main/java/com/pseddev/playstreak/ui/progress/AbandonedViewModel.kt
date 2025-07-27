@@ -28,17 +28,18 @@ class AbandonedViewModel(private val repository: PianoRepository) : ViewModel() 
     
     val abandonedPieces: LiveData<List<AbandonedItem>> = 
         combine(
-            repository.getAllPiecesAndTechniques(),
+            repository.getPiecesWithFavoriteStatus(),
             repository.getAllActivities(),
             sortDirection
-        ) { pieces, activities, currentSortDirection ->
+        ) { piecesWithFavorites, activities, currentSortDirection ->
             val pieceActivities = activities.groupBy { it.pieceOrTechniqueId }
             
             val abandoned = mutableListOf<AbandonedItem>()
             
-            pieces.filter { 
-                it.type == ItemType.PIECE && !it.isFavorite 
-            }.forEach { piece ->
+            piecesWithFavorites.filter { 
+                it.piece.type == ItemType.PIECE && !it.isFavorite 
+            }.forEach { pieceWithFavorite ->
+                val piece = pieceWithFavorite.piece
                 val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
                 val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
                 val lastActivityDate = lastActivity?.timestamp

@@ -41,7 +41,7 @@ class SuggestionsAdapter(
             binding.suggestionReasonText.text = item.suggestionReason
             
             // Show favorite icon for favorite pieces
-            if (item.piece.isFavorite) {
+            if (item.isFavorite) {
                 binding.favoriteIcon.visibility = View.VISIBLE
             } else {
                 binding.favoriteIcon.visibility = View.GONE

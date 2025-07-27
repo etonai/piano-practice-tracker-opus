@@ -47,11 +47,15 @@ class AddPieceViewModel(
                 
                 val piece = PieceOrTechnique(
                     name = TextNormalizer.normalizePieceName(name),
-                    type = type,
-                    isFavorite = isFavorite
+                    type = type
                 )
                 
-                repository.insertPieceOrTechnique(piece)
+                val pieceId = repository.insertPieceOrTechnique(piece)
+                
+                // Add to favorites if requested
+                if (isFavorite) {
+                    repository.addFavorite(pieceId)
+                }
                 _saveResult.value = AddPieceResult.Success
                 
             } catch (e: Exception) {

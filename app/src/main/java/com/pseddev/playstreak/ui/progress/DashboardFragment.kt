@@ -100,7 +100,7 @@ class DashboardFragment : Fragment() {
             if (suggestions.isNotEmpty()) {
                 binding.suggestionsCard.visibility = View.VISIBLE
                 val suggestionText = suggestions.joinToString("\n") { suggestion ->
-                    val favoriteIndicator = if (suggestion.piece.isFavorite) "⭐ " else ""
+                    val favoriteIndicator = if (suggestion.isFavorite) "⭐ " else ""
                     "• $favoriteIndicator${suggestion.piece.name} (${suggestion.suggestionReason})"
                 }
                 binding.suggestionsList.text = suggestionText
@@ -125,7 +125,7 @@ class DashboardFragment : Fragment() {
             if (suggestions.isNotEmpty()) {
                 binding.performanceSuggestionsCard.visibility = View.VISIBLE
                 val suggestionText = suggestions.joinToString("\n") { suggestion ->
-                    val favoriteIndicator = if (suggestion.piece.isFavorite) "⭐ " else ""
+                    val favoriteIndicator = if (suggestion.isFavorite) "⭐ " else ""
                     "• $favoriteIndicator${suggestion.piece.name} (${suggestion.suggestionReason})"
                 }
                 binding.performanceSuggestionsList.text = suggestionText

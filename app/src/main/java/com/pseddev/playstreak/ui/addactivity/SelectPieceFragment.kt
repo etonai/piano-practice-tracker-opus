@@ -81,12 +81,12 @@ class SelectPieceFragment : Fragment() {
                 
                 if (favorites.isNotEmpty()) {
                     groupedItems.add(PieceAdapterItem.Header("Favorites:"))
-                    groupedItems.addAll(favorites.map { PieceAdapterItem.Item(it) })
+                    groupedItems.addAll(favorites.map { PieceAdapterItem.Item(it, isFavorite = true) })
                 }
                 
                 if (all.isNotEmpty()) {
                     groupedItems.add(PieceAdapterItem.Header("All Pieces/Techniques:"))
-                    groupedItems.addAll(all.map { PieceAdapterItem.Item(it) })
+                    groupedItems.addAll(all.map { PieceAdapterItem.Item(it, isFavorite = false) })
                 }
                 
                 adapter.submitList(groupedItems)

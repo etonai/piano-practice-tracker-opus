@@ -11,6 +11,13 @@ This document tracks feature requests, enhancements, and larger development task
 
 ## Open Tickets
 
+### Ticket #11: 🎫 Add Export Pieces TO CSV and Import Activities from CSV
+**Status:** Open  
+**Date Created:** 2025-07-27  
+**Priority:** Medium  
+**Description:** Add two new buttons to the Import/Export Data screen: "Export Pieces to CSV" to export piece statistics and information, and "Import Activities from CSV" to import only activity data without replacing pieces.  
+**Details:** [ticket_11.md](ticketdetail/ticket_11.md)
+
 ### Ticket #10: 🎫 Toggle Verbose Calendar Mode
 **Status:** Open  
 **Date Created:** 2025-07-26  
