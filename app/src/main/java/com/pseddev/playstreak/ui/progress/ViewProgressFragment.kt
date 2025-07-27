@@ -1,3 +1,16 @@
+/*
+ * Timeline Tab Temporarily Disabled for Evaluation
+ * 
+ * DevCycle 2025-0005 Phase 4: Timeline tab has been temporarily removed to evaluate
+ * user preference for Calendar Activities Detail Mode vs. separate Timeline functionality.
+ * 
+ * RESTORATION PROCESS:
+ * 1. In setupTabs() TabLayoutMediator: Uncomment line 65 and move line 66 to position 5
+ * 2. In ViewProgressPagerAdapter: Change getItemCount() back to (6/5) and uncomment line 106
+ * 3. Restore data loading in TimelineViewModel.kt and TimelineFragment.kt
+ * 
+ * All Timeline code is preserved via comments for quick restoration.
+ */
 package com.pseddev.playstreak.ui.progress
 
 import android.os.Bundle
@@ -62,8 +75,8 @@ class ViewProgressFragment : Fragment() {
                 1 -> "Calendar"
                 2 -> "Suggestions"
                 3 -> "Pieces"
-                4 -> "Timeline"
-                5 -> if (proUserManager.isProUser()) "Inactive" else ""
+                // 4 -> "Timeline"  // Timeline tab temporarily disabled for evaluation
+                4 -> if (proUserManager.isProUser()) "Inactive" else ""
                 else -> ""
             }
         }.attach()
@@ -94,7 +107,8 @@ class ViewProgressFragment : Fragment() {
     }
     
     private inner class ViewProgressPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
-        override fun getItemCount(): Int = if (proUserManager.isProUser()) 6 else 5
+        // Timeline tab temporarily disabled - reduced from 6/5 to 5/4 tabs
+        override fun getItemCount(): Int = if (proUserManager.isProUser()) 5 else 4
         
         override fun createFragment(position: Int): Fragment {
             return when (position) {
@@ -102,8 +116,8 @@ class ViewProgressFragment : Fragment() {
                 1 -> CalendarFragment()
                 2 -> SuggestionsFragment()
                 3 -> PiecesFragment()
-                4 -> TimelineFragment()
-                5 -> if (proUserManager.isProUser()) AbandonedFragment() else throw IllegalArgumentException("Invalid position: $position")
+                // 4 -> TimelineFragment()  // Timeline fragment temporarily disabled for evaluation
+                4 -> if (proUserManager.isProUser()) AbandonedFragment() else throw IllegalArgumentException("Invalid position: $position")
                 else -> throw IllegalArgumentException("Invalid position: $position")
             }
         }

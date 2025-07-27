@@ -1,3 +1,16 @@
+/*
+ * Timeline Data Loading Temporarily Disabled
+ * 
+ * DevCycle 2025-0005 Phase 4: Timeline data loading has been disabled to prevent
+ * unnecessary database queries while Timeline tab is hidden for evaluation.
+ * 
+ * RESTORATION PROCESS:
+ * 1. Uncomment the activitiesWithPieces LiveData block (lines 37-56)
+ * 2. Remove the temporary empty LiveData assignment (line 60)
+ * 3. Restore TimelineFragment.kt onViewCreated() functionality
+ * 
+ * All Timeline data loading code is preserved via comments.
+ */
 package com.pseddev.playstreak.ui.progress
 
 import androidx.lifecycle.*
@@ -31,6 +44,9 @@ class TimelineViewModel(
     )
     val showPerformancesOnly: LiveData<Boolean> = _showPerformancesOnly
     
+    /*
+    // Timeline data loading temporarily disabled for evaluation
+    // This prevents unnecessary database queries while Timeline tab is hidden
     val activitiesWithPieces: LiveData<List<ActivityWithPiece>> = 
         _showPerformancesOnly.switchMap { performancesOnly ->
             repository.getAllActivitiesWithPieces()
@@ -51,6 +67,10 @@ class TimelineViewModel(
                 }
                 .asLiveData()
         }
+    */
+    
+    // Temporary empty LiveData to replace disabled Timeline data loading
+    val activitiesWithPieces: LiveData<List<ActivityWithPiece>> = MutableLiveData(emptyList())
     
     val isProUser: Boolean
         get() = proUserManager.isProUser()
