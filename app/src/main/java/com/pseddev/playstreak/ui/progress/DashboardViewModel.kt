@@ -394,8 +394,117 @@ class DashboardViewModel(
                     regularNonFavorites + fallbackNonFavorites
                 } else regularNonFavorites
                 
-                // Combine and sort favorites first, then non-favorites
-                finalFavorites + finalNonFavorites
+                // PRACTICE SUGGESTIONS: Combine favorites first, then non-favorites
+                val practiceSuggestions = (finalFavorites + finalNonFavorites).map {
+                    it.copy(suggestionType = SuggestionType.PRACTICE)
+                }
+                
+                // PERFORMANCE SUGGESTIONS (Pro users only) - same logic as SuggestionsViewModel
+                val performanceSuggestions = if (proUserManager.isProUser()) {
+                    val twentyEightDaysAgo = now - (28 * 24 * 60 * 60 * 1000L)
+                    
+                    val performanceActivities = activities.filter { it.activityType == ActivityType.PERFORMANCE }
+                    val piecePerformanceActivities = performanceActivities.groupBy { it.pieceOrTechniqueId }
+                    
+                    val firstTierSuggestions = mutableListOf<SuggestionItem>()
+                    val secondTierSuggestions = mutableListOf<SuggestionItem>()
+                    
+                    pieces.filter { it.type == ItemType.PIECE }.forEach { piece ->
+                        val allPieceActivities = pieceActivities[piece.id] ?: emptyList()
+                        val piecePerformances = piecePerformanceActivities[piece.id] ?: emptyList()
+                        
+                        // Get practice activities in last 28 days
+                        val recentPractices = allPieceActivities.filter { 
+                            it.activityType == ActivityType.PRACTICE && it.timestamp >= twentyEightDaysAgo 
+                        }
+                        
+                        // Check if practiced at least 3 times in last 28 days AND has at least one Level 4 practice
+                        val hasLevel4Practice = recentPractices.any { it.level == 4 }
+                        if (recentPractices.size >= 3 && hasLevel4Practice) {
+                            val lastPerformance = piecePerformances.maxByOrNull { it.timestamp }
+                            val lastPerformanceDate = lastPerformance?.timestamp
+                            val lastPractice = recentPractices.maxByOrNull { it.timestamp }
+                            val lastPracticeDate = lastPractice?.timestamp
+                            
+                            val daysSinceLastPerformance = if (lastPerformanceDate != null) {
+                                ((now - lastPerformanceDate) / (24 * 60 * 60 * 1000)).toInt()
+                            } else {
+                                Int.MAX_VALUE
+                            }
+                            
+                            val daysSinceLastPractice = if (lastPracticeDate != null) {
+                                ((now - lastPracticeDate) / (24 * 60 * 60 * 1000)).toInt()
+                            } else {
+                                Int.MAX_VALUE
+                            }
+                            
+                            // First tier: Practiced ≥3 times in 28 days BUT not performed in 28 days
+                            if (lastPerformanceDate == null || lastPerformanceDate < twentyEightDaysAgo) {
+                                val favoritePrefix = if (piece.isFavorite) "⭐ " else ""
+                                firstTierSuggestions.add(
+                                    SuggestionItem(
+                                        piece = piece,
+                                        lastActivityDate = lastPracticeDate,
+                                        daysSinceLastActivity = daysSinceLastPractice,
+                                        suggestionReason = if (lastPerformanceDate == null) {
+                                            "${favoritePrefix}${recentPractices.size} practices, never performed"
+                                        } else {
+                                            "${favoritePrefix}${recentPractices.size} practices, last performance $daysSinceLastPerformance days ago"
+                                        },
+                                        suggestionType = SuggestionType.PERFORMANCE
+                                    )
+                                )
+                            } else if (lastPerformanceDate!! < startOfToday) {
+                                // Second tier: Practiced ≥3 times in 28 days AND performed in 28 days BUT not today
+                                val favoritePrefix = if (piece.isFavorite) "⭐ " else ""
+                                secondTierSuggestions.add(
+                                    SuggestionItem(
+                                        piece = piece,
+                                        lastActivityDate = lastPerformanceDate,
+                                        daysSinceLastActivity = daysSinceLastPerformance,
+                                        suggestionReason = "${favoritePrefix}${recentPractices.size} practices, last performance $daysSinceLastPerformance days ago",
+                                        suggestionType = SuggestionType.PERFORMANCE
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Sort first tier by most recent practice (lowest daysSinceLastPractice)
+                    val sortedFirstTier = firstTierSuggestions.sortedWith(
+                        compareBy<SuggestionItem> { it.daysSinceLastActivity }
+                        .thenBy { it.piece.name.lowercase() }
+                    )
+                    
+                    // Sort second tier by least recent performance (highest daysSinceLastPerformance)
+                    val sortedSecondTier = secondTierSuggestions.sortedWith(
+                        compareByDescending<SuggestionItem> { it.daysSinceLastActivity }
+                        .thenByDescending { suggestion -> 
+                            val allPieceActivities = pieceActivities[suggestion.piece.id] ?: emptyList()
+                            allPieceActivities.filter { 
+                                it.activityType == ActivityType.PRACTICE && it.timestamp >= twentyEightDaysAgo 
+                            }.size
+                        }
+                        .thenBy { it.piece.name.lowercase() }
+                    )
+                    
+                    // Combine tiers and take 5 total suggestions
+                    (sortedFirstTier + sortedSecondTier).take(5)
+                } else emptyList()
+                
+                // Combine practice and performance suggestions while respecting favorite limits
+                val allSuggestions = practiceSuggestions + performanceSuggestions
+                
+                // Apply favorite limits across all suggestion types
+                val finalFavoriteLimit = if (proUserManager.isProUser()) 4 else 1
+                val favoriteSuggestionsInAll = allSuggestions.filter { it.piece.isFavorite }
+                val nonFavoriteSuggestionsInAll = allSuggestions.filter { !it.piece.isFavorite }
+                
+                // Limit favorites to user limit and preserve order
+                val limitedFavorites = favoriteSuggestionsInAll.take(finalFavoriteLimit)
+                val limitedNonFavorites = nonFavoriteSuggestionsInAll
+                
+                limitedFavorites + limitedNonFavorites
             }
             .asLiveData()
     

@@ -324,8 +324,19 @@ class SuggestionsViewModel(
                     (sortedFirstTier + sortedSecondTier).take(5)
                 } else emptyList()
                 
-                // Combine practice suggestions first, then performance suggestions
-                practiceSuggestions + performanceSuggestions
+                // Combine practice and performance suggestions while respecting favorite limits
+                val allSuggestions = practiceSuggestions + performanceSuggestions
+                
+                // Apply favorite limits across all suggestion types
+                val finalFavoriteLimit = if (proUserManager.isProUser()) 4 else 1
+                val favoriteSuggestionsInAll = allSuggestions.filter { it.piece.isFavorite }
+                val nonFavoriteSuggestionsInAll = allSuggestions.filter { !it.piece.isFavorite }
+                
+                // Limit favorites to user limit and preserve order
+                val limitedFavorites = favoriteSuggestionsInAll.take(finalFavoriteLimit)
+                val limitedNonFavorites = nonFavoriteSuggestionsInAll
+                
+                limitedFavorites + limitedNonFavorites
             }
             .asLiveData()
 }
