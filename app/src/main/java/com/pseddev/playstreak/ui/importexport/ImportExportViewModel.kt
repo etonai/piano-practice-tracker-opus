@@ -16,6 +16,8 @@ import com.pseddev.playstreak.utils.CsvHandler
 import com.pseddev.playstreak.utils.GoogleDriveHelper
 import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.SyncManager
+import com.pseddev.playstreak.data.models.JsonImportResult
+import com.pseddev.playstreak.data.models.JsonValidationResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +49,12 @@ class ImportExportViewModel(
     private val _validationResult = MutableLiveData<Event<CsvHandler.CsvValidationResult>>()
     val validationResult: LiveData<Event<CsvHandler.CsvValidationResult>> = _validationResult
     
+    private val _jsonImportResult = MutableLiveData<Event<Result<JsonImportResult>>>()
+    val jsonImportResult: LiveData<Event<Result<JsonImportResult>>> = _jsonImportResult
+    
+    private val _jsonValidationResult = MutableLiveData<Event<JsonValidationResult>>()
+    val jsonValidationResult: LiveData<Event<JsonValidationResult>> = _jsonValidationResult
+    
     private val _purgeResult = MutableLiveData<Event<Result<String>>>()
     val purgeResult: LiveData<Event<Result<String>>> = _purgeResult
     
@@ -72,13 +80,36 @@ class ImportExportViewModel(
             }
             // Update last export time
             sharedPrefs.edit().putLong("last_export_time", System.currentTimeMillis()).apply()
-            _exportResult.value = Event(Result.success("Export successful!"))
+            _exportResult.value = Event(Result.success("CSV export successful!"))
         } catch (e: Exception) {
             Log.e("ExportDebug", "Exception in ViewModel: ${e.javaClass.simpleName} - ${e.message}", e)
             // Record crash context for CSV export error
             crashlyticsManager.recordCsvError("export", 0, e) // Activity count not available at this level
             // Add more detailed error information
-            val errorMessage = "Export failed: ${e.javaClass.simpleName} - ${e.message}"
+            val errorMessage = "CSV export failed: ${e.javaClass.simpleName} - ${e.message}"
+            _exportResult.value = Event(Result.failure(Exception(errorMessage, e)))
+        } finally {
+            _isLoading.value = false
+        }
+    }
+    
+    suspend fun exportToJson(writer: Writer) {
+        if (BuildConfig.DEBUG) {
+            Log.d("JsonExport", "Starting JSON export")
+        }
+        _isLoading.value = true
+        try {
+            withContext(Dispatchers.IO) {
+                repository.exportToJson(writer)
+            }
+            // Update last export time
+            sharedPrefs.edit().putLong("last_export_time", System.currentTimeMillis()).apply()
+            _exportResult.value = Event(Result.success("JSON export successful!"))
+        } catch (e: Exception) {
+            Log.e("JsonExport", "Exception in ViewModel: ${e.javaClass.simpleName} - ${e.message}", e)
+            // Record crash context for JSON export error
+            crashlyticsManager.recordCsvError("json_export", 0, e) // Reuse CSV error tracking for JSON
+            val errorMessage = "JSON export failed: ${e.javaClass.simpleName} - ${e.message}"
             _exportResult.value = Event(Result.failure(Exception(errorMessage, e)))
         } finally {
             _isLoading.value = false
@@ -118,6 +149,48 @@ class ImportExportViewModel(
                         activityCount = 0,
                         uniquePieceCount = 0,
                         errors = listOf("Failed to validate CSV: ${e.message}")
+                    )
+                )
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    
+    fun importFromJson(jsonContent: String) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                // First validate the JSON against user limits
+                val pieceLimit = proUserManager.getPieceLimit()
+                val activityLimit = proUserManager.getActivityLimit()
+                
+                val validationResult = withContext(Dispatchers.IO) {
+                    repository.validateJsonForImport(jsonContent.reader(), pieceLimit, activityLimit)
+                }
+                
+                if (!validationResult.isValid) {
+                    // Validation failed - show error dialog
+                    _jsonValidationResult.value = Event(validationResult)
+                } else {
+                    // Validation passed - proceed with actual import using fresh reader
+                    val importResult = withContext(Dispatchers.IO) {
+                        repository.importFromJson(jsonContent.reader())
+                    }
+                    
+                    _jsonImportResult.value = Event(Result.success(importResult))
+                }
+                
+            } catch (e: Exception) {
+                // Record crash context for JSON import error
+                crashlyticsManager.recordCsvError("json_import", 0, e) // Reuse CSV error tracking for JSON
+                _jsonValidationResult.value = Event(
+                    JsonValidationResult(
+                        isValid = false,
+                        pieceCount = 0,
+                        activityCount = 0,
+                        errors = listOf("Failed to validate JSON: ${e.message}"),
+                        formatVersion = null
                     )
                 )
             } finally {

@@ -9,7 +9,11 @@ import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
 import com.pseddev.playstreak.ui.progress.ActivityWithPiece
 import com.pseddev.playstreak.utils.CsvHandler
+import com.pseddev.playstreak.utils.JsonExporter
+import com.pseddev.playstreak.utils.JsonImporter
 import com.pseddev.playstreak.utils.StreakCalculator
+import com.pseddev.playstreak.data.models.JsonImportResult
+import com.pseddev.playstreak.data.models.JsonValidationResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -240,6 +244,104 @@ class PianoRepository(
         }
         
         return result
+    }
+    
+    suspend fun exportToJson(writer: Writer) {
+        Log.d("JsonExport", "Repository.exportToJson called")
+        try {
+            Log.d("JsonExport", "Getting pieces and activities from database...")
+            val pieces = getAllPiecesAndTechniques().first()
+            val activities = getAllActivities().first().sortedBy { it.timestamp }
+            
+            Log.d("JsonExport", "Got ${pieces.size} pieces and ${activities.size} activities")
+            Log.d("JsonExport", "Calling JsonExporter.exportToJson")
+            
+            JsonExporter.exportToJson(writer, pieces, activities)
+            
+            Log.d("JsonExport", "JsonExporter.exportToJson completed")
+        } catch (e: Exception) {
+            Log.e("JsonExport", "Exception in Repository.exportToJson: ${e.javaClass.simpleName} - ${e.message}", e)
+            throw e
+        }
+    }
+    
+    suspend fun validateJsonForImport(reader: java.io.Reader, pieceLimit: Int, activityLimit: Int): JsonValidationResult {
+        return JsonImporter.validateJson(reader, pieceLimit, activityLimit)
+    }
+    
+    suspend fun importFromJson(reader: java.io.Reader): JsonImportResult {
+        Log.d("JsonImport", "Repository.importFromJson called")
+        
+        try {
+            // First validate and parse the JSON
+            val importResult = JsonImporter.importFromJson(reader)
+            
+            if (!importResult.success) {
+                return importResult
+            }
+            
+            // Get the imported data
+            val importedPieces = JsonImporter.getLastImportedPieces()
+            val importedActivities = JsonImporter.getLastImportedActivities()
+            
+            Log.d("JsonImport", "Importing ${importedPieces.size} pieces and ${importedActivities.size} activities")
+            
+            // Clear existing data
+            deleteAllActivities()
+            deleteAllPiecesAndTechniques()
+            
+            // Create piece name to new ID mapping
+            val pieceNameToIdMap = mutableMapOf<String, Long>()
+            
+            // Insert pieces and build mapping
+            importedPieces.forEach { piece ->
+                val newId = insertPieceOrTechnique(piece)
+                pieceNameToIdMap[piece.name] = newId
+                Log.d("JsonImport", "Inserted piece '${piece.name}' with new ID $newId")
+            }
+            
+            // Create mapping from original piece IDs to new piece IDs
+            val originalPieceIdToNewIdMap = mutableMapOf<Long, Long>()
+            val originalPieceIds = JsonImporter.getLastOriginalPieceIds()
+            
+            originalPieceIds.forEach { (pieceName, originalId) ->
+                val newId = pieceNameToIdMap[pieceName]
+                if (newId != null) {
+                    originalPieceIdToNewIdMap[originalId] = newId
+                }
+            }
+            
+            // Insert activities with correct piece IDs
+            importedActivities.forEach { activity ->
+                val newPieceId = originalPieceIdToNewIdMap[activity.pieceOrTechniqueId]
+                if (newPieceId != null) {
+                    val activityWithCorrectId = activity.copy(pieceOrTechniqueId = newPieceId)
+                    insertActivity(activityWithCorrectId)
+                } else {
+                    Log.w("JsonImport", "Could not find new piece ID for original piece ID ${activity.pieceOrTechniqueId}")
+                }
+            }
+            
+            Log.d("JsonImport", "JSON import completed successfully")
+            
+            return JsonImportResult(
+                success = true,
+                piecesImported = importedPieces.size,
+                activitiesImported = importedActivities.size,
+                errors = emptyList(),
+                warnings = emptyList()
+            )
+            
+        } catch (e: Exception) {
+            Log.e("JsonImport", "Exception in Repository.importFromJson: ${e.javaClass.simpleName} - ${e.message}", e)
+            return JsonImportResult(
+                success = false,
+                piecesImported = 0,
+                activitiesImported = 0,
+                errors = listOf("Import failed: ${e.message}"),
+                warnings = emptyList()
+            )
+        }
     }
     
     private suspend fun updatePieceStatistics(pieceId: Long) {

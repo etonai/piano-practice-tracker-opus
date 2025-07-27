@@ -108,9 +108,14 @@ Wait for user confirmation before using `git commit` commands.
 2. **🔄 In Progress** → **🔍 In Verification**: Mark when implementation is complete
 3. **🔍 In Verification** → **✅ Completed**: Mark ONLY after user verification
 
+**For DevCycle Phases** (documented in `app/docs/DevCycle_*.md`):
+1. **🎫 Open** → **🔄 In Progress**: Mark when starting work
+2. **🔄 In Progress** → **🔍 IN VERIFICATION**: Mark when implementation is complete
+3. **🔍 IN VERIFICATION** → **✅ COMPLETED**: Mark ONLY after user verification
+
 ### Critical Rules
 
-🚨 **NEVER** mark any item as complete/implemented/fixed until the user has:
+🚨 **NEVER** mark any item as complete/implemented/fixed/COMPLETED until the user has:
 - Tested the implementation
 - Confirmed it works as expected
 - Explicitly approved the work
@@ -121,6 +126,14 @@ Wait for user confirmation before using `git commit` commands.
 - "Did I wait for their approval?"
 
 If any answer is NO, use verification status instead.
+
+⚠️ **CRITICAL REMINDER FOR DEVCYCLE PHASES:**
+DevCycle phases should NEVER be marked as "✅ COMPLETED" just because code implementation is finished. Code implementation completion only means the phase moves to "🔍 IN VERIFICATION" status. Only mark as "✅ COMPLETED" after:
+1. User has built/tested the implementation
+2. User confirms functionality works as expected
+3. User explicitly approves the work
+
+**Remember:** Implementation ≠ Completion. Completion = Implementation + User Verification + User Approval.
 
 ### Correct Procedure
 1. Complete the code changes
