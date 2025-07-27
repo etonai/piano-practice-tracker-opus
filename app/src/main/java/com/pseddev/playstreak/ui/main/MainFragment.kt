@@ -67,6 +67,25 @@ class MainFragment : Fragment() {
         } else {
             View.GONE
         }
+        
+        // Hide testing/development buttons in production builds
+        binding.buttonAddActivity.visibility = if (BuildConfig.DEBUG) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        
+        binding.buttonAddPiece.visibility = if (BuildConfig.DEBUG) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        
+        binding.buttonManageFavorites.visibility = if (BuildConfig.DEBUG) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
     }
     
     private fun setupObservers() {

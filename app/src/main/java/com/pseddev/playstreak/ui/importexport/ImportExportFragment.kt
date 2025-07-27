@@ -119,6 +119,19 @@ class ImportExportFragment : Fragment() {
         } else {
             View.GONE
         }
+        
+        // Hide Google Drive functionality in production builds
+        binding.driveStatusCard.visibility = if (com.pseddev.playstreak.BuildConfig.DEBUG) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        
+        binding.syncWithDriveButton.visibility = if (com.pseddev.playstreak.BuildConfig.DEBUG) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
     }
     
     private fun observeViewModel() {
