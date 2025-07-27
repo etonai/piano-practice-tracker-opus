@@ -106,7 +106,7 @@
 
     </LinearLayout>
 
-    <!-- Piece Details Card (shown on selection) -->
+    <!-- Enhanced Piece Details Card (shown on selection) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/pieceDetailsCard"
         android:layout_width="match_parent"
@@ -116,70 +116,207 @@
         android:visibility="gone"
         app:cardElevation="8dp">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:maxHeight="400dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/pieceNameText"
-                    android:layout_width="0dp"
+                <!-- Header with piece name and close button -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textAppearance="?attr/textAppearanceHeadline6" />
+                    android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/closeDetailsButton"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    <TextView
+                        android:id="@+id/pieceNameText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="?attr/textAppearanceHeadline6" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/closeDetailsButton"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Close" />
+
+                </LinearLayout>
+
+                <!-- Basic Information Section -->
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Close" />
+                    android:layout_marginTop="16dp"
+                    android:text="Basic Information"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/pieceTypeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/isFavoriteText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/dateCreatedText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <!-- Practice Statistics Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Practice Statistics"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/practiceCountText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/lastPracticeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/secondLastPracticeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/thirdLastPracticeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/lastSatisfactoryPracticeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <!-- Performance Statistics Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Performance Statistics"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/performanceCountText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/lastPerformanceText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/secondLastPerformanceText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/thirdLastPerformanceText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/lastSatisfactoryPerformanceText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <!-- Legacy Data Section (from activities) -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Legacy Activity Data"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/totalActivitiesText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/totalTimeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <TextView
+                    android:id="@+id/lastActivityText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <!-- System Information Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="System Information"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/lastUpdatedText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="?android:attr/textColorSecondary" />
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/totalActivitiesText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textAppearance="?attr/textAppearanceBody1" />
-
-            <TextView
-                android:id="@+id/practiceCountText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textAppearance="?attr/textAppearanceBody2" />
-
-            <TextView
-                android:id="@+id/performanceCountText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textAppearance="?attr/textAppearanceBody2" />
-
-            <TextView
-                android:id="@+id/totalTimeText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textAppearance="?attr/textAppearanceBody2" />
-
-            <TextView
-                android:id="@+id/lastActivityText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textAppearance="?attr/textAppearanceBody2"
-                android:textColor="?android:attr/textColorSecondary" />
-
-        </LinearLayout>
+        </ScrollView>
 
     </com.google.android.material.card.MaterialCardView>
 
