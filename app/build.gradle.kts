@@ -18,8 +18,8 @@ android {
         applicationId = "com.pseddev.playstreak"
         minSdk = 24
         targetSdk = 34
-        versionCode = 5
-        versionName = "1.0.8.21-beta"
+        versionCode = 6
+        versionName = "1.0.8.22-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
