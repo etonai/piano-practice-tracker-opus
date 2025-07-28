@@ -145,7 +145,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="When enabled, the Prune Data button in Settings becomes available. Pruning removes old activity records while preserving all pieces, statistics, and favorites. This setting defaults to OFF for safety."
+                    android:text="When enabled, the Data Pruning Options button in Settings becomes available. Pruning removes old activity records while preserving all pieces, statistics, and favorites. This setting defaults to OFF for safety."
                     android:textAppearance="?attr/textAppearanceCaption"
                     android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginTop="12dp" />

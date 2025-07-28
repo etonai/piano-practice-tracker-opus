@@ -253,7 +253,7 @@
     <fragment
         android:id="@+id/pruneDataFragment"
         android:name="com.pseddev.playstreak.ui.prunedata.PruneDataFragment"
-        android:label="Prune Data"
+        android:label="Data Pruning Options"
         tools:layout="@layout/fragment_prune_data">
         
         <action
