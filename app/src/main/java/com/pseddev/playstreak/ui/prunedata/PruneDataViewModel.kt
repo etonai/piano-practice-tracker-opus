@@ -8,6 +8,7 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.ConfigurationManager
+import com.pseddev.playstreak.utils.ProUserManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,7 +23,8 @@ sealed class PruningResult {
 // Data class for activity counts
 data class ActivityCounts(
     val stored: Int,
-    val lifetime: Int
+    val lifetime: Int,
+    val maximum: Int
 )
 
 class PruneDataViewModel(
@@ -31,6 +33,7 @@ class PruneDataViewModel(
 ) : ViewModel() {
     
     private val configurationManager = ConfigurationManager.getInstance(context)
+    private val proUserManager = ProUserManager.getInstance(context)
     
     private val _activityCounts = MutableLiveData<ActivityCounts>()
     val activityCounts: LiveData<ActivityCounts> = _activityCounts
@@ -57,14 +60,16 @@ class PruneDataViewModel(
                 configurationManager.initializeLifetimeCounter(storedCount)
                 
                 val lifetimeCount = configurationManager.getLifetimeActivityCount()
+                val maximumCount = proUserManager.getActivityLimit()
                 
                 _activityCounts.value = ActivityCounts(
                     stored = storedCount,
-                    lifetime = maxOf(lifetimeCount, storedCount) // Ensure lifetime >= stored
+                    lifetime = maxOf(lifetimeCount, storedCount), // Ensure lifetime >= stored
+                    maximum = maximumCount
                 )
             } catch (e: Exception) {
                 android.util.Log.e("PruneDataViewModel", "Error loading activity count", e)
-                _activityCounts.value = ActivityCounts(stored = 0, lifetime = 0)
+                _activityCounts.value = ActivityCounts(stored = 0, lifetime = 0, maximum = 0)
             }
         }
     }

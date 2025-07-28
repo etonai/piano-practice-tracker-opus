@@ -44,6 +44,7 @@ class PruneDataFragment : Fragment() {
     private fun setupObservers() {
         viewModel.activityCounts.observe(viewLifecycleOwner) { counts ->
             binding.activitiesStoredText.text = "Activities Stored: ${counts.stored}"
+            binding.maximumActivitiesText.text = "Maximum Activities: ${counts.maximum}"
             binding.lifetimeActivitiesText.text = "Lifetime Activities: ${counts.lifetime}"
             
             // Update button text to show actual count to be pruned
@@ -59,7 +60,7 @@ class PruneDataFragment : Fragment() {
         }
         
         viewModel.pruningInProgress.observe(viewLifecycleOwner) { inProgress ->
-            val counts = viewModel.activityCounts.value ?: ActivityCounts(0, 0)
+            val counts = viewModel.activityCounts.value ?: ActivityCounts(0, 0, 0)
             binding.pruneOldestActivitiesButton.isEnabled = !inProgress && counts.stored > 0
             binding.pruneOldestActivitiesButton.text = if (inProgress) {
                 "Pruning Activities..."
@@ -103,7 +104,7 @@ class PruneDataFragment : Fragment() {
         }
         
         binding.pruneOldestActivitiesButton.setOnClickListener {
-            val counts = viewModel.activityCounts.value ?: ActivityCounts(0, 0)
+            val counts = viewModel.activityCounts.value ?: ActivityCounts(0, 0, 0)
             if (counts.stored > 0) {
                 showPruningConfirmationDialog(counts.stored)
             }

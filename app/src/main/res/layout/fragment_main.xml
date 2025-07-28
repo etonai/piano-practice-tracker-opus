@@ -210,11 +210,21 @@
             android:layout_marginBottom="12dp" />
         
         <TextView
+            android:id="@+id/lifetimeActivitiesCountText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Lifetime Activities: 0"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="4dp" />
+        
+        <TextView
             android:id="@+id/activitiesCountText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Activities: 0"
+            android:text="Stored Activities: 0"
             android:textAppearance="?attr/textAppearanceBody2"
             android:textColor="?android:attr/textColorSecondary"
             android:layout_marginBottom="4dp" />

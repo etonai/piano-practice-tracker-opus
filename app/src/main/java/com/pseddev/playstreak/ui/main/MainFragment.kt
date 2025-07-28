@@ -16,6 +16,8 @@ import com.pseddev.playstreak.databinding.FragmentMainBinding
 import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.ConfigurationManager
 import android.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class MainFragment : Fragment() {
     
@@ -53,6 +55,7 @@ class MainFragment : Fragment() {
         updateAppTitle()
         updateToggleButtonText(proUserManager.isProUser())
         updatePruneDataButtonState()
+        updateLifetimeActivitiesDisplay()
         
         // Hide debug buttons in production builds
         binding.buttonTogglePro.visibility = if (BuildConfig.DEBUG) {
@@ -111,7 +114,9 @@ class MainFragment : Fragment() {
         
         viewModel.activitiesCount.observe(viewLifecycleOwner) { count ->
             binding.buttonAddActivity.text = "Add Activity ($count)"
-            binding.activitiesCountText.text = "Activities: $count"
+            binding.activitiesCountText.text = "Stored Activities: $count"
+            // Update lifetime activities count when activities count changes
+            updateLifetimeActivitiesDisplay()
         }
         
         // Set version text
@@ -186,6 +191,13 @@ class MainFragment : Fragment() {
         binding.buttonPruneData.alpha = if (isPruningEnabled) 1.0f else 0.5f
     }
     
+    private fun updateLifetimeActivitiesDisplay() {
+        lifecycleScope.launch {
+            val lifetimeCount = configurationManager.getLifetimeActivityCount()
+            binding.lifetimeActivitiesCountText.text = "Lifetime Activities: $lifetimeCount"
+        }
+    }
+    
     private fun showPruningDisabledDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("Data Pruning Disabled")
@@ -204,6 +216,8 @@ class MainFragment : Fragment() {
         updateToggleButtonText(proUserManager.isProUser())
         // Update prune data button state in case configuration toggle changed
         updatePruneDataButtonState()
+        // Update lifetime activities display in case it changed
+        updateLifetimeActivitiesDisplay()
     }
     
     override fun onDestroyView() {
