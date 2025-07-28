@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.pseddev.playstreak.databinding.FragmentConfigurationBinding
 import com.pseddev.playstreak.utils.PreferencesManager
+import com.pseddev.playstreak.utils.ConfigurationManager
 
 class ConfigurationFragment : Fragment() {
     
@@ -16,6 +17,7 @@ class ConfigurationFragment : Fragment() {
     
     private lateinit var viewModel: ConfigurationViewModel
     private lateinit var preferencesManager: PreferencesManager
+    private lateinit var configurationManager: ConfigurationManager
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,6 +32,7 @@ class ConfigurationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         preferencesManager = PreferencesManager.getInstance(requireContext())
+        configurationManager = ConfigurationManager.getInstance(requireContext())
         
         // Create ViewModel with custom factory
         viewModel = ViewModelProvider(this, ConfigurationViewModelFactory(preferencesManager))
@@ -37,6 +40,7 @@ class ConfigurationFragment : Fragment() {
         
         setupObservers()
         setupClickListeners()
+        setupPruningToggle()
     }
     
     private fun setupObservers() {
@@ -53,6 +57,16 @@ class ConfigurationFragment : Fragment() {
     private fun setupClickListeners() {
         binding.switchCalendarDetailMode.setOnCheckedChangeListener { _, isChecked ->
             viewModel.setCalendarDetailMode(isChecked)
+        }
+    }
+    
+    private fun setupPruningToggle() {
+        // Set initial state from ConfigurationManager
+        binding.switchAllowPruning.isChecked = configurationManager.isPruningEnabled()
+        
+        // Set up toggle listener
+        binding.switchAllowPruning.setOnCheckedChangeListener { _, isChecked ->
+            configurationManager.setPruningEnabled(isChecked)
         }
     }
     

@@ -14,6 +14,8 @@ import com.pseddev.playstreak.analytics.AnalyticsManager
 import com.pseddev.playstreak.crashlytics.CrashlyticsManager
 import com.pseddev.playstreak.databinding.FragmentMainBinding
 import com.pseddev.playstreak.utils.ProUserManager
+import com.pseddev.playstreak.utils.ConfigurationManager
+import android.app.AlertDialog
 
 class MainFragment : Fragment() {
     
@@ -27,6 +29,7 @@ class MainFragment : Fragment() {
     private lateinit var proUserManager: ProUserManager
     private lateinit var crashlyticsManager: CrashlyticsManager
     private lateinit var analyticsManager: AnalyticsManager
+    private lateinit var configurationManager: ConfigurationManager
     
     override fun onCreateView(
         inflater: LayoutInflater, 
@@ -43,11 +46,13 @@ class MainFragment : Fragment() {
         proUserManager = ProUserManager.getInstance(requireContext())
         crashlyticsManager = CrashlyticsManager(requireContext())
         analyticsManager = AnalyticsManager(requireContext())
+        configurationManager = ConfigurationManager.getInstance(requireContext())
         
         setupObservers()
         setupClickListeners()
         updateAppTitle()
         updateToggleButtonText(proUserManager.isProUser())
+        updatePruneDataButtonState()
         
         // Hide debug buttons in production builds
         binding.buttonTogglePro.visibility = if (BuildConfig.DEBUG) {
@@ -131,7 +136,11 @@ class MainFragment : Fragment() {
         }
         
         binding.buttonPruneData.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_pruneDataFragment)
+            if (configurationManager.isPruningEnabled()) {
+                findNavController().navigate(R.id.action_mainFragment_to_pruneDataFragment)
+            } else {
+                showPruningDisabledDialog()
+            }
         }
         
         binding.buttonConfiguration.setOnClickListener {
@@ -171,11 +180,30 @@ class MainFragment : Fragment() {
         binding.buttonTogglePro.text = buttonText
     }
     
+    private fun updatePruneDataButtonState() {
+        val isPruningEnabled = configurationManager.isPruningEnabled()
+        binding.buttonPruneData.isEnabled = isPruningEnabled
+        binding.buttonPruneData.alpha = if (isPruningEnabled) 1.0f else 0.5f
+    }
+    
+    private fun showPruningDisabledDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Data Pruning Disabled")
+            .setMessage("Enable 'Allow Pruning of Data' in Configuration to access this feature.")
+            .setPositiveButton("Go to Configuration") { _, _ ->
+                findNavController().navigate(R.id.action_mainFragment_to_configurationFragment)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
     override fun onResume() {
         super.onResume()
         // Update title and button text when returning to the fragment in case Pro status changed
         updateAppTitle()
         updateToggleButtonText(proUserManager.isProUser())
+        // Update prune data button state in case configuration toggle changed
+        updatePruneDataButtonState()
     }
     
     override fun onDestroyView() {
