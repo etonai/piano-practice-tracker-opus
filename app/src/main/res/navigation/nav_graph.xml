@@ -254,7 +254,12 @@
         android:id="@+id/pruneDataFragment"
         android:name="com.pseddev.playstreak.ui.prunedata.PruneDataFragment"
         android:label="Prune Data"
-        tools:layout="@layout/fragment_prune_data" />
+        tools:layout="@layout/fragment_prune_data">
+        
+        <action
+            android:id="@+id/action_pruneDataFragment_to_importExportFragment"
+            app:destination="@id/syncFragment" />
+    </fragment>
         
     <dialog
         android:id="@+id/syncDialogFragment"

@@ -43,4 +43,14 @@ interface ActivityDao {
     // Synchronous methods for migration
     @Query("SELECT * FROM activities WHERE pieceOrTechniqueId = :pieceId ORDER BY timestamp DESC")
     fun getActivitiesForPieceSync(pieceId: Long): List<Activity>
+    
+    // Pruning methods for data management
+    @Query("SELECT * FROM activities ORDER BY timestamp ASC LIMIT :count")
+    suspend fun getOldestActivities(count: Int): List<Activity>
+    
+    @Query("DELETE FROM activities WHERE id IN (:activityIds)")
+    suspend fun deleteActivitiesByIds(activityIds: List<Long>): Int
+    
+    @Query("SELECT COUNT(*) FROM activities")
+    suspend fun getTotalActivityCount(): Int
 }

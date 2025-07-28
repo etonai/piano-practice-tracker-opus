@@ -1,24 +1,114 @@
 package com.pseddev.playstreak.ui.prunedata
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.map
+import androidx.lifecycle.viewModelScope
 import com.pseddev.playstreak.data.repository.PianoRepository
+import com.pseddev.playstreak.utils.ConfigurationManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+// Result types for pruning operations
+sealed class PruningResult {
+    data class Success(val deletedCount: Int) : PruningResult()
+    object NoActivitiesToPrune : PruningResult()
+    data class Error(val message: String) : PruningResult()
+}
+
+// Data class for activity counts
+data class ActivityCounts(
+    val stored: Int,
+    val lifetime: Int
+)
 
 class PruneDataViewModel(
     private val repository: PianoRepository,
     private val context: android.content.Context
 ) : ViewModel() {
     
-    // Phase 1: Basic ViewModel foundation
-    // Future phases will add:
-    // - Activity count LiveData
-    // - Pruning functionality
-    // - Lifetime counter management
-    // - Error handling and validation
+    private val configurationManager = ConfigurationManager.getInstance(context)
+    
+    private val _activityCounts = MutableLiveData<ActivityCounts>()
+    val activityCounts: LiveData<ActivityCounts> = _activityCounts
+    
+    // Backward compatibility for existing code
+    val activityCount: LiveData<Int> = _activityCounts.map { it.stored }
+    
+    private val _pruningInProgress = MutableLiveData<Boolean>()
+    val pruningInProgress: LiveData<Boolean> = _pruningInProgress
+    
+    private val _pruningResult = MutableLiveData<PruningResult?>()
+    val pruningResult: LiveData<PruningResult?> = _pruningResult
     
     init {
-        // Initialize ViewModel for Phase 1
-        // Functionality will be added in subsequent phases
+        loadActivityCount()
+    }
+    
+    private fun loadActivityCount() {
+        viewModelScope.launch {
+            try {
+                val storedCount = repository.getTotalActivityCount()
+                
+                // Initialize lifetime counter for existing users if needed
+                configurationManager.initializeLifetimeCounter(storedCount)
+                
+                val lifetimeCount = configurationManager.getLifetimeActivityCount()
+                
+                _activityCounts.value = ActivityCounts(
+                    stored = storedCount,
+                    lifetime = maxOf(lifetimeCount, storedCount) // Ensure lifetime >= stored
+                )
+            } catch (e: Exception) {
+                android.util.Log.e("PruneDataViewModel", "Error loading activity count", e)
+                _activityCounts.value = ActivityCounts(stored = 0, lifetime = 0)
+            }
+        }
+    }
+    
+    fun pruneOldestActivities(count: Int = 100) {
+        viewModelScope.launch {
+            _pruningInProgress.value = true
+            _pruningResult.value = null
+            
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    // Get oldest activities by timestamp
+                    val oldestActivities = repository.getOldestActivities(count)
+                    
+                    if (oldestActivities.isEmpty()) {
+                        return@withContext PruningResult.NoActivitiesToPrune
+                    }
+                    
+                    // Delete activities WITHOUT updating piece statistics
+                    val deletedCount = repository.deleteActivitiesWithoutStatsUpdate(
+                        oldestActivities.map { it.id }
+                    )
+                    
+                    PruningResult.Success(deletedCount)
+                }
+                
+                _pruningResult.value = result
+                
+                // Refresh activity count after successful pruning
+                if (result is PruningResult.Success) {
+                    loadActivityCount()
+                }
+                
+            } catch (e: Exception) {
+                android.util.Log.e("PruneDataViewModel", "Error during pruning operation", e)
+                _pruningResult.value = PruningResult.Error(e.message ?: "Unknown error occurred")
+            } finally {
+                _pruningInProgress.value = false
+            }
+        }
+    }
+    
+    fun clearPruningResult() {
+        _pruningResult.value = null
     }
 }
 

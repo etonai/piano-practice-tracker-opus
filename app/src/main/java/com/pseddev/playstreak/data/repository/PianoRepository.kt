@@ -12,6 +12,7 @@ import com.pseddev.playstreak.utils.CsvHandler
 import com.pseddev.playstreak.utils.JsonExporter
 import com.pseddev.playstreak.utils.JsonImporter
 import com.pseddev.playstreak.utils.StreakCalculator
+import com.pseddev.playstreak.utils.ConfigurationManager
 import com.pseddev.playstreak.data.models.JsonImportResult
 import com.pseddev.playstreak.data.models.JsonValidationResult
 import kotlinx.coroutines.flow.Flow
@@ -23,8 +24,11 @@ import java.util.Calendar
 
 class PianoRepository(
     private val pieceOrTechniqueDao: PieceOrTechniqueDao,
-    private val activityDao: ActivityDao
+    private val activityDao: ActivityDao,
+    private val context: android.content.Context
 ) {
+    
+    private val configurationManager = ConfigurationManager.getInstance(context)
     
     fun getAllPiecesAndTechniques(): Flow<List<PieceOrTechnique>> = 
         pieceOrTechniqueDao.getAllPiecesAndTechniques()
@@ -96,6 +100,10 @@ class PianoRepository(
     
     suspend fun insertActivity(activity: Activity) {
         activityDao.insert(activity)
+        
+        // Increment lifetime activity counter
+        configurationManager.incrementLifetimeActivityCount(1)
+        
         updatePieceStatistics(activity.pieceOrTechniqueId)
     }
     
@@ -252,11 +260,12 @@ class PianoRepository(
             Log.d("JsonExport", "Getting pieces and activities from database...")
             val pieces = getAllPiecesAndTechniques().first()
             val activities = getAllActivities().first().sortedBy { it.timestamp }
+            val lifetimeCount = configurationManager.getLifetimeActivityCount()
             
-            Log.d("JsonExport", "Got ${pieces.size} pieces and ${activities.size} activities")
+            Log.d("JsonExport", "Got ${pieces.size} pieces, ${activities.size} activities, lifetime count: $lifetimeCount")
             Log.d("JsonExport", "Calling JsonExporter.exportToJson")
             
-            JsonExporter.exportToJson(writer, pieces, activities)
+            JsonExporter.exportToJson(writer, pieces, activities, lifetimeCount)
             
             Log.d("JsonExport", "JsonExporter.exportToJson completed")
         } catch (e: Exception) {
@@ -320,6 +329,18 @@ class PianoRepository(
                 } else {
                     Log.w("JsonImport", "Could not find new piece ID for original piece ID ${activity.pieceOrTechniqueId}")
                 }
+            }
+            
+            // Update lifetime counter based on imported data
+            val importedLifetimeCount = JsonImporter.getLastImportedLifetimeCount()
+            if (importedLifetimeCount != null) {
+                // Use the lifetime count from the JSON file
+                configurationManager.setLifetimeActivityCount(importedLifetimeCount)
+                Log.d("JsonImport", "Set lifetime count from JSON: $importedLifetimeCount")
+            } else {
+                // Fallback to using the count of imported activities as lifetime count
+                configurationManager.setLifetimeActivityCount(importedActivities.size)
+                Log.d("JsonImport", "Set lifetime count from activity count: ${importedActivities.size}")
             }
             
             Log.d("JsonImport", "JSON import completed successfully")
@@ -393,6 +414,20 @@ class PianoRepository(
         } catch (e: Exception) {
             Log.e("PieceStats", "Error updating piece statistics for piece $pieceId", e)
         }
+    }
+    
+    // Data pruning methods for Phase 3
+    suspend fun getTotalActivityCount(): Int {
+        return activityDao.getTotalActivityCount()
+    }
+    
+    suspend fun getOldestActivities(count: Int): List<Activity> {
+        return activityDao.getOldestActivities(count)
+    }
+    
+    suspend fun deleteActivitiesWithoutStatsUpdate(activityIds: List<Long>): Int {
+        // Delete activities directly without triggering piece statistics updates
+        return activityDao.deleteActivitiesByIds(activityIds)
     }
     
 }

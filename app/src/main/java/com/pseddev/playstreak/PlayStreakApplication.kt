@@ -12,7 +12,8 @@ class PlayStreakApplication : Application() {
     val repository by lazy { 
         PianoRepository(
             database.pieceOrTechniqueDao(),
-            database.activityDao()
+            database.activityDao(),
+            this
         ) 
     }
     

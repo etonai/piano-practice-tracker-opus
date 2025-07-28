@@ -30,12 +30,13 @@ object JsonExporter {
     fun exportToJson(
         writer: Writer,
         pieces: List<PieceOrTechnique>,
-        activities: List<Activity>
+        activities: List<Activity>,
+        lifetimeActivityCount: Int? = null
     ) {
         Log.d("JsonExporter", "Starting JSON export with ${pieces.size} pieces and ${activities.size} activities")
         
         try {
-            val exportData = createExportData(pieces, activities)
+            val exportData = createExportData(pieces, activities, lifetimeActivityCount)
             val jsonString = gson.toJson(exportData)
             
             writer.write(jsonString)
@@ -53,13 +54,15 @@ object JsonExporter {
      */
     private fun createExportData(
         pieces: List<PieceOrTechnique>,
-        activities: List<Activity>
+        activities: List<Activity>,
+        lifetimeActivityCount: Int? = null
     ): ExportData {
         val exportInfo = ExportInfo(
             version = EXPORT_FORMAT_VERSION,
             exportDate = dateFormatter.format(Date()),
             format = EXPORT_FORMAT_TYPE,
-            appVersion = BuildConfig.VERSION_NAME
+            appVersion = BuildConfig.VERSION_NAME,
+            lifetimeActivityCount = lifetimeActivityCount
         )
         
         val exportPieces = pieces.map { piece ->

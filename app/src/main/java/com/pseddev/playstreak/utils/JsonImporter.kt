@@ -174,6 +174,7 @@ object JsonImporter {
                 lastImportedPieces = pieces
                 lastImportedActivities = activities
                 lastOriginalPieceIds = originalPieceIds
+                lastImportedLifetimeCount = exportData.exportInfo.lifetimeActivityCount
             }
             
         } catch (e: JsonSyntaxException) {
@@ -201,6 +202,7 @@ object JsonImporter {
     private var lastImportedPieces: List<PieceOrTechnique> = emptyList()
     private var lastImportedActivities: List<Activity> = emptyList()
     private var lastOriginalPieceIds: Map<String, Long> = emptyMap() // piece name -> original ID
+    private var lastImportedLifetimeCount: Int? = null
     
     /**
      * Gets the pieces from the last successful import
@@ -216,6 +218,11 @@ object JsonImporter {
      * Gets the mapping of piece names to their original IDs from the export
      */
     fun getLastOriginalPieceIds(): Map<String, Long> = lastOriginalPieceIds
+    
+    /**
+     * Gets the lifetime activity count from the last import, or null if not provided
+     */
+    fun getLastImportedLifetimeCount(): Int? = lastImportedLifetimeCount
     
     /**
      * Converts an ExportPiece to a PieceOrTechnique entity

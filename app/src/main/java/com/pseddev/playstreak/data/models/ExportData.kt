@@ -32,7 +32,10 @@ data class ExportInfo(
     val format: String,
     
     @SerializedName("appVersion")
-    val appVersion: String
+    val appVersion: String,
+    
+    @SerializedName("lifetimeActivityCount")
+    val lifetimeActivityCount: Int? = null // Total activities ever created
 )
 
 /**
