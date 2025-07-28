@@ -130,6 +130,10 @@ class MainFragment : Fragment() {
             findNavController().navigate(R.id.action_mainFragment_to_syncFragment)
         }
         
+        binding.buttonPruneData.setOnClickListener {
+            findNavController().navigate(R.id.action_mainFragment_to_pruneDataFragment)
+        }
+        
         binding.buttonConfiguration.setOnClickListener {
             findNavController().navigate(R.id.action_mainFragment_to_configurationFragment)
         }

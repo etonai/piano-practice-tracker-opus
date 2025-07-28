@@ -34,6 +34,10 @@
         <action
             android:id="@+id/action_mainFragment_to_configurationFragment"
             app:destination="@id/configurationFragment" />
+            
+        <action
+            android:id="@+id/action_mainFragment_to_pruneDataFragment"
+            app:destination="@id/pruneDataFragment" />
     </fragment>
 
     <fragment
@@ -245,6 +249,12 @@
         android:name="com.pseddev.playstreak.ui.configuration.ConfigurationFragment"
         android:label="Configuration"
         tools:layout="@layout/fragment_configuration" />
+        
+    <fragment
+        android:id="@+id/pruneDataFragment"
+        android:name="com.pseddev.playstreak.ui.prunedata.PruneDataFragment"
+        android:label="Prune Data"
+        tools:layout="@layout/fragment_prune_data" />
         
     <dialog
         android:id="@+id/syncDialogFragment"
