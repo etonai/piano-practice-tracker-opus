@@ -1,12 +1,14 @@
 package com.pseddev.playstreak.ui.progress
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.databinding.ItemTimelineActivityBinding
+import com.pseddev.playstreak.utils.ProUserManager
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -16,7 +18,9 @@ import java.util.*
  */
 class CalendarActivitiesAdapter(
     private val onDeleteClick: (ActivityWithPiece) -> Unit,
-    private val onEditClick: (ActivityWithPiece) -> Unit
+    private val onEditClick: (ActivityWithPiece) -> Unit,
+    private val onAddActivityClick: (ActivityWithPiece) -> Unit,
+    private val proUserManager: ProUserManager
 ) : ListAdapter<ActivityWithPiece, CalendarActivitiesAdapter.ViewHolder>(DiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -27,7 +31,7 @@ class CalendarActivitiesAdapter(
     }
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position), onDeleteClick, onEditClick)
+        holder.bind(getItem(position), onDeleteClick, onEditClick, onAddActivityClick, proUserManager)
     }
     
     class ViewHolder(private val binding: ItemTimelineActivityBinding) : 
@@ -36,7 +40,13 @@ class CalendarActivitiesAdapter(
         private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
         private val timeFormat = SimpleDateFormat("h:mm a", Locale.US)
         
-        fun bind(item: ActivityWithPiece, onDeleteClick: (ActivityWithPiece) -> Unit, onEditClick: (ActivityWithPiece) -> Unit) {
+        fun bind(
+            item: ActivityWithPiece, 
+            onDeleteClick: (ActivityWithPiece) -> Unit, 
+            onEditClick: (ActivityWithPiece) -> Unit,
+            onAddActivityClick: (ActivityWithPiece) -> Unit,
+            proUserManager: ProUserManager
+        ) {
             val activity = item.activity
             val piece = item.pieceOrTechnique
             
@@ -85,6 +95,16 @@ class CalendarActivitiesAdapter(
                 binding.notesText.text = activity.notes
             } else {
                 binding.notesText.text = ""
+            }
+            
+            // Show add activity button only for Pro users
+            if (proUserManager.isProUser()) {
+                binding.addActivityButton.visibility = View.VISIBLE
+                binding.addActivityButton.setOnClickListener {
+                    onAddActivityClick(item)
+                }
+            } else {
+                binding.addActivityButton.visibility = View.GONE
             }
             
             binding.deleteButton.setOnClickListener {

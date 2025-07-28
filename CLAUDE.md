@@ -81,6 +81,15 @@ The project uses:
 - Standard Android testing framework is set up with example tests
 - The project follows modern Android development practices with Kotlin and AndroidX libraries
 
+## Development Cycle Rules
+
+**CRITICAL**: Follow all rules and processes defined in `app/docs/DevCycles_overview.md`, including:
+- **NEVER immediately implement** when adding a new phase to a DevCycle
+- Add new phases to documentation first with "Open" status
+- Wait for explicit approval or further direction before beginning implementation
+- Allow time for phase planning, refinement, and clarification
+- Follow all cycle management processes and status progression rules
+
 ## Git Workflow Rules
 
 **IMPORTANT**: Do not commit any changes to git until the user has:

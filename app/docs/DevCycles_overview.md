@@ -100,20 +100,28 @@ Each development cycle document should include:
 - Identify primary work items (features, bugs, tickets)
 - Set realistic target completion dates
 
-### 2. Active Development
+### 2. Phase Planning and Implementation
+- **CRITICAL RULE**: When adding a new phase to a DevCycle, NEVER immediately begin implementing it
+- New phases must be added to documentation first and marked as "Open" status
+- Allow time for phase planning, refinement, and clarification before implementation begins
+- Initial phase descriptions are often incomplete and need further discussion/planning
+- Wait for explicit approval or further direction before moving to implementation
+- Once phase is fully planned and approved, then begin implementation work
+
+### 3. Active Development
 - Update TODO items in real-time as work progresses
 - Mark completed items with ✅
 - Mark pending items with ❌ TODO:
 - Document technical decisions and implementation details
 - Add cycle notes for important context or changes
 
-### 3. Progress Tracking
+### 4. Progress Tracking
 - Regularly review and update cycle status
 - Adjust scope if needed (document changes in cycle notes)
 - Ensure all work aligns with cycle objectives
 - Maintain clear next steps for continuation
 
-### 4. Cycle Completion
+### 5. Cycle Completion
 - Verify all work items are complete or properly transitioned
 - **Ensure all code changes are committed to version control**
 - **Confirm completion date and time with user before marking cycle complete**
@@ -124,7 +132,7 @@ Each development cycle document should include:
 - Move completed cycle document to `devcycles/` directory for archival
 - Plan subsequent cycle if needed
 
-### 5. Cycle Handoff
+### 6. Cycle Handoff
 - When switching between developers or sessions
 - Current cycle status provides clear continuation point
 - All context and progress preserved in documentation

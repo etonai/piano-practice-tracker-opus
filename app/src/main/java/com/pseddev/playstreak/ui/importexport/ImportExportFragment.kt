@@ -94,11 +94,24 @@ class ImportExportFragment : Fragment() {
     
     private fun setupButtons() {
         binding.exportToCsvButton.setOnClickListener {
-            showExportFormatDialog()
+            if (com.pseddev.playstreak.BuildConfig.DEBUG) {
+                showExportFormatDialog()
+            } else {
+                // Production mode: directly export as JSON
+                val timestamp = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.US).format(Date())
+                val fileName = "PlayStreak_combined_export_$timestamp.json"
+                exportJsonLauncher.launch(fileName)
+            }
         }
         
         binding.importFromCsvButton.setOnClickListener {
-            showImportFormatDialog()
+            if (com.pseddev.playstreak.BuildConfig.DEBUG) {
+                showImportFormatDialog()
+            } else {
+                // Production mode: directly import JSON
+                binding.warningTextView.visibility = View.VISIBLE
+                importJsonLauncher.launch("application/json")
+            }
         }
         
         binding.syncWithDriveButton.setOnClickListener {
@@ -131,6 +144,15 @@ class ImportExportFragment : Fragment() {
             View.VISIBLE
         } else {
             View.GONE
+        }
+        
+        // Update content descriptions based on build type
+        if (com.pseddev.playstreak.BuildConfig.DEBUG) {
+            binding.exportToCsvButton.contentDescription = "Export data to CSV or JSON file"
+            binding.importFromCsvButton.contentDescription = "Import data from CSV or JSON file"
+        } else {
+            binding.exportToCsvButton.contentDescription = "Export data to JSON file"
+            binding.importFromCsvButton.contentDescription = "Import data from JSON file"
         }
     }
     

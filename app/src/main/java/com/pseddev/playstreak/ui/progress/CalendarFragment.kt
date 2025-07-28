@@ -261,6 +261,21 @@ class CalendarFragment : Fragment() {
             itemBinding.notesText.text = ""
         }
         
+        // Show add activity button only for Pro users
+        if (proUserManager.isProUser()) {
+            itemBinding.addActivityButton.visibility = View.VISIBLE
+            itemBinding.addActivityButton.setOnClickListener {
+                // Show quick add activity dialog with piece pre-filled
+                val dialog = QuickAddActivityDialogFragment.newInstance(
+                    piece.id,
+                    piece.name
+                )
+                dialog.show(parentFragmentManager, "QuickAddActivityDialog")
+            }
+        } else {
+            itemBinding.addActivityButton.visibility = View.GONE
+        }
+        
         itemBinding.deleteButton.setOnClickListener {
             showDeleteConfirmationDialog(item)
         }

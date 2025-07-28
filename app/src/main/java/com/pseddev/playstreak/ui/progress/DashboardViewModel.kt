@@ -126,10 +126,9 @@ class DashboardViewModel(
                     // Check if practiced at least 3 times in last 28 days AND has at least one Level 4 practice
                     val hasLevel4Practice = recentPractices.any { it.level == 4 }
                     if (recentPractices.size >= 3 && hasLevel4Practice) {
-                        val lastPerformance = piecePerformances.maxByOrNull { it.timestamp }
-                        val lastPerformanceDate = lastPerformance?.timestamp
-                        val lastPractice = recentPractices.maxByOrNull { it.timestamp }
-                        val lastPracticeDate = lastPractice?.timestamp
+                        // Use piece fields for last activity dates instead of expensive database queries
+                        val lastPerformanceDate = piece.lastPerformanceDate
+                        val lastPracticeDate = piece.lastPracticeDate
                         
                         val daysSinceLastPerformance = if (lastPerformanceDate != null) {
                             ((now - lastPerformanceDate) / (24 * 60 * 60 * 1000)).toInt()
@@ -222,9 +221,23 @@ class DashboardViewModel(
                 val nonFavoriteSuggestions = mutableListOf<SuggestionItem>()
                 
                 pieces.filter { it.type == ItemType.PIECE }.forEach { piece ->
-                    val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
-                    val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
-                    val lastActivityDate = lastActivity?.timestamp
+                    // Use piece fields instead of expensive database queries
+                    val lastPracticeDate = piece.lastPracticeDate
+                    val lastPerformanceDate = piece.lastPerformanceDate
+                    
+                    // Determine most recent activity and its type
+                    val (lastActivityDate, isLastActivityPerformance) = when {
+                        lastPracticeDate != null && lastPerformanceDate != null -> {
+                            if (lastPracticeDate > lastPerformanceDate) {
+                                lastPracticeDate to false
+                            } else {
+                                lastPerformanceDate to true
+                            }
+                        }
+                        lastPracticeDate != null -> lastPracticeDate to false
+                        lastPerformanceDate != null -> lastPerformanceDate to true
+                        else -> null to false
+                    }
                     
                     val daysSince = if (lastActivityDate != null) {
                         ((now - lastActivityDate) / (24 * 60 * 60 * 1000)).toInt()
@@ -242,13 +255,10 @@ class DashboardViewModel(
                                     lastActivityDate = lastActivityDate,
                                     daysSinceLastActivity = daysSince,
                                     suggestionReason = if (lastActivityDate == null) "Never practiced" else {
-                                    val activityTypeText = when (lastActivity!!.activityType) {
-                                        ActivityType.PRACTICE -> "Last practice"
-                                        ActivityType.PERFORMANCE -> "Last performance"
+                                        val activityTypeText = if (isLastActivityPerformance) "Last performance" else "Last practice"
+                                        val dayText = if (daysSince == 1) "day" else "days"
+                                        "$activityTypeText $daysSince $dayText ago"
                                     }
-                                    val dayText = if (daysSince == 1) "day" else "days"
-                                    "$activityTypeText $daysSince $dayText ago"
-                                }
                                 )
                             )
                         }
@@ -261,10 +271,7 @@ class DashboardViewModel(
                                     lastActivityDate = lastActivityDate,
                                     daysSinceLastActivity = daysSince,
                                     suggestionReason = {
-                                        val activityTypeText = when (lastActivity!!.activityType) {
-                                            ActivityType.PRACTICE -> "Last practice"
-                                            ActivityType.PERFORMANCE -> "Last performance"
-                                        }
+                                        val activityTypeText = if (isLastActivityPerformance) "Last performance" else "Last practice"
                                         "$activityTypeText $daysSince days ago"
                                     }()
                                 )
@@ -291,9 +298,23 @@ class DashboardViewModel(
                     val allFavorites = pieces.filter { it.type == ItemType.PIECE && it.isFavorite && it.id !in usedPieceIds }
                     val fallbackFavorites = if (allFavorites.isNotEmpty()) {
                         val favoritesWithActivity = allFavorites.mapNotNull { piece ->
-                            val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
-                            val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
-                            val lastActivityDate = lastActivity?.timestamp
+                            // Use piece fields instead of expensive database queries
+                            val lastPracticeDate = piece.lastPracticeDate
+                            val lastPerformanceDate = piece.lastPerformanceDate
+                            
+                            // Determine most recent activity and its type
+                            val (lastActivityDate, isLastActivityPerformance) = when {
+                                lastPracticeDate != null && lastPerformanceDate != null -> {
+                                    if (lastPracticeDate > lastPerformanceDate) {
+                                        lastPracticeDate to false
+                                    } else {
+                                        lastPerformanceDate to true
+                                    }
+                                }
+                                lastPracticeDate != null -> lastPracticeDate to false
+                                lastPerformanceDate != null -> lastPerformanceDate to true
+                                else -> null to false
+                            }
                             
                             // Exclude pieces practiced today
                             if (lastActivityDate != null && lastActivityDate >= startOfToday) {
@@ -311,10 +332,7 @@ class DashboardViewModel(
                                 lastActivityDate = lastActivityDate,
                                 daysSinceLastActivity = daysSince,
                                 suggestionReason = if (lastActivityDate == null) "Never practiced" else {
-                                    val activityTypeText = when (lastActivity!!.activityType) {
-                                        ActivityType.PRACTICE -> "Last practice"
-                                        ActivityType.PERFORMANCE -> "Last performance"
-                                    }
+                                    val activityTypeText = if (isLastActivityPerformance) "Last performance" else "Last practice"
                                     val dayText = if (daysSince == 1) "day" else "days"
                                     "$activityTypeText $daysSince $dayText ago"
                                 }
@@ -352,9 +370,23 @@ class DashboardViewModel(
                     val allNonFavorites = pieces.filter { it.type == ItemType.PIECE && !it.isFavorite && it.id !in usedPieceIds }
                     val fallbackNonFavorites = if (allNonFavorites.isNotEmpty()) {
                         val nonFavoritesWithActivity = allNonFavorites.mapNotNull { piece ->
-                            val pieceActivitiesForPiece = pieceActivities[piece.id] ?: emptyList()
-                            val lastActivity = pieceActivitiesForPiece.maxByOrNull { it.timestamp }
-                            val lastActivityDate = lastActivity?.timestamp
+                            // Use piece fields instead of expensive database queries
+                            val lastPracticeDate = piece.lastPracticeDate
+                            val lastPerformanceDate = piece.lastPerformanceDate
+                            
+                            // Determine most recent activity and its type
+                            val (lastActivityDate, isLastActivityPerformance) = when {
+                                lastPracticeDate != null && lastPerformanceDate != null -> {
+                                    if (lastPracticeDate > lastPerformanceDate) {
+                                        lastPracticeDate to false
+                                    } else {
+                                        lastPerformanceDate to true
+                                    }
+                                }
+                                lastPracticeDate != null -> lastPracticeDate to false
+                                lastPerformanceDate != null -> lastPerformanceDate to true
+                                else -> null to false
+                            }
                             
                             // Only include abandoned/inactive pieces (31+ days or never practiced)
                             if (lastActivityDate == null || lastActivityDate < thirtyOneDaysAgo) {
@@ -369,10 +401,7 @@ class DashboardViewModel(
                                     lastActivityDate = lastActivityDate,
                                     daysSinceLastActivity = daysSince,
                                     suggestionReason = if (lastActivityDate == null) "Never practiced" else {
-                                        val activityTypeText = when (lastActivity!!.activityType) {
-                                            ActivityType.PRACTICE -> "Last practice"
-                                            ActivityType.PERFORMANCE -> "Last performance"
-                                        }
+                                        val activityTypeText = if (isLastActivityPerformance) "Last performance" else "Last practice"
                                         val dayText = if (daysSince == 1) "day" else "days"
                                         "$activityTypeText $daysSince $dayText ago"
                                     }
@@ -421,10 +450,9 @@ class DashboardViewModel(
                         // Check if practiced at least 3 times in last 28 days AND has at least one Level 4 practice
                         val hasLevel4Practice = recentPractices.any { it.level == 4 }
                         if (recentPractices.size >= 3 && hasLevel4Practice) {
-                            val lastPerformance = piecePerformances.maxByOrNull { it.timestamp }
-                            val lastPerformanceDate = lastPerformance?.timestamp
-                            val lastPractice = recentPractices.maxByOrNull { it.timestamp }
-                            val lastPracticeDate = lastPractice?.timestamp
+                            // Use piece fields for last activity dates instead of expensive database queries
+                            val lastPerformanceDate = piece.lastPerformanceDate
+                            val lastPracticeDate = piece.lastPracticeDate
                             
                             val daysSinceLastPerformance = if (lastPerformanceDate != null) {
                                 ((now - lastPerformanceDate) / (24 * 60 * 60 * 1000)).toInt()

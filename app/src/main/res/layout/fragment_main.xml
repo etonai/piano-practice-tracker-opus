@@ -204,7 +204,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="PlayStreak Statistics"
+            android:text="PlayStreak 🎵 Statistics"
             android:textAppearance="?attr/textAppearanceSubtitle2"
             android:textColor="?android:attr/textColorPrimary"
             android:layout_marginBottom="12dp" />

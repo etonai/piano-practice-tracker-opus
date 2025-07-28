@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Export Data"
-        android:contentDescription="Export data to CSV or JSON file"
+        android:contentDescription="Export data to JSON file"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/driveStatusCard" />
@@ -67,7 +67,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Import Data"
-        android:contentDescription="Import data from CSV or JSON file"
+        android:contentDescription="Import data from JSON file"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/exportToCsvButton" />
@@ -110,7 +110,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="⚠️ Warning: Importing CSV data will replace all existing data in the app."
+        android:text="⚠️ Warning: Importing data will replace all existing data in the app."
         android:textColor="@android:color/holo_red_dark"
         android:textSize="14sp"
         android:visibility="gone"
