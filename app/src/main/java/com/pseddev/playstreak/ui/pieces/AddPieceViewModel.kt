@@ -25,6 +25,27 @@ class AddPieceViewModel(
     private val _saveResult = MutableLiveData<AddPieceResult>()
     val saveResult: LiveData<AddPieceResult> = _saveResult
     
+    private val _canAddFavorites = MutableLiveData<Boolean>()
+    val canAddFavorites: LiveData<Boolean> = _canAddFavorites
+    
+    init {
+        checkFavoritesLimit()
+    }
+    
+    private fun checkFavoritesLimit() {
+        viewModelScope.launch {
+            try {
+                val currentFavoriteCount = repository.getAllPiecesAndTechniques().first()
+                    .count { it.isFavorite }
+                val canAdd = proUserManager.canAddMoreFavorites(currentFavoriteCount)
+                _canAddFavorites.value = canAdd
+            } catch (e: Exception) {
+                // In case of error, assume they can add favorites to avoid blocking functionality
+                _canAddFavorites.value = true
+            }
+        }
+    }
+    
     fun savePiece(name: String, type: ItemType, isFavorite: Boolean) {
         viewModelScope.launch {
             try {

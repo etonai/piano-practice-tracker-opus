@@ -53,7 +53,8 @@ class AddPieceFragment : Fragment() {
             binding.pieceNameInputLayout.error = null
             
             val type = if (binding.radioPiece.isChecked) ItemType.PIECE else ItemType.TECHNIQUE
-            val isFavorite = binding.favoriteSwitch.isChecked
+            // Only mark as favorite if the switch is visible and checked
+            val isFavorite = binding.favoriteSwitch.visibility == View.VISIBLE && binding.favoriteSwitch.isChecked
             
             viewModel.savePiece(name, type, isFavorite)
         }
@@ -77,6 +78,10 @@ class AddPieceFragment : Fragment() {
                     showPieceLimitDialog(result.currentCount, result.limit, result.isProUser)
                 }
             }
+        }
+        
+        viewModel.canAddFavorites.observe(viewLifecycleOwner) { canAdd ->
+            binding.favoriteSwitch.visibility = if (canAdd) View.VISIBLE else View.GONE
         }
     }
     
