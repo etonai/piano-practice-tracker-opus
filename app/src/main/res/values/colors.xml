@@ -19,4 +19,7 @@
     
     <!-- Calendar Selection Ring -->
     <color name="calendar_selection_ring">#FFCC99FF</color>
+    
+    <!-- Star Colors -->
+    <color name="star_yellow">#FFFFC107</color>
 </resources>
