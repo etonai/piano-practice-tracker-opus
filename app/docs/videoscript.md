@@ -1,5 +1,10 @@
 # PlayStreak
 
+Hi, I'm PseudonymousEd, an amateur musician and professional java coder.
+
+And this is PLayStreak, an app to track my piano/uke/singing practices.
+
+So here is the main page of PlayStreak
 
 These tabs are what you'll typically use every day when you are ready for practice.
 
@@ -16,17 +21,19 @@ And some suggestions of pieces to practice
 
 I just practiced a song, Part of Your World from The Little Mermaid, so I'll enter it now.
 
-And now you see it is included on the list of activities for today. And my streak has increased to 2 days.
+And now you see it is included on the list of activities for today. And my streak has increased to 3 days.
+
+
+
+## Calendar
+At a glance you can see what days you've been active this month
+Pick a day and see what you practiced or performed that day
 
 That's the gist of the app. Practice a song and add it as an activity. When you aren't practicing, you can look at your practice history.
 
 That's the TLDR of this video, you can just start using it and figure out the rest.
 
 But here's more information about what PlayStreak can do:
-
-## Calendar
-At a glance you can see what days you've been active this month
-Pick a day and see what you practiced or performed that day
 
 Optionally, you can go into Configuration and enable detail mode...
 Which allows you to see more detail about the pieces you practiced an a particular day, and allows you to edit or delete the records.
@@ -35,10 +42,15 @@ Which allows you to see more detail about the pieces you practiced an a particul
 The suggestions tab allows you to see what the app is suggesting you practice next, which is based on what you've practiced recently and not so recently
 It also allows you to quickly add an activity based on one of those pieces, by selecting the + icon
 
+
+
 ## Pieces
 The pieces tab allows you to see all of the pieces you've entered, and lets you sort by name, last activity date, or by the number of activities for that piece.
 
 When you select a piece, you get additional information on how many times you've practiced it and when was the last
+
+
+
 ## Settings
 
 The settings is where we keep some additional functionality that you shouldn't need to use every day
@@ -77,15 +89,20 @@ Those are favorites. You can designate some pieces as favorites, and they will b
 
 ## End
 
-Anyway, let me close this by showing you another way I use this.
+Anyway, let me close this video by showing you another way I use this.
 
 I like spending part of my practice time in the suggestions tab. PlayStreak has given me some suggestions, and I'd like to play What I Did For Love. I'll be right back...
 
 Ok, I'm done with practicing it, so I'm adding the activity.
 
-And you can see that PlayStreak has given me another suggestion. I'll play some more of these suggestions, and use the quick add to add them, then I'll go back to my Pieces list to see what I haven't played in a while, or I'll go to the Calendar view and look at the last few days to see what I should continue practicing.
+And you can see that PlayStreak has given me another suggestion. I'll play some more of these suggestions, and use the quick add to add them, then I'll go back to my Pieces list to see what I haven't played in a while, 
+or I'll go to the Calendar view and look at the last few days to see what I should continue practicing.
 
 That's it!
 
+
+I hope this app can be as useful for you as it has been for me.
+
+Thanks for watching!  A link to the Google Play Store will be in the description.
 
 
