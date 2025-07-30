@@ -6,13 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentDashboardBinding
-import kotlinx.coroutines.launch
 
 class DashboardFragment : Fragment() {
     
@@ -80,8 +78,7 @@ class DashboardFragment : Fragment() {
             }
         }
         
-        viewLifecycleOwner.lifecycleScope.launch {
-            val streak = viewModel.calculateStreak()
+        viewModel.currentStreak.observe(viewLifecycleOwner) { streak ->
             val emojiSuffix = when {
                 streak >= 14 -> " 🔥🔥🔥"
                 streak >= 8 -> " 🔥" 

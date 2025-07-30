@@ -6,6 +6,7 @@ import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.ProUserManager
+import com.pseddev.playstreak.utils.StreakCalculator
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.combine
 import java.util.*
@@ -17,6 +18,7 @@ class DashboardViewModel(
     
     private val proUserManager = ProUserManager.getInstance(context)
     private val suggestionsService = SuggestionsService(proUserManager)
+    private val streakCalculator = StreakCalculator()
     
     private val todayStart = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, 0)
@@ -103,6 +105,12 @@ class DashboardViewModel(
                 suggestionsService.generateAllSuggestions(pieces, activities)
             }
             .asLiveData()
+    
+    val currentStreak: LiveData<Int> = repository.getAllActivities()
+        .map { activities ->
+            streakCalculator.calculateCurrentStreak(activities)
+        }
+        .asLiveData()
     
     suspend fun calculateStreak(): Int = repository.calculateCurrentStreak()
 }
