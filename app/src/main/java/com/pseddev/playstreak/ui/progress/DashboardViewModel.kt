@@ -9,6 +9,8 @@ import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.StreakCalculator
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
+import android.util.Log
 import java.util.*
 
 class DashboardViewModel(
@@ -47,12 +49,19 @@ class DashboardViewModel(
     
     val todayActivities: LiveData<List<ActivityWithPiece>> = 
         combine(
-            repository.getActivitiesForDateRange(todayStart, todayEnd),
-            repository.getAllPiecesAndTechniques()
+            repository.getActivitiesForDateRange(todayStart, todayEnd).onEach { 
+                Log.d("DashboardFlow", "Activities Flow emitted: ${it.size} activities")
+            },
+            repository.getAllPiecesAndTechniques().onEach {
+                Log.d("DashboardFlow", "Pieces Flow emitted: ${it.size} pieces")
+            }
         ) { activities, pieces ->
+            Log.d("DashboardFlow", "Combining flows - ${activities.size} activities with pieces")
             activities.mapNotNull { activity ->
                 val piece = pieces.find { it.id == activity.pieceOrTechniqueId }
                 piece?.let { ActivityWithPiece(activity, it) }
+            }.also { result ->
+                Log.d("DashboardFlow", "Final result: ${result.size} ActivityWithPiece items")
             }
         }.asLiveData()
     

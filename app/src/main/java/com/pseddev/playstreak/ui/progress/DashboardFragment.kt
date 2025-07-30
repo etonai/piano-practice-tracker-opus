@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import android.util.Log
 import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
@@ -39,9 +40,11 @@ class DashboardFragment : Fragment() {
         setupClickListeners()
         
         viewModel.todayActivities.observe(viewLifecycleOwner) { activities ->
+            Log.d("DashboardUI", "Observer called with ${activities.size} activities")
             binding.todayCountText.text = "${activities.size} activities"
             
             if (activities.isNotEmpty()) {
+                Log.d("DashboardUI", "Showing activities group with ${activities.size} activities")
                 binding.todayActivitiesGroup.visibility = View.VISIBLE
                 val activitySummary = activities.joinToString("\n") { activityWithPiece ->
                     val activity = activityWithPiece.activity
@@ -53,8 +56,12 @@ class DashboardFragment : Fragment() {
                     "• $time - ${piece.name} - $type $level$minutes"
                 }
                 binding.todayActivitiesList.text = activitySummary
+                Log.d("DashboardUI", "Set todayActivitiesList text to: $activitySummary")
             } else {
+                Log.d("DashboardUI", "Hiding activities group - should be empty now")
                 binding.todayActivitiesGroup.visibility = View.GONE
+                binding.todayActivitiesList.text = ""
+                Log.d("DashboardUI", "Set todayActivitiesGroup visibility to GONE and cleared text")
             }
         }
         
