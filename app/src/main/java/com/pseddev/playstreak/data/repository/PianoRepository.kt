@@ -115,6 +115,10 @@ class PianoRepository(
     suspend fun deleteActivity(activity: Activity) {
         val pieceId = activity.pieceOrTechniqueId
         activityDao.delete(activity)
+        
+        // Decrement lifetime activity counter for user deletions
+        configurationManager.decrementLifetimeActivityCount(1)
+        
         updatePieceStatistics(pieceId)
     }
     

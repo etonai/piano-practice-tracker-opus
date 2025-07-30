@@ -58,6 +58,15 @@ class ConfigurationManager private constructor(context: Context) {
     }
     
     /**
+     * Decrement the lifetime activity counter
+     * @param decrement number to subtract from lifetime count (default 1)
+     */
+    fun decrementLifetimeActivityCount(decrement: Int = 1) {
+        val current = getLifetimeActivityCount()
+        setLifetimeActivityCount(maxOf(0, current - decrement)) // Prevent negative values
+    }
+    
+    /**
      * Initialize lifetime counter for existing users
      * @param currentActivityCount the current number of stored activities
      */

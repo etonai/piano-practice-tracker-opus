@@ -1,17 +1,13 @@
 # PlayStreak
 
-Hi, I'm PseudonymousEd, an amateur musician and professional java coder.
+Hi, I'm PseudonymousEd
 
-And this is PLayStreak, an app to track my piano/uke/singing practices.
+And I'm here to show you PLayStreak, an app I build to track my piano/uke/singing practices.
 
-So here is the main page of PlayStreak
-
-These tabs are what you'll typically use every day when you are ready for practice.
-
-
+Let's start by looking at the Dashboard and Calendar, the two tabs you should be using every time you practice.
 
 ## Dashboard
-Overview of what you need to know
+Overview of what's in the app
 Your streak
 What you've done today
 What you did yesterday
