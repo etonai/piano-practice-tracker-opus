@@ -176,9 +176,7 @@ class QuickAddActivityDialogFragment : DialogFragment() {
             performanceType = performanceType
         )
         
-        lifecycleScope.launch {
-            viewModel.addActivity(activity)
-        }
+        viewModel.addActivity(activity)
     }
     
     override fun onDestroyView() {

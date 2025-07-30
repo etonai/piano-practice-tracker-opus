@@ -1,6 +1,7 @@
 package com.pseddev.playstreak.ui.progress
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.ProUserManager
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class QuickAddActivityViewModel(
@@ -21,22 +23,24 @@ class QuickAddActivityViewModel(
     private val _addResult = MutableLiveData<Result<Unit>>()
     val addResult: LiveData<Result<Unit>> = _addResult
     
-    suspend fun addActivity(activity: Activity) {
-        try {
-            // Check activity limit before adding
-            val currentActivityCount = repository.getActivityCount()
-            val activityLimit = proUserManager.getActivityLimit()
-            
-            if (currentActivityCount >= activityLimit) {
-                val limitMessage = "You have reached the activity limit of $activityLimit activities. Cannot add more activities."
-                _addResult.postValue(Result.failure(IllegalStateException(limitMessage)))
-                return
+    fun addActivity(activity: Activity) {
+        GlobalScope.launch {
+            try {
+                // Check activity limit before adding
+                val currentActivityCount = repository.getActivityCount()
+                val activityLimit = proUserManager.getActivityLimit()
+                
+                if (currentActivityCount >= activityLimit) {
+                    val limitMessage = "You have reached the activity limit of $activityLimit activities. Cannot add more activities."
+                    _addResult.postValue(Result.failure(IllegalStateException(limitMessage)))
+                    return@launch
+                }
+                
+                repository.insertActivity(activity)
+                _addResult.postValue(Result.success(Unit))
+            } catch (e: Exception) {
+                _addResult.postValue(Result.failure(e))
             }
-            
-            repository.insertActivity(activity)
-            _addResult.postValue(Result.success(Unit))
-        } catch (e: Exception) {
-            _addResult.postValue(Result.failure(e))
         }
     }
 }

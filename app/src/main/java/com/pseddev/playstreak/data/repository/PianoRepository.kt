@@ -367,7 +367,10 @@ class PianoRepository(
     
     private suspend fun updatePieceStatistics(pieceId: Long) {
         try {
-            val piece = pieceOrTechniqueDao.getById(pieceId) ?: return
+            val piece = pieceOrTechniqueDao.getById(pieceId)
+            if (piece == null) {
+                return
+            }
             val activities = getActivitiesForPiece(pieceId).first()
             
             // Separate activities by type
