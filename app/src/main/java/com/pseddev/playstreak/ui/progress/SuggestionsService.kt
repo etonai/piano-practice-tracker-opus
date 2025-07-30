@@ -47,13 +47,18 @@ class SuggestionsService(
         val allSuggestions = practiceSuggestions + performanceSuggestions
         
         // Apply favorite limits across all suggestion types
-        val finalFavoriteLimit = if (proUserManager.isProUser()) 4 else 1
+        val finalFavoriteLimit = if (proUserManager.isProUser()) 
+            ProUserManager.PRO_USER_PRACTICE_FAVORITE_SUGGESTIONS 
+            else ProUserManager.FREE_USER_PRACTICE_FAVORITE_SUGGESTIONS
+        val finalNonFavoriteLimit = if (proUserManager.isProUser()) 
+            ProUserManager.PRO_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS + ProUserManager.PRO_USER_PERFORMANCE_SUGGESTIONS 
+            else ProUserManager.FREE_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS
         val favoriteSuggestionsInAll = allSuggestions.filter { it.piece.isFavorite }
         val nonFavoriteSuggestionsInAll = allSuggestions.filter { !it.piece.isFavorite }
         
         // Limit favorites to user limit and preserve order
         val limitedFavorites = favoriteSuggestionsInAll.take(finalFavoriteLimit)
-        val limitedNonFavorites = nonFavoriteSuggestionsInAll
+        val limitedNonFavorites = nonFavoriteSuggestionsInAll.take(finalNonFavoriteLimit)
         
         return limitedFavorites + limitedNonFavorites
     }
@@ -157,8 +162,8 @@ class SuggestionsService(
             .thenBy { it.piece.name.lowercase() }
         )
         
-        // Combine tiers and take 5 total suggestions
-        return (sortedFirstTier + sortedSecondTier).take(5)
+        // Combine tiers and take Pro user performance suggestions limit
+        return (sortedFirstTier + sortedSecondTier).take(ProUserManager.PRO_USER_PERFORMANCE_SUGGESTIONS)
     }
     
     /**
@@ -233,7 +238,9 @@ class SuggestionsService(
         }
         
         // Determine favorite limit based on Pro status
-        val favoriteLimit = if (proUserManager.isProUser()) 4 else 1
+        val favoriteLimit = if (proUserManager.isProUser()) 
+            ProUserManager.PRO_USER_PRACTICE_FAVORITE_SUGGESTIONS 
+            else ProUserManager.FREE_USER_PRACTICE_FAVORITE_SUGGESTIONS
         
         // Always aim for up to limit favorites total
         val finalFavoriteSuggestions = if (favoriteSuggestions.size < favoriteLimit) {
@@ -299,7 +306,9 @@ class SuggestionsService(
         } else favoriteSuggestions
         
         // Determine non-favorite limit based on Pro status
-        val nonFavoriteLimit = if (proUserManager.isProUser()) 4 else 2
+        val nonFavoriteLimit = if (proUserManager.isProUser()) 
+            ProUserManager.PRO_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS 
+            else ProUserManager.FREE_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS
         
         // Always aim for up to limit non-favorites total
         val finalNonFavoriteSuggestions = if (nonFavoriteSuggestions.size < nonFavoriteLimit) {

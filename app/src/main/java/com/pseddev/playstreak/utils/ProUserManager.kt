@@ -106,6 +106,13 @@ class ProUserManager private constructor(context: Context) {
         private const val FREE_USER_PIECE_LIMIT = 500
         private const val PRO_USER_PIECE_LIMIT = 550
         
+        // Practice Suggestions Limits
+        const val FREE_USER_PRACTICE_FAVORITE_SUGGESTIONS = 1
+        const val PRO_USER_PRACTICE_FAVORITE_SUGGESTIONS = 4
+        const val FREE_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS = 2
+        const val PRO_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS = 4
+        const val PRO_USER_PERFORMANCE_SUGGESTIONS = 5  // Free users get 0
+        
         @Volatile
         private var INSTANCE: ProUserManager? = null
         
