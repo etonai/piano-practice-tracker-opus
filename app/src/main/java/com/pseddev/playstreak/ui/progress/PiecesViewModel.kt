@@ -167,6 +167,25 @@ class PiecesViewModel(
             repository.deletePieceAndActivities(pieceWithStats.piece.id)
         }
     }
+    
+    fun updatePiece(pieceId: Long, newName: String, newType: ItemType) {
+        viewModelScope.launch {
+            try {
+                val currentPiece = repository.getPieceOrTechniqueById(pieceId)
+                currentPiece?.let { piece ->
+                    val updatedPiece = piece.copy(
+                        name = newName,
+                        type = newType,
+                        lastUpdated = System.currentTimeMillis()
+                    )
+                    repository.updatePieceOrTechnique(updatedPiece)
+                }
+            } catch (e: Exception) {
+                // Handle error - could emit to a LiveData for UI feedback
+                android.util.Log.e("PiecesViewModel", "Error updating piece", e)
+            }
+        }
+    }
 }
 
 class PiecesViewModelFactory(

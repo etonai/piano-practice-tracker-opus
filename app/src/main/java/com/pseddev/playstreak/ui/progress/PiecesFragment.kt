@@ -67,6 +67,14 @@ class PiecesFragment : Fragment() {
                 )
                 dialog.show(parentFragmentManager, "QuickAddActivityDialog")
             },
+            onEditClick = { pieceWithStats ->
+                val dialog = EditPieceDialogFragment.newInstance(
+                    pieceWithStats.piece.id,
+                    pieceWithStats.piece.name,
+                    pieceWithStats.piece.type
+                )
+                dialog.show(parentFragmentManager, "EditPieceDialog")
+            },
             onDeleteClick = { pieceWithStats ->
                 showDeleteConfirmationDialog(pieceWithStats)
             },

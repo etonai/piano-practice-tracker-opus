@@ -156,7 +156,9 @@ Thanks, and happy practicing!
 🎵 Built a Practice Tracking App - Looking for Beta Testers!
 TL;DR: Free music practice tracking app needs beta testers. Android available now, iOS coming soon.
 
-Hey musicians! I'm a singing piano/uke player who got tired of managing practice sessions in spreadsheets, so I built an app to solve the problem. After testing with 4 months of personal data (tracked 38 songs, some played up to 49 times), I'm ready to share it with fellow musicians.
+Hey musicians! I'm a singing piano/uke player who got tired of managing practice sessions in spreadsheets, so I built an app to solve the problem. After testing with 4 months of personal data (tracked 39 songs, some played up to 50 times), I'm ready to share it with fellow musicians.
+
+Quick demo:  https://youtube.com/shorts/_nynODrn4m4
 
 What it does:
 
@@ -180,5 +182,7 @@ iOS users: Message me to get notified when the iPhone version drops
 All instruments welcome - while I'm a uke/piano player, this works for any instrument
 
 The app is completely free and I'm excited to see how other musicians use it. Thanks for reading!
+
+Full demo:  https://youtu.be/xCG22KZg3Gk
 
 Also posting in other instrument communities - hope that's cool with the mods!
