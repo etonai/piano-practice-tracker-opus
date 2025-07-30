@@ -52,8 +52,18 @@ class PianoRepository(
         pieceOrTechniqueDao.delete(item)
     
     suspend fun deletePieceAndActivities(pieceId: Long) {
+        // Count activities before deletion to update lifetime counter
+        val activitiesToDelete = getActivitiesForPiece(pieceId).first()
+        val activityCount = activitiesToDelete.size
+        
         // First delete all activities for this piece
         activityDao.deleteActivitiesForPiece(pieceId)
+        
+        // Decrement lifetime activity counter for user deletions
+        if (activityCount > 0) {
+            configurationManager.decrementLifetimeActivityCount(activityCount)
+        }
+        
         // Then delete the piece itself
         val piece = pieceOrTechniqueDao.getById(pieceId)
         piece?.let { pieceOrTechniqueDao.delete(it) }
