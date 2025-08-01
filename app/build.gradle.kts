@@ -12,12 +12,12 @@ plugins {
 
 android {
     namespace = "com.pseddev.playstreak"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.pseddev.playstreak"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 10
         versionName = "1.0.8.26-beta"
 
