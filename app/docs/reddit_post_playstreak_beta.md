@@ -186,3 +186,15 @@ The app is completely free and I'm excited to see how other musicians use it. Th
 Full demo:  https://youtu.be/xCG22KZg3Gk
 
 Also posting in other instrument communities - hope that's cool with the mods!
+
+
+## Additional information:
+
+https://groups.google.com/u/1/g/playstreak
+https://play.google.com/store/apps/details?id=com.pseddev.playstreak
+https://play.google.com/apps/testing/com.pseddev.playstreak
+
+My new app helps people track their music practice sessions.
+https://groups.google.com/u/1/g/playstreak
+https://play.google.com/store/apps/details?id=com.pseddev.playstreak
+https://play.google.com/apps/testing/com.pseddev.playstreak
