@@ -12,12 +12,12 @@ plugins {
 
 android {
     namespace = "com.pseddev.playstreak"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.pseddev.playstreak"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 10
         versionName = "1.0.8.26-beta"
 
@@ -40,6 +40,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+            isDebuggable = true
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
