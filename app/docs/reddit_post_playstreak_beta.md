@@ -156,7 +156,7 @@ Thanks, and happy practicing!
 🎵 Built a Practice Tracking App - Looking for Beta Testers!
 TL;DR: Free music practice tracking app needs beta testers. Android available now, iOS coming soon.
 
-Hey musicians! I'm a singing piano/uke player who got tired of managing practice sessions in spreadsheets, so I built an app to solve the problem. After testing with 4 months of personal data (tracked 39 songs, some played up to 50 times), I'm ready to share it with fellow musicians.
+Hey musicians! I'm a singing piano/uke player who got tired of managing practice sessions in spreadsheets, so I built an app to solve the problem. After testing with 4 months of personal data (tracked 39 songs, some played 50+ times), I'm ready to share it with fellow musicians.
 
 Quick demo:  https://youtube.com/shorts/_nynODrn4m4
 
@@ -177,13 +177,67 @@ Get gentle nudges about neglected pieces
 
 Join the beta:
 
-Android users: DM me for the beta link
+Android users: 
+1. Join the Google Group (required to activate the download)
+   https://groups.google.com/u/1/g/playstreak
+2. Install:
+   Android https://play.google.com/store/apps/details?id=com.pseddev.playstreak
+   Web https://play.google.com/apps/testing/com.pseddev.playstreak
+
 iOS users: Message me to get notified when the iPhone version drops
 All instruments welcome - while I'm a uke/piano player, this works for any instrument
 
 The app is completely free and I'm excited to see how other musicians use it. Thanks for reading!
 
 Full demo:  https://youtu.be/xCG22KZg3Gk
+
+Also posting in other instrument communities - hope that's cool with the mods!
+
+## Post 6 - Guitar Players (r/guitar)
+
+Built a Practice Tracking App for Cover Songs - Looking for Feedback!
+
+TL;DR:
+I made an app to track my practices! Looking for feedback. I hope this isn't flagged as self-promotion, there are a few posts in the sub from people who have written apps. Android available now, iOS coming soon.
+
+Hey r/guitar! While I don't play guitar myself (I play uke and piano), I built this app to solve a problem I think many guitarists face - keeping track of all the covers you've learned and making sure they don't get rusty. After testing with 4 months of personal data (tracked 39 songs on piano/uke, some played 50+ times), I'm ready to share it with musicians to see what they think.
+
+Quick demo video: https://youtube.com/shorts/_nynODrn4m4
+
+**Why I created this:** I play covers on piano and uke, and kept losing touch with songs I'd already "mastered". I'd spend time learning a song, get it down solid, then months later realize I couldn't remember how to play it anymore. This app helps me keep all my covers "in my fingers" by tracking when I last played each one and suggesting which ones need attention. I think guitarists face the same challenge with their cover repertoire.
+
+What it does:
+
+• Simple logging: Add covers after practice with a personal rating
+• Helpful insights: Track streaks, see your most/least practiced songs, and view practice history  
+• Data export: Full backup functionality so your data stays yours
+• Suggestions: Once you have enough data, the app suggests which covers to practice based on songs you haven't touched in a while
+• Clean management: Archive old sessions while preserving play counts and recent history
+
+Perfect for guitarists who want to:
+
+• Build consistent practice habits with their cover repertoire
+• Track improvement over time on specific songs
+• Never forget that cover they learned months ago
+• Get gentle nudges about neglected pieces
+• Keep their entire songbook fresh and ready to play
+
+Join the beta:
+
+Android users: 
+1. Join the Google Group (required to access the download)
+   https://groups.google.com/u/1/g/playstreak
+2. Install:
+   Install with Android link https://play.google.com/store/apps/details?id=com.pseddev.playstreak
+   Install with Web link https://play.google.com/apps/testing/com.pseddev.playstreak
+
+iOS users: Message me to get notified when the iPhone version drops
+
+**Looking for feedback:** I'm particularly interested in hearing from guitarists about features that would be most useful for tracking cover songs. What would make this more valuable for your practice routine?
+
+The app is free with no ads and I'm excited to see how other musicians use it. Thanks for reading!
+
+Full demo video: https://youtu.be/xCG22KZg3Gk
 
 Also posting in other instrument communities - hope that's cool with the mods!
 
