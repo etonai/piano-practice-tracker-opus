@@ -27,3 +27,11 @@ app/google-services.json
 keystore/
 keystore.properties
 *.keystore
+
+# Kotlin build artifacts and logs
+.kotlin/
+*.log
+
+# Temporary files
+nul
+*.tmp
