@@ -18,8 +18,8 @@ android {
         applicationId = "com.pseddev.playstreak"
         minSdk = 24
         targetSdk = 36
-        versionCode = 10
-        versionName = "1.0.8.26-beta"
+        versionCode = 11
+        versionName = "1.0.8.27-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -60,6 +60,18 @@ android {
             }
         }
     }
+    
+    // Disable baseline profiles and art profiles completely
+    androidComponents {
+        onVariants { variant ->
+            variant.packaging.dex.useLegacyPackaging = true
+        }
+    }
+    
+    // Disable ART profile compilation
+    aaptOptions {
+        noCompress += listOf("tflite", "lite")
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -71,6 +83,7 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    
     
     packaging {
         resources {
@@ -84,7 +97,16 @@ android {
                 "META-INF/com/android/build/gradle/app-metadata.properties",
                 "baseline-prof.txt",
                 "baseline.prof",
-                "baseline.profm"
+                "baseline.profm",
+                "**/baseline.prof*",
+                "META-INF/com.android.tools/r8-from-*/baseline.prof",
+                "META-INF/com.android.tools/proguard/baseline.prof",
+                // Disable dex metadata to fix file lock issues
+                "**/dex-metadata.json",
+                "**/dex-metadata-map.properties",
+                "META-INF/com.android.tools/r8-from-*/**",
+                "**/art-profile.dex",
+                "**/art-profile.txt"
             )
         }
     }
