@@ -32,10 +32,17 @@ class SuggestionsViewModel(
     private val proUserManager = ProUserManager.getInstance(context)
     private val suggestionsService = SuggestionsService(proUserManager)
     
-    val suggestions: LiveData<List<SuggestionItem>> = 
+    val practiceSuggestions: LiveData<List<SuggestionItem>> = 
         repository.getAllPiecesAndTechniques()
             .combine(repository.getAllActivities()) { pieces, activities ->
-                suggestionsService.generateAllSuggestions(pieces, activities)
+                suggestionsService.generatePracticeSuggestions(pieces, activities)
+            }
+            .asLiveData()
+    
+    val performanceSuggestions: LiveData<List<SuggestionItem>> = 
+        repository.getAllPiecesAndTechniques()
+            .combine(repository.getAllActivities()) { pieces, activities ->
+                suggestionsService.generatePerformanceSuggestions(pieces, activities)
             }
             .asLiveData()
 }

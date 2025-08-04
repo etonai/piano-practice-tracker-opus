@@ -1,5 +1,6 @@
 package com.pseddev.playstreak.ui.progress
 
+import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
@@ -43,6 +44,20 @@ class SuggestionsService(
         val practiceSuggestions = generatePracticeSuggestions(pieces, activities)
         val performanceSuggestions = generatePerformanceSuggestions(pieces, activities)
         
+        if (BuildConfig.DEBUG) {
+            // DEBUG: Log practice suggestions before combining
+            android.util.Log.d("Phase4Debug74", "=== PRACTICE SUGGESTIONS BEFORE COMBINING ===")
+            practiceSuggestions.forEachIndexed { index, suggestion ->
+                android.util.Log.d("Phase4Debug75", "Practice[$index] ${suggestion.piece.name} | favorite=${suggestion.piece.isFavorite} | reason=${suggestion.suggestionReason}")
+            }
+            
+            // DEBUG: Log performance suggestions before combining
+            android.util.Log.d("Phase4Debug76", "=== PERFORMANCE SUGGESTIONS BEFORE COMBINING ===")
+            performanceSuggestions.forEachIndexed { index, suggestion ->
+                android.util.Log.d("Phase4Debug77", "Performance[$index] ${suggestion.piece.name} | favorite=${suggestion.piece.isFavorite} | reason=${suggestion.suggestionReason}")
+            }
+        }
+        
         // Combine practice and performance suggestions while respecting favorite limits
         val allSuggestions = practiceSuggestions + performanceSuggestions
         
@@ -51,10 +66,31 @@ class SuggestionsService(
             ProUserManager.PRO_USER_PRACTICE_FAVORITE_SUGGESTIONS 
             else ProUserManager.FREE_USER_PRACTICE_FAVORITE_SUGGESTIONS
         val finalNonFavoriteLimit = if (proUserManager.isProUser()) 
-            ProUserManager.PRO_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS + ProUserManager.PRO_USER_PERFORMANCE_SUGGESTIONS 
+            ProUserManager.PRO_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS 
             else ProUserManager.FREE_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS
         val favoriteSuggestionsInAll = allSuggestions.filter { it.piece.isFavorite }
         val nonFavoriteSuggestionsInAll = allSuggestions.filter { !it.piece.isFavorite }
+        
+        if (BuildConfig.DEBUG) {
+            // DEBUG: Log the limits and counts in generateAllSuggestions
+            android.util.Log.d("Phase4Debug55", "=== generateAllSuggestions() LIMITING LOGIC ===")
+            android.util.Log.d("Phase4Debug56", "finalFavoriteLimit: $finalFavoriteLimit")
+            android.util.Log.d("Phase4Debug57", "finalNonFavoriteLimit: $finalNonFavoriteLimit")
+            android.util.Log.d("Phase4Debug58", "favoriteSuggestionsInAll.size: ${favoriteSuggestionsInAll.size}")
+            android.util.Log.d("Phase4Debug59", "nonFavoriteSuggestionsInAll.size: ${nonFavoriteSuggestionsInAll.size}")
+            
+            // DEBUG: Log all favorite suggestions to check ordering
+            android.util.Log.d("Phase4Debug70", "=== ALL FAVORITE SUGGESTIONS IN ORDER ===")
+            favoriteSuggestionsInAll.forEachIndexed { index, suggestion ->
+                android.util.Log.d("Phase4Debug71", "Fav[$index] ${suggestion.piece.name} | type=${suggestion.suggestionType} | reason=${suggestion.suggestionReason}")
+            }
+            
+            // DEBUG: Log all non-favorite suggestions to check ordering  
+            android.util.Log.d("Phase4Debug72", "=== ALL NON-FAVORITE SUGGESTIONS IN ORDER ===")
+            nonFavoriteSuggestionsInAll.forEachIndexed { index, suggestion ->
+                android.util.Log.d("Phase4Debug73", "NonFav[$index] ${suggestion.piece.name} | type=${suggestion.suggestionType} | reason=${suggestion.suggestionReason}")
+            }
+        }
         
         // Limit favorites to user limit and preserve order
         val limitedFavorites = favoriteSuggestionsInAll.take(finalFavoriteLimit)
@@ -71,8 +107,21 @@ class SuggestionsService(
         pieces: List<PieceOrTechnique>,
         activities: List<Activity>
     ): List<SuggestionItem> {
+        if (BuildConfig.DEBUG) {
+            // DEBUG: Log start of performance suggestions generation
+            android.util.Log.d("Phase4Debug60", "=== generatePerformanceSuggestions() START ===")
+            android.util.Log.d("Phase4Debug61", "Pro user: ${proUserManager.isProUser()}")
+        }
+        
         if (!proUserManager.isProUser()) {
+            if (BuildConfig.DEBUG) {
+                android.util.Log.d("Phase4Debug62", "Not pro user, returning empty list")
+            }
             return emptyList()
+        }
+        
+        if (BuildConfig.DEBUG) {
+            android.util.Log.d("Phase4Debug63", "Total pieces: ${pieces.filter { it.type == ItemType.PIECE }.size}")
         }
         
         val pieceActivities = activities.groupBy { it.pieceOrTechniqueId }
@@ -162,8 +211,23 @@ class SuggestionsService(
             .thenBy { it.piece.name.lowercase() }
         )
         
+        if (BuildConfig.DEBUG) {
+            // DEBUG: Log tier results before limiting
+            android.util.Log.d("Phase4Debug64", "=== PERFORMANCE SUGGESTIONS TIERS ===")
+            android.util.Log.d("Phase4Debug65", "First tier suggestions: ${sortedFirstTier.size}")
+            android.util.Log.d("Phase4Debug66", "Second tier suggestions: ${sortedSecondTier.size}")
+            android.util.Log.d("Phase4Debug67", "Combined before limit: ${sortedFirstTier.size + sortedSecondTier.size}")
+            android.util.Log.d("Phase4Debug68", "Performance limit: ${ProUserManager.PRO_USER_PERFORMANCE_SUGGESTIONS}")
+        }
+        
+        val result = (sortedFirstTier + sortedSecondTier).take(ProUserManager.PRO_USER_PERFORMANCE_SUGGESTIONS)
+        
+        if (BuildConfig.DEBUG) {
+            android.util.Log.d("Phase4Debug69", "Final performance suggestions: ${result.size}")
+        }
+        
         // Combine tiers and take Pro user performance suggestions limit
-        return (sortedFirstTier + sortedSecondTier).take(ProUserManager.PRO_USER_PERFORMANCE_SUGGESTIONS)
+        return result
     }
     
     /**
@@ -175,6 +239,13 @@ class SuggestionsService(
     ): List<SuggestionItem> {
         val favoriteSuggestions = mutableListOf<SuggestionItem>()
         val nonFavoriteSuggestions = mutableListOf<SuggestionItem>()
+        
+        if (BuildConfig.DEBUG) {
+            // DEBUG: Log start of practice suggestions generation
+            android.util.Log.d("Phase4Debug41", "=== generatePracticeSuggestions() START ===")
+            android.util.Log.d("Phase4Debug42", "Pro user: ${proUserManager.isProUser()}")
+            android.util.Log.d("Phase4Debug43", "Total pieces: ${pieces.filter { it.type == ItemType.PIECE }.size}")
+        }
         
         pieces.filter { it.type == ItemType.PIECE }.forEach { piece ->
             // Use piece fields instead of expensive database queries
@@ -221,6 +292,7 @@ class SuggestionsService(
             } else {
                 // Non-favorites that haven't been practiced in 7+ days but have been practiced in last 31 days
                 if (lastActivityDate != null && lastActivityDate < sevenDaysAgo && lastActivityDate >= thirtyOneDaysAgo) {
+                    android.util.Log.d("Phase4Debug44", "Adding non-favorite: ${piece.name} | days=$daysSince | count before add: ${nonFavoriteSuggestions.size}")
                     nonFavoriteSuggestions.add(
                         SuggestionItem(
                             piece = piece,
@@ -233,6 +305,7 @@ class SuggestionsService(
                             }()
                         )
                     )
+                    android.util.Log.d("Phase4Debug45", "Added non-favorite: ${piece.name} | count after add: ${nonFavoriteSuggestions.size}")
                 }
             }
         }
@@ -242,10 +315,24 @@ class SuggestionsService(
             ProUserManager.PRO_USER_PRACTICE_FAVORITE_SUGGESTIONS 
             else ProUserManager.FREE_USER_PRACTICE_FAVORITE_SUGGESTIONS
         
+        if (BuildConfig.DEBUG) {
+            // DEBUG: Log all favorite suggestions before finalFavoriteSuggestions assignment
+            android.util.Log.d("Phase4Debug78", "=== FAVORITE SUGGESTIONS BEFORE FALLBACK LOGIC ===")
+            android.util.Log.d("Phase4Debug79", "favoriteLimit: $favoriteLimit, favoriteSuggestions.size: ${favoriteSuggestions.size}")
+            favoriteSuggestions.forEachIndexed { index, suggestion ->
+                android.util.Log.d("Phase4Debug80", "FavBeforeFallback[$index] ${suggestion.piece.name} | days=${suggestion.daysSinceLastActivity} | reason=${suggestion.suggestionReason}")
+            }
+        }
+        
+        // Sort favorite suggestions by last activity (least recent first)
+        val sortedFavoriteSuggestions = favoriteSuggestions.sortedWith(
+            compareBy<SuggestionItem> { it.lastActivityDate ?: 0L }
+        )
+        
         // Always aim for up to limit favorites total
-        val finalFavoriteSuggestions = if (favoriteSuggestions.size < favoriteLimit) {
-            val neededCount = favoriteLimit - favoriteSuggestions.size
-            val usedPieceIds = favoriteSuggestions.map { it.piece.id }.toSet()
+        val finalFavoriteSuggestions = if (sortedFavoriteSuggestions.size < favoriteLimit) {
+            val neededCount = favoriteLimit - sortedFavoriteSuggestions.size
+            val usedPieceIds = sortedFavoriteSuggestions.map { it.piece.id }.toSet()
             
             // Get fallback favorites (excluding already used pieces and pieces practiced today)
             val allFavorites = pieces.filter { it.type == ItemType.PIECE && it.isFavorite && it.id !in usedPieceIds }
@@ -302,18 +389,30 @@ class SuggestionsService(
                 } else emptyList()
             } else emptyList()
             
-            favoriteSuggestions + fallbackFavorites
-        } else favoriteSuggestions
+            sortedFavoriteSuggestions + fallbackFavorites
+        } else sortedFavoriteSuggestions
         
         // Determine non-favorite limit based on Pro status
         val nonFavoriteLimit = if (proUserManager.isProUser()) 
             ProUserManager.PRO_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS 
             else ProUserManager.FREE_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS
         
+        // DEBUG: Log the counts and limits
+        android.util.Log.d("Phase4Debug46", "=== AFTER MAIN COLLECTION ===")
+        android.util.Log.d("Phase4Debug47", "Collected favorites: ${favoriteSuggestions.size}")
+        android.util.Log.d("Phase4Debug48", "Collected non-favorites: ${nonFavoriteSuggestions.size}")
+        android.util.Log.d("Phase4Debug49", "nonFavoriteLimit: $nonFavoriteLimit")
+        android.util.Log.d("Phase4Debug50", "Need fallback? ${nonFavoriteSuggestions.size < nonFavoriteLimit}")
+        
+        // Sort non-favorite suggestions by last activity (least recent first)
+        val sortedNonFavoriteSuggestions = nonFavoriteSuggestions.sortedWith(
+            compareBy<SuggestionItem> { it.lastActivityDate ?: 0L }
+        )
+        
         // Always aim for up to limit non-favorites total
-        val finalNonFavoriteSuggestions = if (nonFavoriteSuggestions.size < nonFavoriteLimit) {
-            val neededCount = nonFavoriteLimit - nonFavoriteSuggestions.size
-            val usedPieceIds = nonFavoriteSuggestions.map { it.piece.id }.toSet()
+        val finalNonFavoriteSuggestions = if (sortedNonFavoriteSuggestions.size < nonFavoriteLimit) {
+            val neededCount = nonFavoriteLimit - sortedNonFavoriteSuggestions.size
+            val usedPieceIds = sortedNonFavoriteSuggestions.map { it.piece.id }.toSet()
             
             // Get fallback non-favorites (excluding already used pieces)
             val allNonFavorites = pieces.filter { it.type == ItemType.PIECE && !it.isFavorite && it.id !in usedPieceIds }
@@ -369,8 +468,14 @@ class SuggestionsService(
                 } else emptyList()
             } else emptyList()
             
-            nonFavoriteSuggestions + fallbackNonFavorites
-        } else nonFavoriteSuggestions
+            sortedNonFavoriteSuggestions + fallbackNonFavorites
+        } else sortedNonFavoriteSuggestions
+        
+        // DEBUG: Log final results
+        android.util.Log.d("Phase4Debug51", "=== FINAL PRACTICE SUGGESTIONS RESULT ===")
+        android.util.Log.d("Phase4Debug52", "Final favorites: ${finalFavoriteSuggestions.size}")
+        android.util.Log.d("Phase4Debug53", "Final non-favorites: ${finalNonFavoriteSuggestions.size}")
+        android.util.Log.d("Phase4Debug54", "Total practice suggestions: ${finalFavoriteSuggestions.size + finalNonFavoriteSuggestions.size}")
         
         // PRACTICE SUGGESTIONS: Combine favorites first, then non-favorites
         return (finalFavoriteSuggestions + finalNonFavoriteSuggestions).map {
