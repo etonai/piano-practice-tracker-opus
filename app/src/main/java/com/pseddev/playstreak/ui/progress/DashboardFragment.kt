@@ -101,6 +101,20 @@ class DashboardFragment : Fragment() {
         }
         
         viewModel.suggestions.observe(viewLifecycleOwner) { suggestions ->
+            Log.d("Phase4Debug01", "Dashboard received ${suggestions.size} total suggestions")
+            val practiceCount = suggestions.count { it.suggestionType == SuggestionType.PRACTICE }
+            val performanceCount = suggestions.count { it.suggestionType == SuggestionType.PERFORMANCE }
+            val favoritePractice = suggestions.count { it.suggestionType == SuggestionType.PRACTICE && it.piece.isFavorite }
+            val nonFavoritePractice = suggestions.count { it.suggestionType == SuggestionType.PRACTICE && !it.piece.isFavorite }
+            
+            Log.d("Phase4Debug02", "Dashboard breakdown: $practiceCount practice, $performanceCount performance")
+            Log.d("Phase4Debug03", "Dashboard practice: $favoritePractice favorite, $nonFavoritePractice non-favorite")
+            
+            // Log first few suggestions for comparison
+            suggestions.take(5).forEachIndexed { index, suggestion ->
+                Log.d("Phase4Debug04", "Dashboard[$index]: ${suggestion.piece.name} (${suggestion.suggestionType}, favorite=${suggestion.piece.isFavorite})")
+            }
+            
             if (suggestions.isNotEmpty()) {
                 binding.suggestionsCard.visibility = View.VISIBLE
                 val suggestionText = suggestions.joinToString("\n") { suggestion ->

@@ -8,9 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentSuggestionsBinding
+import com.pseddev.playstreak.utils.ProUserManager
 
 class SuggestionsFragment : Fragment() {
     
@@ -25,6 +27,8 @@ class SuggestionsFragment : Fragment() {
     }
     
     private lateinit var practiceAdapter: SuggestionsAdapter
+    private lateinit var performanceAdapter: SuggestionsAdapter
+    private lateinit var proUserManager: ProUserManager
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,6 +42,9 @@ class SuggestionsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        // Initialize ProUserManager
+        proUserManager = ProUserManager.getInstance(requireContext())
+        
         val onAddActivityClick = { suggestionItem: SuggestionItem ->
             // Show quick add activity dialog with piece pre-filled
             val dialog = QuickAddActivityDialogFragment.newInstance(
@@ -48,16 +55,48 @@ class SuggestionsFragment : Fragment() {
         }
         
         practiceAdapter = SuggestionsAdapter(onAddActivityClick)
+        performanceAdapter = SuggestionsAdapter(onAddActivityClick)
         
         binding.practiceRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.practiceRecyclerView.adapter = practiceAdapter
         binding.practiceRecyclerView.setHasFixedSize(false)
         binding.practiceRecyclerView.isNestedScrollingEnabled = false
         
+        // Set up performance RecyclerView
+        binding.performanceRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.performanceRecyclerView.adapter = performanceAdapter
+        binding.performanceRecyclerView.setHasFixedSize(false)
+        binding.performanceRecyclerView.isNestedScrollingEnabled = false
         
-        viewModel.suggestions.observe(viewLifecycleOwner) { suggestions ->
-            // Only show practice suggestions (no Pro features)
-            val practiceSuggestions = suggestions.filter { it.suggestionType == SuggestionType.PRACTICE }
+        
+        // Observe practice suggestions separately
+        viewModel.practiceSuggestions.observe(viewLifecycleOwner) { allPracticeSuggestions ->
+            if (BuildConfig.DEBUG) {
+                android.util.Log.d("Phase4Debug05", "SuggestionsTab received ${allPracticeSuggestions.size} practice suggestions")
+            }
+            
+            // Apply Free/Pro user limits to practice suggestions
+            val favoriteLimit = if (proUserManager.isProUser()) 
+                ProUserManager.PRO_USER_PRACTICE_FAVORITE_SUGGESTIONS 
+                else ProUserManager.FREE_USER_PRACTICE_FAVORITE_SUGGESTIONS
+            val nonFavoriteLimit = if (proUserManager.isProUser()) 
+                ProUserManager.PRO_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS 
+                else ProUserManager.FREE_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS
+                
+            val favoriteSuggestions = allPracticeSuggestions.filter { it.piece.isFavorite }.take(favoriteLimit)
+            val nonFavoriteSuggestions = allPracticeSuggestions.filter { !it.piece.isFavorite }.take(nonFavoriteLimit)
+            val practiceSuggestions = favoriteSuggestions + nonFavoriteSuggestions
+            
+            if (BuildConfig.DEBUG) {
+                android.util.Log.d("Phase4Debug06", "SuggestionsTab limits: favorite=$favoriteLimit, nonFavorite=$nonFavoriteLimit")
+                android.util.Log.d("Phase4Debug07", "SuggestionsTab after limiting: ${practiceSuggestions.size} practice total")
+                android.util.Log.d("Phase4Debug08", "SuggestionsTab practice: ${favoriteSuggestions.size} favorite, ${nonFavoriteSuggestions.size} non-favorite")
+                
+                // Log first few suggestions for comparison
+                practiceSuggestions.take(5).forEachIndexed { index, suggestion ->
+                    android.util.Log.d("Phase4Debug09", "SuggestionsTab[$index]: ${suggestion.piece.name} (favorite=${suggestion.piece.isFavorite})")
+                }
+            }
             
             // Update practice suggestions
             practiceAdapter.submitList(practiceSuggestions)
@@ -69,17 +108,61 @@ class SuggestionsFragment : Fragment() {
                 binding.noPracticeSuggestionsText.visibility = View.GONE
             }
             
-            // Hide performance suggestions section completely (no Pro features)
-            binding.performanceSuggestionsHeader.visibility = View.GONE
-            binding.performanceRecyclerView.visibility = View.GONE
-            binding.noPerformanceSuggestionsText.visibility = View.GONE
-            
-            // Show empty state only if no practice suggestions
-            if (practiceSuggestions.isEmpty()) {
-                binding.emptyView.visibility = View.VISIBLE
-            } else {
-                binding.emptyView.visibility = View.GONE
+            updateEmptyState()
+        }
+        
+        // Observe performance suggestions separately
+        viewModel.performanceSuggestions.observe(viewLifecycleOwner) { performanceSuggestions ->
+            if (BuildConfig.DEBUG) {
+                android.util.Log.d("Phase4Debug82", "SuggestionsTab received ${performanceSuggestions.size} performance suggestions")
             }
+            
+            // Show performance suggestions for Pro users
+            if (proUserManager.isProUser()) {
+                if (BuildConfig.DEBUG) {
+                    android.util.Log.d("Phase4Debug81", "Pro user detected, showing performance suggestions")
+                    performanceSuggestions.forEachIndexed { index, suggestion ->
+                        android.util.Log.d("Phase4Debug83", "PerfSugg[$index]: ${suggestion.piece.name} | ${suggestion.suggestionReason}")
+                    }
+                }
+                
+                binding.performanceSuggestionsHeader.visibility = View.VISIBLE
+                performanceAdapter.submitList(performanceSuggestions)
+                
+                if (performanceSuggestions.isEmpty()) {
+                    if (BuildConfig.DEBUG) {
+                        android.util.Log.d("Phase4Debug84", "No performance suggestions, showing 'no suggestions' text")
+                    }
+                    binding.performanceRecyclerView.visibility = View.GONE
+                    binding.noPerformanceSuggestionsText.visibility = View.VISIBLE
+                } else {
+                    if (BuildConfig.DEBUG) {
+                        android.util.Log.d("Phase4Debug85", "Showing ${performanceSuggestions.size} performance suggestions")
+                    }
+                    binding.performanceRecyclerView.visibility = View.VISIBLE
+                    binding.noPerformanceSuggestionsText.visibility = View.GONE
+                }
+            } else {
+                // Hide performance suggestions for non-Pro users
+                binding.performanceSuggestionsHeader.visibility = View.GONE
+                binding.performanceRecyclerView.visibility = View.GONE
+                binding.noPerformanceSuggestionsText.visibility = View.GONE
+            }
+            
+            updateEmptyState()
+        }
+    }
+    
+    private fun updateEmptyState() {
+        // This will be called from both observers, but we need to check both states
+        val practiceCount = practiceAdapter.itemCount
+        val performanceCount = if (proUserManager.isProUser()) performanceAdapter.itemCount else 0
+        
+        val hasAnySuggestions = practiceCount > 0 || performanceCount > 0
+        if (hasAnySuggestions) {
+            binding.emptyView.visibility = View.GONE
+        } else {
+            binding.emptyView.visibility = View.VISIBLE
         }
     }
     
