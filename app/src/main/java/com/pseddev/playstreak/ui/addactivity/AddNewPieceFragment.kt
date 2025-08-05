@@ -46,13 +46,25 @@ class AddNewPieceFragment : Fragment() {
             binding.radioTechnique.isEnabled = false
         }
         
+        // Observe error messages
+        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
+            if (errorMessage != null) {
+                binding.nameInputLayout.error = errorMessage
+            } else {
+                binding.nameInputLayout.error = null
+            }
+        }
+        
         binding.buttonOk.setOnClickListener {
             val name = binding.editTextName.text.toString().trim()
             
             if (name.isEmpty()) {
-                Toast.makeText(requireContext(), "Please enter a name", Toast.LENGTH_SHORT).show()
+                binding.nameInputLayout.error = "Please enter a name"
                 return@setOnClickListener
             }
+            
+            // Clear any previous error
+            binding.nameInputLayout.error = null
             
             val type = if (binding.radioPiece.isChecked) ItemType.PIECE else ItemType.TECHNIQUE
             

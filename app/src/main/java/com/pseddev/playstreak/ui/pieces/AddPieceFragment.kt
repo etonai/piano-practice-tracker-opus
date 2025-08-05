@@ -77,6 +77,9 @@ class AddPieceFragment : Fragment() {
                 is AddPieceResult.PieceLimitReached -> {
                     showPieceLimitDialog(result.currentCount, result.limit, result.isProUser)
                 }
+                is AddPieceResult.DuplicateName -> {
+                    binding.pieceNameInputLayout.error = "This piece already exists"
+                }
             }
         }
         

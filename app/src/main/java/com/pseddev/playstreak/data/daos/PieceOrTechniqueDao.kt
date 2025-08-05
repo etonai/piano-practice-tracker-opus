@@ -54,4 +54,8 @@ interface PieceOrTechniqueDao {
     
     @Query("SELECT * FROM pieces_techniques WHERE lastSatisfactoryPractice IS NOT NULL ORDER BY lastSatisfactoryPractice DESC")
     fun getPiecesWithSatisfactoryPractice(): Flow<List<PieceOrTechnique>>
+    
+    // Check if a piece name already exists (case-insensitive)
+    @Query("SELECT COUNT(*) > 0 FROM pieces_techniques WHERE LOWER(name) = LOWER(:name)")
+    suspend fun doesPieceNameExist(name: String): Boolean
 }

@@ -14,6 +14,7 @@ sealed class AddPieceResult {
     object Success : AddPieceResult()
     data class Error(val message: String) : AddPieceResult()
     data class PieceLimitReached(val currentCount: Int, val limit: Int, val isProUser: Boolean) : AddPieceResult()
+    object DuplicateName : AddPieceResult()
 }
 
 class AddPieceViewModel(
@@ -49,6 +50,13 @@ class AddPieceViewModel(
     fun savePiece(name: String, type: ItemType, isFavorite: Boolean) {
         viewModelScope.launch {
             try {
+                // Check for duplicate name first (case-insensitive)
+                val normalizedName = TextNormalizer.normalizePieceName(name)
+                if (repository.doesPieceNameExist(normalizedName)) {
+                    _saveResult.value = AddPieceResult.DuplicateName
+                    return@launch
+                }
+                
                 // Check piece limit before saving
                 val currentPieceCount = repository.getAllPiecesAndTechniques().first().size
                 val limit = proUserManager.getPieceLimit()
@@ -67,7 +75,7 @@ class AddPieceViewModel(
                 }
                 
                 val piece = PieceOrTechnique(
-                    name = TextNormalizer.normalizePieceName(name),
+                    name = normalizedName,
                     type = type,
                     isFavorite = isFavorite
                 )

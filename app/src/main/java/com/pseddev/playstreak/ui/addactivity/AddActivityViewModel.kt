@@ -57,6 +57,13 @@ class AddActivityViewModel(
     fun insertPieceOrTechnique(name: String, type: ItemType, onComplete: (Long) -> Unit) {
         viewModelScope.launch {
             try {
+                // Check for duplicate name first (case-insensitive)
+                val normalizedName = TextNormalizer.normalizePieceName(name)
+                if (repository.doesPieceNameExist(normalizedName)) {
+                    _errorMessage.value = "This piece already exists"
+                    return@launch
+                }
+                
                 // Check piece limit before adding
                 val currentPieceCount = repository.getAllPiecesAndTechniques().first().size
                 if (!proUserManager.canAddMorePieces(currentPieceCount)) {
@@ -67,7 +74,7 @@ class AddActivityViewModel(
                 
                 val id = repository.insertPieceOrTechnique(
                     PieceOrTechnique(
-                        name = TextNormalizer.normalizePieceName(name),
+                        name = normalizedName,
                         type = type,
                         isFavorite = false
                     )

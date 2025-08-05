@@ -51,6 +51,9 @@ class PianoRepository(
     suspend fun deletePieceOrTechnique(item: PieceOrTechnique) = 
         pieceOrTechniqueDao.delete(item)
     
+    suspend fun doesPieceNameExist(name: String): Boolean = 
+        pieceOrTechniqueDao.doesPieceNameExist(name)
+    
     suspend fun deletePieceAndActivities(pieceId: Long) {
         // Count activities before deletion to update lifetime counter
         val activitiesToDelete = getActivitiesForPiece(pieceId).first()
