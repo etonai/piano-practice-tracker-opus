@@ -39,12 +39,13 @@ class DashboardViewModel(
     private val yesterdayStart = todayStart - 24 * 60 * 60 * 1000
     private val yesterdayEnd = todayEnd - 24 * 60 * 60 * 1000
     
-    private val weekStart = Calendar.getInstance().apply {
+    // Rolling 7-day period calculation (last 7 days from today)
+    private val sevenDaysAgoStart = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, 0)
         set(Calendar.MINUTE, 0)
         set(Calendar.SECOND, 0)
         set(Calendar.MILLISECOND, 0)
-        add(Calendar.DAY_OF_YEAR, -7)
+        add(Calendar.DAY_OF_YEAR, -6) // -6 to include today as day 7
     }.timeInMillis
     
     val todayActivities: LiveData<List<ActivityWithPiece>> = 
@@ -77,26 +78,27 @@ class DashboardViewModel(
         }.asLiveData()
     
     val weekSummary: LiveData<String> = 
-        repository.getActivitiesForDateRange(weekStart, todayEnd)
+        repository.getActivitiesForDateRange(sevenDaysAgoStart, todayEnd)
             .map { activities ->
                 val practiceCount = activities.count { it.activityType == com.pseddev.playstreak.data.entities.ActivityType.PRACTICE }
                 val performanceCount = activities.count { it.activityType == com.pseddev.playstreak.data.entities.ActivityType.PERFORMANCE }
                 val totalMinutes = activities.filter { it.minutes > 0 }.sumOf { it.minutes }
                 
-                // Calculate number of active days
-                val activeDays = activities.groupBy { activity ->
-                    val cal = Calendar.getInstance().apply { timeInMillis = activity.timestamp }
-                    cal.get(Calendar.DAY_OF_YEAR)
-                }.size
+                // Format total time in a user-friendly way
+                val timeFormatted = when {
+                    totalMinutes >= 60 -> {
+                        val hours = totalMinutes / 60
+                        val mins = totalMinutes % 60
+                        if (mins > 0) "${hours}h ${mins}m" else "${hours}h"
+                    }
+                    totalMinutes > 0 -> "${totalMinutes}m"
+                    else -> "0m"
+                }
                 
                 buildString {
-                    append("This week: ")
-                    append("$practiceCount practice activit${if (practiceCount != 1) "ies" else "y"}, ")
-                    append("$performanceCount performance${if (performanceCount != 1) "s" else ""}")
-                    append(" across $activeDays day${if (activeDays != 1) "s" else ""}")
-                    if (totalMinutes > 0) {
-                        append("\nTotal tracked time: $totalMinutes minutes")
-                    }
+                    append("• $practiceCount practice activit${if (practiceCount != 1) "ies" else "y"}\n")
+                    append("• $performanceCount performance activit${if (performanceCount != 1) "ies" else "y"}\n")
+                    append("• $timeFormatted total tracked time")
                 }
             }
             .asLiveData()
