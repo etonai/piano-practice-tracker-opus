@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.pseddev.playstreak.analytics.AnalyticsManager
 import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.ProUserManager
@@ -19,11 +20,12 @@ class QuickAddActivityViewModel(
 ) : ViewModel() {
     
     private val proUserManager = ProUserManager.getInstance(context)
+    private val analyticsManager = AnalyticsManager(context)
     
     private val _addResult = MutableLiveData<Result<Unit>>()
     val addResult: LiveData<Result<Unit>> = _addResult
     
-    fun addActivity(activity: Activity) {
+    fun addActivity(activity: Activity, source: String = "dashboard_quick") {
         GlobalScope.launch {
             try {
                 // Check activity limit before adding
@@ -37,10 +39,37 @@ class QuickAddActivityViewModel(
                 }
                 
                 repository.insertActivity(activity)
+                
+                // Track analytics event with provided source context
+                val piece = repository.getPieceOrTechniqueById(activity.pieceOrTechniqueId)
+                piece?.let {
+                    analyticsManager.trackActivityLogged(
+                        activityType = activity.activityType,
+                        pieceType = it.type,
+                        hasDuration = activity.minutes > 0,
+                        source = source
+                    )
+                }
+                
+                // Check for streak achievements
+                val newStreak = repository.calculateCurrentStreak()
+                trackStreakAchievement(newStreak)
+                
                 _addResult.postValue(Result.success(Unit))
             } catch (e: Exception) {
                 _addResult.postValue(Result.failure(e))
             }
+        }
+    }
+    
+    /**
+     * Track streak achievement milestones
+     */
+    private fun trackStreakAchievement(streakLength: Int) {
+        // Only track milestones at specific levels
+        if (streakLength in listOf(3, 5, 8, 14, 21, 30, 50, 100)) {
+            val emojiLevel = analyticsManager.getEmojiLevelForStreak(streakLength)
+            analyticsManager.trackStreakAchieved(streakLength, emojiLevel)
         }
     }
 }

@@ -25,33 +25,40 @@ class AnalyticsManager(private val context: Context) {
         private const val EVENT_ACTIVITY_LOGGED = "activity_logged"
         private const val EVENT_STREAK_ACHIEVED = "streak_achieved"
         private const val EVENT_PIECE_ADDED = "piece_added"
-        private const val EVENT_CSV_OPERATION = "csv_operation"
+        private const val EVENT_DATA_OPERATION = "data_operation"
+        private const val EVENT_DATA_PRUNING = "data_pruning"
         
         // Parameter names
         private const val PARAM_ACTIVITY_TYPE = "activity_type"
         private const val PARAM_PIECE_TYPE = "piece_type"
         private const val PARAM_HAS_DURATION = "has_duration"
+        private const val PARAM_SOURCE = "source"
         private const val PARAM_STREAK_LENGTH = "streak_length"
         private const val PARAM_EMOJI_LEVEL = "emoji_level"
         private const val PARAM_TOTAL_PIECES = "total_pieces"
         private const val PARAM_OPERATION_TYPE = "operation_type"
+        private const val PARAM_FORMAT = "format"
         private const val PARAM_ACTIVITY_COUNT = "activity_count"
+        private const val PARAM_DELETED_COUNT = "deleted_count"
         private const val PARAM_SUCCESS = "success"
     }
     
     /**
      * Track when user logs a practice or performance activity
+     * @param source the entry point: "main_flow", "dashboard_quick", "calendar_quick", "suggestion"
      */
     fun trackActivityLogged(
         activityType: ActivityType,
         pieceType: ItemType,
-        hasDuration: Boolean
+        hasDuration: Boolean,
+        source: String = "unknown"
     ) {
         if (!analyticsEnabled) return
         firebaseAnalytics.logEvent(EVENT_ACTIVITY_LOGGED) {
             param(PARAM_ACTIVITY_TYPE, activityType.name)
             param(PARAM_PIECE_TYPE, pieceType.name)
             param(PARAM_HAS_DURATION, if (hasDuration) 1L else 0L)
+            param(PARAM_SOURCE, source)
         }
     }
     
@@ -68,27 +75,61 @@ class AnalyticsManager(private val context: Context) {
     
     /**
      * Track when user adds a new piece or technique
+     * @param source the entry point: "pieces_tab", "during_activity_creation"
      */
-    fun trackPieceAdded(pieceType: ItemType, totalPieceCount: Int) {
+    fun trackPieceAdded(
+        pieceType: ItemType, 
+        totalPieceCount: Int,
+        source: String = "unknown"
+    ) {
         if (!analyticsEnabled) return
         firebaseAnalytics.logEvent(EVENT_PIECE_ADDED) {
             param(PARAM_PIECE_TYPE, pieceType.name)
             param(PARAM_TOTAL_PIECES, totalPieceCount.toLong())
+            param(PARAM_SOURCE, source)
         }
     }
     
     /**
-     * Track CSV import/export operations
+     * Track data import/export operations (JSON, CSV)
      */
+    fun trackDataOperation(
+        operationType: String, // "import" or "export"
+        format: String, // "json" or "csv"
+        activityCount: Int,
+        success: Boolean
+    ) {
+        if (!analyticsEnabled) return
+        firebaseAnalytics.logEvent(EVENT_DATA_OPERATION) {
+            param(PARAM_OPERATION_TYPE, operationType)
+            param(PARAM_FORMAT, format)
+            param(PARAM_ACTIVITY_COUNT, activityCount.toLong())
+            param(PARAM_SUCCESS, if (success) 1L else 0L)
+        }
+    }
+
+    /**
+     * Track CSV import/export operations (deprecated - use trackDataOperation instead)
+     */
+    @Deprecated("Use trackDataOperation with format='csv' instead")
     fun trackCsvOperation(
         operationType: String, // "import" or "export"
         activityCount: Int,
         success: Boolean
     ) {
+        trackDataOperation(operationType, "csv", activityCount, success)
+    }
+
+    /**
+     * Track data pruning operations (deletion of oldest activities)
+     */
+    fun trackDataPruning(
+        deletedCount: Int,
+        success: Boolean
+    ) {
         if (!analyticsEnabled) return
-        firebaseAnalytics.logEvent(EVENT_CSV_OPERATION) {
-            param(PARAM_OPERATION_TYPE, operationType)
-            param(PARAM_ACTIVITY_COUNT, activityCount.toLong())
+        firebaseAnalytics.logEvent(EVENT_DATA_PRUNING) {
+            param(PARAM_DELETED_COUNT, deletedCount.toLong())
             param(PARAM_SUCCESS, if (success) 1L else 0L)
         }
     }

@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.pseddev.playstreak.analytics.AnalyticsManager
 import com.pseddev.playstreak.crashlytics.CrashlyticsManager
 import com.pseddev.playstreak.data.models.SyncOperationResult
 import com.pseddev.playstreak.data.repository.PianoRepository
@@ -35,6 +36,7 @@ class ImportExportViewModel(
     private val syncManager = SyncManager(context, repository, driveHelper)
     private val proUserManager = ProUserManager.getInstance(context)
     private val crashlyticsManager = CrashlyticsManager(context)
+    private val analyticsManager = AnalyticsManager(context)
     private val sharedPrefs = context.getSharedPreferences("play_streak_export_prefs", Context.MODE_PRIVATE)
     
     private val _isLoading = MutableLiveData<Boolean>()
@@ -99,16 +101,35 @@ class ImportExportViewModel(
         }
         _isLoading.value = true
         try {
-            withContext(Dispatchers.IO) {
+            val activityCount = withContext(Dispatchers.IO) {
                 repository.exportToJson(writer)
+                repository.getTotalActivityCount() // Get activity count after export
             }
             // Update last export time
             sharedPrefs.edit().putLong("last_export_time", System.currentTimeMillis()).apply()
+            
+            // Track analytics for JSON export
+            analyticsManager.trackDataOperation(
+                operationType = "export",
+                format = "json",
+                activityCount = activityCount,
+                success = true
+            )
+            
             _exportResult.value = Event(Result.success("JSON export successful!"))
         } catch (e: Exception) {
             Log.e("JsonExport", "Exception in ViewModel: ${e.javaClass.simpleName} - ${e.message}", e)
             // Record crash context for JSON export error
             crashlyticsManager.recordCsvError("json_export", 0, e) // Reuse CSV error tracking for JSON
+            
+            // Track failed JSON export
+            analyticsManager.trackDataOperation(
+                operationType = "export",
+                format = "json",
+                activityCount = 0,
+                success = false
+            )
+            
             val errorMessage = "JSON export failed: ${e.javaClass.simpleName} - ${e.message}"
             _exportResult.value = Event(Result.failure(Exception(errorMessage, e)))
         } finally {
@@ -172,11 +193,27 @@ class ImportExportViewModel(
                 if (!validationResult.isValid) {
                     // Validation failed - show error dialog
                     _jsonValidationResult.value = Event(validationResult)
+                    
+                    // Track failed JSON import (validation failed)
+                    analyticsManager.trackDataOperation(
+                        operationType = "import",
+                        format = "json",
+                        activityCount = validationResult.activityCount,
+                        success = false
+                    )
                 } else {
                     // Validation passed - proceed with actual import using fresh reader
                     val importResult = withContext(Dispatchers.IO) {
                         repository.importFromJson(jsonContent.reader())
                     }
+                    
+                    // Track successful JSON import
+                    analyticsManager.trackDataOperation(
+                        operationType = "import",
+                        format = "json",
+                        activityCount = importResult.activitiesImported,
+                        success = importResult.success
+                    )
                     
                     _jsonImportResult.value = Event(Result.success(importResult))
                 }
@@ -184,6 +221,14 @@ class ImportExportViewModel(
             } catch (e: Exception) {
                 // Record crash context for JSON import error
                 crashlyticsManager.recordCsvError("json_import", 0, e) // Reuse CSV error tracking for JSON
+                
+                // Track failed JSON import (exception occurred)
+                analyticsManager.trackDataOperation(
+                    operationType = "import",
+                    format = "json",
+                    activityCount = 0,
+                    success = false
+                )
                 _jsonValidationResult.value = Event(
                     JsonValidationResult(
                         isValid = false,

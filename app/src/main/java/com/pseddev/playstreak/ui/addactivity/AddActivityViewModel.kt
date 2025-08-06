@@ -79,6 +79,15 @@ class AddActivityViewModel(
                         isFavorite = false
                     )
                 )
+                
+                // Track analytics for piece addition during activity creation
+                val newPieceCount = repository.getAllPiecesAndTechniques().first().size
+                analyticsManager.trackPieceAdded(
+                    pieceType = type,
+                    totalPieceCount = newPieceCount,
+                    source = "during_activity_creation"
+                )
+                
                 onComplete(id)
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to add piece: ${e.message}"
@@ -141,9 +150,14 @@ class AddActivityViewModel(
                     analyticsManager.trackActivityLogged(
                         activityType = activityType,
                         pieceType = it.type,
-                        hasDuration = minutes > 0
+                        hasDuration = minutes > 0,
+                        source = "main_flow"
                     )
                 }
+                
+                // Check for streak achievements after activity is added
+                val newStreak = repository.calculateCurrentStreak()
+                trackStreakAchievement(newStreak)
                 
                 _navigateToMain.value = true
             } catch (e: Exception) {
@@ -198,6 +212,17 @@ class AddActivityViewModel(
     fun clearEditMode() {
         _editMode.value = false
         _editActivity.value = null
+    }
+    
+    /**
+     * Track streak achievement milestones
+     */
+    private fun trackStreakAchievement(streakLength: Int) {
+        // Only track milestones at specific levels
+        if (streakLength in listOf(3, 5, 8, 14, 21, 30, 50, 100)) {
+            val emojiLevel = analyticsManager.getEmojiLevelForStreak(streakLength)
+            analyticsManager.trackStreakAchieved(streakLength, emojiLevel)
+        }
     }
     
     fun clearErrorMessage() {

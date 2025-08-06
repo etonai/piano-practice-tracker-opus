@@ -30,16 +30,19 @@ class QuickAddActivityDialogFragment : DialogFragment() {
     
     private var pieceId: Long = -1
     private var pieceName: String = ""
+    private var source: String = "dashboard_quick"
     
     companion object {
         private const val ARG_PIECE_ID = "piece_id"
         private const val ARG_PIECE_NAME = "piece_name"
+        private const val ARG_SOURCE = "source"
         
-        fun newInstance(pieceId: Long, pieceName: String): QuickAddActivityDialogFragment {
+        fun newInstance(pieceId: Long, pieceName: String, source: String = "dashboard_quick"): QuickAddActivityDialogFragment {
             val fragment = QuickAddActivityDialogFragment()
             val args = Bundle().apply {
                 putLong(ARG_PIECE_ID, pieceId)
                 putString(ARG_PIECE_NAME, pieceName)
+                putString(ARG_SOURCE, source)
             }
             fragment.arguments = args
             return fragment
@@ -51,6 +54,7 @@ class QuickAddActivityDialogFragment : DialogFragment() {
         arguments?.let {
             pieceId = it.getLong(ARG_PIECE_ID)
             pieceName = it.getString(ARG_PIECE_NAME, "")
+            source = it.getString(ARG_SOURCE, "dashboard_quick")
         }
     }
     
@@ -176,7 +180,7 @@ class QuickAddActivityDialogFragment : DialogFragment() {
             performanceType = performanceType
         )
         
-        viewModel.addActivity(activity)
+        viewModel.addActivity(activity, source)
     }
     
     override fun onDestroyView() {

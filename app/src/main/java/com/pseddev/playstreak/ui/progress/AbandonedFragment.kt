@@ -91,7 +91,8 @@ class AbandonedFragment : Fragment() {
     private fun showQuickAddActivityDialog(abandonedItem: AbandonedItem) {
         val dialog = QuickAddActivityDialogFragment.newInstance(
             abandonedItem.piece.id,
-            abandonedItem.piece.name
+            abandonedItem.piece.name,
+            "dashboard_quick"
         )
         dialog.show(parentFragmentManager, "QuickAddActivityDialog")
     }

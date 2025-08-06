@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import com.pseddev.playstreak.analytics.AnalyticsManager
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.ConfigurationManager
 import com.pseddev.playstreak.utils.ProUserManager
@@ -34,6 +35,7 @@ class PruneDataViewModel(
     
     private val configurationManager = ConfigurationManager.getInstance(context)
     private val proUserManager = ProUserManager.getInstance(context)
+    private val analyticsManager = AnalyticsManager(context)
     
     private val _activityCounts = MutableLiveData<ActivityCounts>()
     val activityCounts: LiveData<ActivityCounts> = _activityCounts
@@ -98,14 +100,39 @@ class PruneDataViewModel(
                 
                 _pruningResult.value = result
                 
-                // Refresh activity count after successful pruning
-                if (result is PruningResult.Success) {
-                    loadActivityCount()
+                // Track analytics for data pruning operation
+                when (result) {
+                    is PruningResult.Success -> {
+                        analyticsManager.trackDataPruning(
+                            deletedCount = result.deletedCount,
+                            success = true
+                        )
+                        // Refresh activity count after successful pruning
+                        loadActivityCount()
+                    }
+                    is PruningResult.NoActivitiesToPrune -> {
+                        analyticsManager.trackDataPruning(
+                            deletedCount = 0,
+                            success = true
+                        )
+                    }
+                    is PruningResult.Error -> {
+                        analyticsManager.trackDataPruning(
+                            deletedCount = 0,
+                            success = false
+                        )
+                    }
                 }
                 
             } catch (e: Exception) {
                 android.util.Log.e("PruneDataViewModel", "Error during pruning operation", e)
                 _pruningResult.value = PruningResult.Error(e.message ?: "Unknown error occurred")
+                
+                // Track failed pruning operation
+                analyticsManager.trackDataPruning(
+                    deletedCount = 0,
+                    success = false
+                )
             } finally {
                 _pruningInProgress.value = false
             }

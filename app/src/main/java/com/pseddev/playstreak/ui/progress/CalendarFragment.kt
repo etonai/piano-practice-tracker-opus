@@ -268,7 +268,8 @@ class CalendarFragment : Fragment() {
                 // Show quick add activity dialog with piece pre-filled
                 val dialog = QuickAddActivityDialogFragment.newInstance(
                     piece.id,
-                    piece.name
+                    piece.name,
+                    "calendar_quick"
                 )
                 dialog.show(parentFragmentManager, "QuickAddActivityDialog")
             }

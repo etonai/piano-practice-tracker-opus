@@ -2,6 +2,7 @@ package com.pseddev.playstreak.ui.pieces
 
 import android.content.Context
 import androidx.lifecycle.*
+import com.pseddev.playstreak.analytics.AnalyticsManager
 import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
 import com.pseddev.playstreak.data.repository.PianoRepository
@@ -23,6 +24,7 @@ class AddPieceViewModel(
 ) : ViewModel() {
     
     private val proUserManager = ProUserManager.getInstance(context)
+    private val analyticsManager = AnalyticsManager(context)
     private val _saveResult = MutableLiveData<AddPieceResult>()
     val saveResult: LiveData<AddPieceResult> = _saveResult
     
@@ -81,6 +83,15 @@ class AddPieceViewModel(
                 )
                 
                 repository.insertPieceOrTechnique(piece)
+                
+                // Track analytics for piece addition
+                val newPieceCount = repository.getAllPiecesAndTechniques().first().size
+                analyticsManager.trackPieceAdded(
+                    pieceType = type,
+                    totalPieceCount = newPieceCount,
+                    source = "pieces_tab"
+                )
+                
                 _saveResult.value = AddPieceResult.Success
                 
             } catch (e: Exception) {

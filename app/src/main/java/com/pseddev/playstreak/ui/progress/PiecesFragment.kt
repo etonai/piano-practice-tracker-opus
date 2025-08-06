@@ -63,7 +63,8 @@ class PiecesFragment : Fragment() {
                 // Show quick add activity dialog with piece pre-filled
                 val dialog = QuickAddActivityDialogFragment.newInstance(
                     pieceWithStats.piece.id,
-                    pieceWithStats.piece.name
+                    pieceWithStats.piece.name,
+                    "dashboard_quick"
                 )
                 dialog.show(parentFragmentManager, "QuickAddActivityDialog")
             },
