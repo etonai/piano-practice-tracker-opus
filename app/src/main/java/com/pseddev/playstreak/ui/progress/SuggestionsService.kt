@@ -18,6 +18,7 @@ class SuggestionsService(
 ) {
     
     private val now = System.currentTimeMillis()
+    private val fourteenHoursAgo = now - (14 * 60 * 60 * 1000L)
     private val twoDaysAgo = now - (2 * 24 * 60 * 60 * 1000L)
     private val sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000L)
     private val thirtyOneDaysAgo = now - (31 * 24 * 60 * 60 * 1000L)
@@ -170,7 +171,14 @@ class SuggestionsService(
                             suggestionReason = if (lastPerformanceDate == null) {
                                 "${favoritePrefix}${recentPractices.size} practices, never performed"
                             } else {
-                                "${favoritePrefix}${recentPractices.size} practices, last performance $daysSinceLastPerformance days ago"
+                                val hoursElapsed = ((now - lastPerformanceDate) / (60 * 60 * 1000)).toInt()
+                                if (hoursElapsed < 48) {
+                                    val hourText = if (hoursElapsed == 1) "hour" else "hours"
+                                    "${favoritePrefix}${recentPractices.size} practices, last performance $hoursElapsed $hourText ago"
+                                } else {
+                                    val dayText = if (daysSinceLastPerformance == 1) "day" else "days"
+                                    "${favoritePrefix}${recentPractices.size} practices, last performance $daysSinceLastPerformance $dayText ago"
+                                }
                             },
                             suggestionType = SuggestionType.PERFORMANCE
                         )
@@ -183,7 +191,16 @@ class SuggestionsService(
                             piece = piece,
                             lastActivityDate = lastPerformanceDate, // Use performance date for sorting
                             daysSinceLastActivity = daysSinceLastPerformance,
-                            suggestionReason = "${favoritePrefix}${recentPractices.size} practices, last performance $daysSinceLastPerformance days ago",
+                            suggestionReason = {
+                                val hoursElapsed = ((now - lastPerformanceDate) / (60 * 60 * 1000)).toInt()
+                                if (hoursElapsed < 48) {
+                                    val hourText = if (hoursElapsed == 1) "hour" else "hours"
+                                    "${favoritePrefix}${recentPractices.size} practices, last performance $hoursElapsed $hourText ago"
+                                } else {
+                                    val dayText = if (daysSinceLastPerformance == 1) "day" else "days"
+                                    "${favoritePrefix}${recentPractices.size} practices, last performance $daysSinceLastPerformance $dayText ago"
+                                }
+                            }(),
                             suggestionType = SuggestionType.PERFORMANCE
                         )
                     )
@@ -273,9 +290,8 @@ class SuggestionsService(
             }
             
             if (piece.isFavorite) {
-                // Favorites that haven't been practiced in 2+ days AND haven't been practiced today
-                if ((lastActivityDate == null || lastActivityDate < twoDaysAgo) && 
-                    (lastActivityDate == null || lastActivityDate < startOfToday)) {
+                // Simplified favorites: not practiced or performed in the last 14 hours
+                if (lastActivityDate == null || lastActivityDate < fourteenHoursAgo) {
                     favoriteSuggestions.add(
                         SuggestionItem(
                             piece = piece,
@@ -283,8 +299,14 @@ class SuggestionsService(
                             daysSinceLastActivity = daysSince,
                             suggestionReason = if (lastActivityDate == null) "Favorite piece - Never practiced" else {
                                 val activityTypeText = if (isLastActivityPerformance) "Last performance" else "Last practice"
-                                val dayText = if (daysSince == 1) "day" else "days"
-                                "Favorite piece - $activityTypeText $daysSince $dayText ago"
+                                val hoursElapsed = ((now - lastActivityDate) / (60 * 60 * 1000)).toInt()
+                                if (hoursElapsed < 48) {
+                                    val hourText = if (hoursElapsed == 1) "hour" else "hours"
+                                    "Favorite piece - $activityTypeText $hoursElapsed $hourText ago"
+                                } else {
+                                    val dayText = if (daysSince == 1) "day" else "days"
+                                    "Favorite piece - $activityTypeText $daysSince $dayText ago"
+                                }
                             }
                         )
                     )
@@ -300,8 +322,14 @@ class SuggestionsService(
                             daysSinceLastActivity = daysSince,
                             suggestionReason = {
                                 val activityTypeText = if (isLastActivityPerformance) "Last performance" else "Last practice"
-                                val dayText = if (daysSince == 1) "day" else "days"
-                                "$activityTypeText $daysSince $dayText ago"
+                                val hoursElapsed = ((now - lastActivityDate!!) / (60 * 60 * 1000)).toInt()
+                                if (hoursElapsed < 48) {
+                                    val hourText = if (hoursElapsed == 1) "hour" else "hours"
+                                    "$activityTypeText $hoursElapsed $hourText ago"
+                                } else {
+                                    val dayText = if (daysSince == 1) "day" else "days"
+                                    "$activityTypeText $daysSince $dayText ago"
+                                }
                             }()
                         )
                     )
@@ -356,8 +384,8 @@ class SuggestionsService(
                         else -> null to false
                     }
                     
-                    // Exclude pieces practiced today
-                    if (lastActivityDate != null && lastActivityDate >= startOfToday) {
+                    // Exclude pieces practiced or performed in the last 14 hours (consistent with main favorites logic)
+                    if (lastActivityDate != null && lastActivityDate >= fourteenHoursAgo) {
                         return@mapNotNull null
                     }
                     
@@ -373,8 +401,14 @@ class SuggestionsService(
                         daysSinceLastActivity = daysSince,
                         suggestionReason = if (lastActivityDate == null) "Favorite piece - Never practiced" else {
                             val activityTypeText = if (isLastActivityPerformance) "Last performance" else "Last practice"
-                            val dayText = if (daysSince == 1) "day" else "days"
-                            "Favorite piece - $activityTypeText $daysSince $dayText ago"
+                            val hoursElapsed = ((now - lastActivityDate) / (60 * 60 * 1000)).toInt()
+                            if (hoursElapsed < 48) {
+                                val hourText = if (hoursElapsed == 1) "hour" else "hours"
+                                "Favorite piece - $activityTypeText $hoursElapsed $hourText ago"
+                            } else {
+                                val dayText = if (daysSince == 1) "day" else "days"
+                                "Favorite piece - $activityTypeText $daysSince $dayText ago"
+                            }
                         }
                     )
                 }
@@ -450,8 +484,14 @@ class SuggestionsService(
                             daysSinceLastActivity = daysSince,
                             suggestionReason = if (lastActivityDate == null) "Never practiced" else {
                                 val activityTypeText = if (isLastActivityPerformance) "Last performance" else "Last practice"
-                                val dayText = if (daysSince == 1) "day" else "days"
-                                "$activityTypeText $daysSince $dayText ago"
+                                val hoursElapsed = ((now - lastActivityDate) / (60 * 60 * 1000)).toInt()
+                                if (hoursElapsed < 48) {
+                                    val hourText = if (hoursElapsed == 1) "hour" else "hours"
+                                    "$activityTypeText $hoursElapsed $hourText ago"
+                                } else {
+                                    val dayText = if (daysSince == 1) "day" else "days"
+                                    "$activityTypeText $daysSince $dayText ago"
+                                }
                             }
                         )
                     } else null
