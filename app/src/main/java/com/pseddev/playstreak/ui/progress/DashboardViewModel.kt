@@ -113,7 +113,21 @@ class DashboardViewModel(
     val suggestions: LiveData<List<SuggestionItem>> = 
         repository.getAllPiecesAndTechniques()
             .combine(repository.getAllActivities()) { pieces, activities ->
-                suggestionsService.generateAllSuggestions(pieces, activities)
+                // Generate practice suggestions with dashboard limits (same as original combined limits)
+                val practiceSuggestions = suggestionsService.generatePracticeSuggestions(pieces, activities)
+                
+                // Apply dashboard-specific limits (same as generateAllSuggestions used)
+                val dashboardFavoriteLimit = if (proUserManager.isProUser()) 
+                    ProUserManager.PRO_USER_PRACTICE_FAVORITE_SUGGESTIONS 
+                    else ProUserManager.FREE_USER_PRACTICE_FAVORITE_SUGGESTIONS
+                val dashboardNonFavoriteLimit = if (proUserManager.isProUser()) 
+                    ProUserManager.PRO_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS 
+                    else ProUserManager.FREE_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS
+                    
+                val favoritesPractice = practiceSuggestions.filter { it.piece.isFavorite }.take(dashboardFavoriteLimit)
+                val nonFavoritesPractice = practiceSuggestions.filter { !it.piece.isFavorite }.take(dashboardNonFavoriteLimit)
+                
+                favoritesPractice + nonFavoritesPractice
             }
             .asLiveData()
     
