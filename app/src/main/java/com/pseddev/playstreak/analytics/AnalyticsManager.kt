@@ -1,11 +1,14 @@
 package com.pseddev.playstreak.analytics
 
 import android.content.Context
+import android.content.SharedPreferences
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.logEvent
 import com.pseddev.playstreak.PlayStreakApplication
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Centralized analytics manager for tracking user events in PlayStreak
@@ -19,6 +22,14 @@ class AnalyticsManager(private val context: Context) {
     private val firebaseAnalytics: FirebaseAnalytics by lazy {
         (context.applicationContext as PlayStreakApplication).firebaseAnalytics
     }
+    
+    // SharedPreferences for streak milestone deduplication
+    private val streakPrefs: SharedPreferences by lazy {
+        context.getSharedPreferences("streak_milestones", Context.MODE_PRIVATE)
+    }
+    
+    // Date format for daily tracking keys
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     
     companion object {
         // Event names - following Firebase naming conventions
@@ -64,13 +75,31 @@ class AnalyticsManager(private val context: Context) {
     
     /**
      * Track when user achieves a practice streak milestone
+     * Implements deduplication to ensure each milestone is only sent once per day
      */
     fun trackStreakAchieved(streakLength: Int, emojiLevel: String) {
         if (!analyticsEnabled) return
+        
+        // Check if this milestone event was already sent today
+        val today = dateFormat.format(Date())
+        val milestoneKey = "milestone_${streakLength}_$today"
+        
+        if (streakPrefs.getBoolean(milestoneKey, false)) {
+            // Already sent this milestone today, skip
+            return
+        }
+        
+        // Send the analytics event
         firebaseAnalytics.logEvent(EVENT_STREAK_ACHIEVED) {
             param(PARAM_STREAK_LENGTH, streakLength.toLong())
             param(PARAM_EMOJI_LEVEL, emojiLevel)
         }
+        
+        // Mark this milestone as sent for today
+        streakPrefs.edit().putBoolean(milestoneKey, true).apply()
+        
+        // Clean up old milestone tracking data (keep only last 7 days)
+        cleanupOldMilestoneData()
     }
     
     /**
@@ -146,6 +175,33 @@ class AnalyticsManager(private val context: Context) {
             streakLength >= 3 -> "musical_note"
             else -> "none"
         }
+    }
+    
+    /**
+     * Clean up old milestone tracking data to prevent SharedPreferences from growing indefinitely
+     * Keeps only the last 7 days of milestone tracking data
+     */
+    private fun cleanupOldMilestoneData() {
+        val editor = streakPrefs.edit()
+        val allKeys = streakPrefs.all.keys
+        val sevenDaysAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -7) }.time
+        val cutoffDate = dateFormat.format(sevenDaysAgo)
+        
+        allKeys.forEach { key ->
+            // Extract date from key format: "milestone_{number}_{date}"
+            if (key.startsWith("milestone_")) {
+                val parts = key.split("_")
+                if (parts.size == 3) {
+                    val dateString = parts[2]
+                    // Remove keys older than 7 days
+                    if (dateString < cutoffDate) {
+                        editor.remove(key)
+                    }
+                }
+            }
+        }
+        
+        editor.apply()
     }
     
     /**

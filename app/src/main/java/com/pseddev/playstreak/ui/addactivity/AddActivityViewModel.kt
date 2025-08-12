@@ -218,8 +218,8 @@ class AddActivityViewModel(
      * Track streak achievement milestones
      */
     private fun trackStreakAchievement(streakLength: Int) {
-        // Only track milestones at specific levels
-        if (streakLength in listOf(3, 5, 8, 14, 21, 30, 50, 100)) {
+        // Only track milestones at specific levels (aligned with emoji progression system)
+        if (streakLength in listOf(3, 5, 8, 14)) {
             val emojiLevel = analyticsManager.getEmojiLevelForStreak(streakLength)
             analyticsManager.trackStreakAchieved(streakLength, emojiLevel)
         }
