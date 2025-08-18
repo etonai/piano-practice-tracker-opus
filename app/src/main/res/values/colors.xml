@@ -22,4 +22,9 @@
     
     <!-- Star Colors -->
     <color name="star_yellow">#FFFFC107</color>
+    
+    <!-- Text Input Colors (light theme) -->
+    <color name="edit_text_background">#FFFFFFFF</color>
+    <color name="edit_text_text">#FF000000</color>
+    <color name="edit_text_hint">#FF666666</color>
 </resources>

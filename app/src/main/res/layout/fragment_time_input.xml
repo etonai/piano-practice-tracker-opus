@@ -47,6 +47,8 @@
         android:inputType="number"
         android:textAlignment="center"
         android:textSize="24sp"
+        android:textColor="@color/edit_text_text"
+        android:textColorHint="@color/edit_text_hint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textOptional"
