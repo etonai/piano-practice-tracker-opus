@@ -165,10 +165,13 @@ class AnalyticsManager(private val context: Context) {
     
     /**
      * Helper function to determine emoji level from streak length
-     * Based on current emoji progression: 🎵 (3-4) → 🎶 (5-7) → 🔥 (8-13) → 🔥🔥🔥 (14+)
+     * Based on emoji progression: 🎵 (3-4) → 🎶 (5-7) → 🔥 (8-13) → 🔥🔥🔥 (14-29) → ⭐⭐⭐ (30-60) → 💎💎💎 (61-90) → 🚀🚀🚀 (91+)
      */
     fun getEmojiLevelForStreak(streakLength: Int): String {
         return when {
+            streakLength >= 91 -> "triple_rocket"
+            streakLength >= 61 -> "triple_diamond"
+            streakLength >= 30 -> "triple_star"
             streakLength >= 14 -> "triple_fire"
             streakLength >= 8 -> "fire"
             streakLength >= 5 -> "musical_notes"
