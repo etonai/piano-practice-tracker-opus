@@ -79,6 +79,17 @@
         app:layout_constraintTop_toBottomOf="@+id/buttonPruneData" />
 
     <Button
+        android:id="@+id/buttonViewAchievements"
+        style="@style/RoundedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="View Achievements"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonConfiguration" />
+
+    <Button
         android:id="@+id/buttonTogglePro"
         style="@style/RoundedButton"
         android:layout_width="0dp"
@@ -88,7 +99,7 @@
         android:backgroundTint="?attr/colorSecondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonConfiguration" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonViewAchievements" />
 
     <Button
         android:id="@+id/buttonTestCrash"
@@ -245,6 +256,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="Favorites: 0"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="4dp" />
+        
+        <TextView
+            android:id="@+id/achievementsCountText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Achievements: 0/13"
             android:textAppearance="?attr/textAppearanceBody2"
             android:textColor="?android:attr/textColorSecondary" />
             

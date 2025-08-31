@@ -15,6 +15,7 @@ import com.pseddev.playstreak.crashlytics.CrashlyticsManager
 import com.pseddev.playstreak.databinding.FragmentMainBinding
 import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.ConfigurationManager
+import com.pseddev.playstreak.utils.AchievementManager
 import android.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -32,6 +33,7 @@ class MainFragment : Fragment() {
     private lateinit var crashlyticsManager: CrashlyticsManager
     private lateinit var analyticsManager: AnalyticsManager
     private lateinit var configurationManager: ConfigurationManager
+    private lateinit var achievementManager: AchievementManager
     
     override fun onCreateView(
         inflater: LayoutInflater, 
@@ -49,6 +51,10 @@ class MainFragment : Fragment() {
         crashlyticsManager = CrashlyticsManager(requireContext())
         analyticsManager = AnalyticsManager(requireContext())
         configurationManager = ConfigurationManager.getInstance(requireContext())
+        achievementManager = AchievementManager(
+            requireContext(),
+            (requireActivity().application as PlayStreakApplication).repository
+        )
         
         setupObservers()
         setupClickListeners()
@@ -56,6 +62,7 @@ class MainFragment : Fragment() {
         updateToggleButtonText(proUserManager.isProUser())
         updatePruneDataButtonState()
         updateLifetimeActivitiesDisplay()
+        updateAchievementsDisplay()
         
         // Hide debug buttons in production builds
         binding.buttonTogglePro.visibility = if (BuildConfig.DEBUG) {
@@ -152,6 +159,10 @@ class MainFragment : Fragment() {
             findNavController().navigate(R.id.action_mainFragment_to_configurationFragment)
         }
         
+        binding.buttonViewAchievements.setOnClickListener {
+            findNavController().navigate(R.id.action_mainFragment_to_achievementsFragment)
+        }
+        
         binding.buttonTogglePro.setOnClickListener {
             val newStatus = proUserManager.toggleProStatus()
             updateAppTitle()
@@ -198,6 +209,14 @@ class MainFragment : Fragment() {
         }
     }
     
+    private fun updateAchievementsDisplay() {
+        lifecycleScope.launch {
+            achievementManager.initializeAchievements()
+            val (unlockedCount, totalCount) = achievementManager.getAchievementCounts()
+            binding.achievementsCountText.text = "Achievements: $unlockedCount/$totalCount"
+        }
+    }
+    
     private fun showPruningDisabledDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("Data Pruning Disabled")
@@ -218,6 +237,8 @@ class MainFragment : Fragment() {
         updatePruneDataButtonState()
         // Update lifetime activities display in case it changed
         updateLifetimeActivitiesDisplay()
+        // Update achievements display in case new achievements were unlocked
+        updateAchievementsDisplay()
     }
     
     override fun onDestroyView() {
