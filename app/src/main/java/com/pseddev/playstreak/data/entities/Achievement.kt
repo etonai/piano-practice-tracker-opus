@@ -6,8 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "achievements")
 data class Achievement(
-    @PrimaryKey(autoGenerate = true) 
-    val id: Long = 0,
+    @PrimaryKey
     val type: AchievementType,
     val title: String,
     val description: String,

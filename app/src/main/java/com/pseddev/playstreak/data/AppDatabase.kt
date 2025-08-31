@@ -21,7 +21,7 @@ import com.pseddev.playstreak.data.entities.PieceOrTechnique
 
 @Database(
     entities = [PieceOrTechnique::class, Activity::class, Achievement::class], 
-    version = 3, 
+    version = 4, 
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -161,6 +161,33 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
         
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                Log.d("Migration", "Starting migration from version 3 to 4")
+                
+                try {
+                    // Recreate achievements table with type as primary key to prevent duplicates
+                    database.execSQL("DROP TABLE IF EXISTS achievements")
+                    database.execSQL("""
+                        CREATE TABLE IF NOT EXISTS achievements (
+                            type TEXT PRIMARY KEY NOT NULL,
+                            title TEXT NOT NULL,
+                            description TEXT NOT NULL,
+                            iconEmoji TEXT NOT NULL,
+                            isUnlocked INTEGER NOT NULL DEFAULT 0,
+                            unlockedAt INTEGER,
+                            dateCreated INTEGER NOT NULL DEFAULT ${System.currentTimeMillis()}
+                        )
+                    """)
+                    
+                    Log.d("Migration", "Migration from version 3 to 4 completed successfully")
+                } catch (e: Exception) {
+                    Log.e("Migration", "Error during migration from version 3 to 4", e)
+                    throw e
+                }
+            }
+        }
+        
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -168,7 +195,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "playstreak_database"
                 )
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
                 INSTANCE = instance
                 instance
