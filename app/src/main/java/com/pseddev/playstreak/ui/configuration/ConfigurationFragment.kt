@@ -6,9 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.launch
+import com.pseddev.playstreak.PlayStreakApplication
+import com.pseddev.playstreak.R
 import com.pseddev.playstreak.databinding.FragmentConfigurationBinding
 import com.pseddev.playstreak.utils.PreferencesManager
 import com.pseddev.playstreak.utils.ConfigurationManager
+import com.pseddev.playstreak.utils.AchievementManager
 
 class ConfigurationFragment : Fragment() {
     
@@ -18,6 +24,7 @@ class ConfigurationFragment : Fragment() {
     private lateinit var viewModel: ConfigurationViewModel
     private lateinit var preferencesManager: PreferencesManager
     private lateinit var configurationManager: ConfigurationManager
+    private lateinit var achievementManager: AchievementManager
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,6 +40,10 @@ class ConfigurationFragment : Fragment() {
         
         preferencesManager = PreferencesManager.getInstance(requireContext())
         configurationManager = ConfigurationManager.getInstance(requireContext())
+        achievementManager = AchievementManager(
+            requireContext(),
+            (requireActivity().application as PlayStreakApplication).repository
+        )
         
         // Create ViewModel with custom factory
         viewModel = ViewModelProvider(this, ConfigurationViewModelFactory(preferencesManager))
@@ -41,6 +52,7 @@ class ConfigurationFragment : Fragment() {
         setupObservers()
         setupClickListeners()
         setupPruningToggle()
+        setupAchievements()
     }
     
     private fun setupObservers() {
@@ -58,6 +70,10 @@ class ConfigurationFragment : Fragment() {
         binding.switchCalendarDetailMode.setOnCheckedChangeListener { _, isChecked ->
             viewModel.setCalendarDetailMode(isChecked)
         }
+        
+        binding.viewAchievementsButton.setOnClickListener {
+            findNavController().navigate(R.id.action_configurationFragment_to_achievementsFragment)
+        }
     }
     
     private fun setupPruningToggle() {
@@ -67,6 +83,15 @@ class ConfigurationFragment : Fragment() {
         // Set up toggle listener
         binding.switchAllowPruning.setOnCheckedChangeListener { _, isChecked ->
             configurationManager.setPruningEnabled(isChecked)
+        }
+    }
+    
+    private fun setupAchievements() {
+        // Initialize achievements and update display
+        lifecycleScope.launch {
+            achievementManager.initializeAchievements()
+            val (unlockedCount, totalCount) = achievementManager.getAchievementCounts()
+            binding.achievementCountDisplay.text = "$unlockedCount/$totalCount achievements"
         }
     }
     
