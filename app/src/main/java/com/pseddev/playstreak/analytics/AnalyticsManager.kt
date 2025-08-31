@@ -38,6 +38,7 @@ class AnalyticsManager(private val context: Context) {
         private const val EVENT_PIECE_ADDED = "piece_added"
         private const val EVENT_DATA_OPERATION = "data_operation"
         private const val EVENT_DATA_PRUNING = "data_pruning"
+        private const val EVENT_ACHIEVEMENT_UNLOCKED = "achievement_unlocked"
         
         // Parameter names
         private const val PARAM_ACTIVITY_TYPE = "activity_type"
@@ -48,6 +49,8 @@ class AnalyticsManager(private val context: Context) {
         private const val PARAM_EMOJI_LEVEL = "emoji_level"
         private const val PARAM_TOTAL_PIECES = "total_pieces"
         private const val PARAM_OPERATION_TYPE = "operation_type"
+        private const val PARAM_ACHIEVEMENT_TYPE = "achievement_type"
+        private const val PARAM_ACHIEVEMENT_CATEGORY = "achievement_category"
         private const val PARAM_FORMAT = "format"
         private const val PARAM_ACTIVITY_COUNT = "activity_count"
         private const val PARAM_DELETED_COUNT = "deleted_count"
@@ -116,6 +119,22 @@ class AnalyticsManager(private val context: Context) {
             param(PARAM_PIECE_TYPE, pieceType.name)
             param(PARAM_TOTAL_PIECES, totalPieceCount.toLong())
             param(PARAM_SOURCE, source)
+        }
+    }
+    
+    /**
+     * Track achievement unlocked events
+     * @param achievementType the type of achievement unlocked
+     * @param category the category: "first_action" or "streak_milestone"
+     */
+    fun trackAchievementUnlocked(
+        achievementType: String,
+        category: String
+    ) {
+        if (!analyticsEnabled) return
+        firebaseAnalytics.logEvent(EVENT_ACHIEVEMENT_UNLOCKED) {
+            param(PARAM_ACHIEVEMENT_TYPE, achievementType)
+            param(PARAM_ACHIEVEMENT_CATEGORY, category)
         }
     }
     

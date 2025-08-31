@@ -11,6 +11,9 @@ import com.pseddev.playstreak.analytics.AnalyticsManager
 import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.ProUserManager
+import com.pseddev.playstreak.utils.AchievementManager
+import com.pseddev.playstreak.data.entities.AchievementType
+import com.pseddev.playstreak.data.entities.ActivityType
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -21,6 +24,7 @@ class QuickAddActivityViewModel(
     
     private val proUserManager = ProUserManager.getInstance(context)
     private val analyticsManager = AnalyticsManager(context)
+    private val achievementManager = AchievementManager(context, repository)
     
     private val _addResult = MutableLiveData<Result<Unit>>()
     val addResult: LiveData<Result<Unit>> = _addResult
@@ -39,6 +43,9 @@ class QuickAddActivityViewModel(
                 }
                 
                 repository.insertActivity(activity)
+                
+                // Check for first activity achievements
+                checkFirstActivityAchievements(activity.activityType, activity.performanceType)
                 
                 // Track analytics event with provided source context
                 val piece = repository.getPieceOrTechniqueById(activity.pieceOrTechniqueId)
@@ -63,13 +70,58 @@ class QuickAddActivityViewModel(
     }
     
     /**
+     * Check for first activity achievements
+     */
+    private suspend fun checkFirstActivityAchievements(activityType: ActivityType, performanceType: String) {
+        when (activityType) {
+            ActivityType.PRACTICE -> {
+                if (!achievementManager.isAchievementUnlocked(AchievementType.FIRST_PRACTICE)) {
+                    achievementManager.unlockAchievement(AchievementType.FIRST_PRACTICE)
+                }
+            }
+            ActivityType.PERFORMANCE -> {
+                if (!achievementManager.isAchievementUnlocked(AchievementType.FIRST_PERFORMANCE)) {
+                    achievementManager.unlockAchievement(AchievementType.FIRST_PERFORMANCE)
+                }
+                
+                // Check for specific performance type achievements
+                when (performanceType.lowercase()) {
+                    "online" -> {
+                        if (!achievementManager.isAchievementUnlocked(AchievementType.FIRST_ONLINE_PERFORMANCE)) {
+                            achievementManager.unlockAchievement(AchievementType.FIRST_ONLINE_PERFORMANCE)
+                        }
+                    }
+                    "live" -> {
+                        if (!achievementManager.isAchievementUnlocked(AchievementType.FIRST_LIVE_PERFORMANCE)) {
+                            achievementManager.unlockAchievement(AchievementType.FIRST_LIVE_PERFORMANCE)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Track streak achievement milestones
      */
-    private fun trackStreakAchievement(streakLength: Int) {
-        // Only track milestones at specific levels (aligned with emoji progression system)
-        if (streakLength in listOf(3, 5, 8, 14, 30, 61, 91)) {
-            val emojiLevel = analyticsManager.getEmojiLevelForStreak(streakLength)
-            analyticsManager.trackStreakAchieved(streakLength, emojiLevel)
+    private suspend fun trackStreakAchievement(streakLength: Int) {
+        // Map streak lengths to achievement types
+        val achievementType = when (streakLength) {
+            3 -> AchievementType.STREAK_3_DAYS
+            5 -> AchievementType.STREAK_5_DAYS
+            8 -> AchievementType.STREAK_8_DAYS
+            14 -> AchievementType.STREAK_14_DAYS
+            30 -> AchievementType.STREAK_30_DAYS
+            61 -> AchievementType.STREAK_61_DAYS
+            91 -> AchievementType.STREAK_91_DAYS
+            else -> null
+        }
+        
+        // Only track milestones at specific levels and unlock achievement
+        achievementType?.let { type ->
+            if (!achievementManager.isAchievementUnlocked(type)) {
+                achievementManager.unlockAchievement(type)
+            }
         }
     }
 }

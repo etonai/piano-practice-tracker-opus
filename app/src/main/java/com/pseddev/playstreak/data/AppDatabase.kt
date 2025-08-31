@@ -10,21 +10,25 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.pseddev.playstreak.data.daos.ActivityDao
+import com.pseddev.playstreak.data.daos.AchievementDao
 import com.pseddev.playstreak.data.daos.PieceOrTechniqueDao
+import com.pseddev.playstreak.data.entities.Achievement
+import com.pseddev.playstreak.data.entities.AchievementType
 import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
 
 @Database(
-    entities = [PieceOrTechnique::class, Activity::class], 
-    version = 2, 
+    entities = [PieceOrTechnique::class, Activity::class, Achievement::class], 
+    version = 3, 
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun pieceOrTechniqueDao(): PieceOrTechniqueDao
     abstract fun activityDao(): ActivityDao
+    abstract fun achievementDao(): AchievementDao
     
     companion object {
         @Volatile
@@ -130,6 +134,33 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
         
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                Log.d("Migration", "Starting migration from version 2 to 3")
+                
+                try {
+                    // Create achievements table
+                    database.execSQL("""
+                        CREATE TABLE IF NOT EXISTS achievements (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            type TEXT NOT NULL,
+                            title TEXT NOT NULL,
+                            description TEXT NOT NULL,
+                            iconEmoji TEXT NOT NULL,
+                            isUnlocked INTEGER NOT NULL DEFAULT 0,
+                            unlockedAt INTEGER,
+                            dateCreated INTEGER NOT NULL DEFAULT ${System.currentTimeMillis()}
+                        )
+                    """)
+                    
+                    Log.d("Migration", "Migration from version 2 to 3 completed successfully")
+                } catch (e: Exception) {
+                    Log.e("Migration", "Error during migration from version 2 to 3", e)
+                    throw e
+                }
+            }
+        }
+        
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -137,7 +168,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "playstreak_database"
                 )
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
                 INSTANCE = instance
                 instance
@@ -158,4 +189,10 @@ class Converters {
     
     @TypeConverter
     fun toActivityType(type: String): ActivityType = ActivityType.valueOf(type)
+    
+    @TypeConverter
+    fun fromAchievementType(type: AchievementType): String = type.name
+    
+    @TypeConverter
+    fun toAchievementType(type: String): AchievementType = AchievementType.valueOf(type)
 }

@@ -8,6 +8,8 @@ import com.pseddev.playstreak.data.entities.PieceOrTechnique
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.TextNormalizer
+import com.pseddev.playstreak.utils.AchievementManager
+import com.pseddev.playstreak.data.entities.AchievementType
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 
@@ -25,6 +27,7 @@ class AddPieceViewModel(
     
     private val proUserManager = ProUserManager.getInstance(context)
     private val analyticsManager = AnalyticsManager(context)
+    private val achievementManager = AchievementManager(context, repository)
     private val _saveResult = MutableLiveData<AddPieceResult>()
     val saveResult: LiveData<AddPieceResult> = _saveResult
     
@@ -83,6 +86,17 @@ class AddPieceViewModel(
                 )
                 
                 repository.insertPieceOrTechnique(piece)
+                
+                // Check for first piece/technique achievements
+                val achievementType = if (type == ItemType.PIECE) {
+                    AchievementType.FIRST_PIECE
+                } else {
+                    AchievementType.FIRST_TECHNIQUE
+                }
+                
+                if (!achievementManager.isAchievementUnlocked(achievementType)) {
+                    achievementManager.unlockAchievement(achievementType)
+                }
                 
                 // Track analytics for piece addition
                 val newPieceCount = repository.getAllPiecesAndTechniques().first().size
