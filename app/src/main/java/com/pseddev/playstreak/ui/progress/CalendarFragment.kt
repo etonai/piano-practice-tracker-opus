@@ -31,6 +31,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
+import android.content.res.Configuration
 
 class CalendarFragment : Fragment() {
     
@@ -173,15 +174,27 @@ class CalendarFragment : Fragment() {
                 
                 // Highlight selected date
                 if (day.date == selectedDate) {
-                    // For selected date, use a contrasting color and add border
-                    textView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
                     textView.alpha = 1.0f
                     
-                    // Add border to selected date
-                    val selectedDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.calendar_day_background)?.mutate() as? GradientDrawable
-                    selectedDrawable?.setColor(color)
-                    selectedDrawable?.setStroke(9, ContextCompat.getColor(requireContext(), R.color.calendar_selection_ring))
-                    textView.background = selectedDrawable
+                    // Handle selection styling based on dark mode and activity presence
+                    if (isDarkMode() && activities.isEmpty()) {
+                        // Dark mode with no activities: use medium gray background for visibility
+                        val selectedDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.calendar_day_background)?.mutate() as? GradientDrawable
+                        val mediumGrayColor = ContextCompat.getColor(requireContext(), R.color.calendar_dark_mode_selection)
+                        selectedDrawable?.setColor(mediumGrayColor)
+                        selectedDrawable?.setStroke(9, ContextCompat.getColor(requireContext(), R.color.calendar_selection_ring))
+                        textView.background = selectedDrawable
+                        textView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+                    } else {
+                        // Light mode or has activities: use original logic
+                        textView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+                        
+                        // Add border to selected date
+                        val selectedDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.calendar_day_background)?.mutate() as? GradientDrawable
+                        selectedDrawable?.setColor(color)
+                        selectedDrawable?.setStroke(9, ContextCompat.getColor(requireContext(), R.color.calendar_selection_ring))
+                        textView.background = selectedDrawable
+                    }
                 } else {
                     textView.alpha = 0.8f
                 }
@@ -382,6 +395,11 @@ class CalendarFragment : Fragment() {
         } else {
             Color.WHITE
         }
+    }
+    
+    private fun isDarkMode(): Boolean {
+        val nightModeFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES
     }
     
     private fun getCalendarColorForActivities(activities: List<ActivityWithPiece>): Int {

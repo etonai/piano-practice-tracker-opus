@@ -20,6 +20,9 @@
     <!-- Calendar Selection Ring -->
     <color name="calendar_selection_ring">#FFCC99FF</color>
     
+    <!-- Calendar Dark Mode Selection -->
+    <color name="calendar_dark_mode_selection">#FF666666</color>
+    
     <!-- Star Colors -->
     <color name="star_yellow">#FFFFC107</color>
     
