@@ -168,19 +168,13 @@ class AchievementManager(
     }
     
     /**
-     * Find the approximate date when a streak milestone was first reached
+     * Find the actual date when a streak milestone was first reached
      */
     private fun findStreakMilestoneDate(activities: List<com.pseddev.playstreak.data.entities.Activity>, milestone: Int): Long? {
         if (activities.isEmpty()) return null
         
-        // Sort activities by timestamp
-        val sortedActivities = activities.sortedBy { it.timestamp }
-        
-        // Simple approximation: find the date that's 'milestone' days after the first activity
-        val firstActivity = sortedActivities.first()
-        val millisecondsPerDay = 24 * 60 * 60 * 1000L
-        
-        return firstActivity.timestamp + (milestone * millisecondsPerDay)
+        val streakCalculator = StreakCalculator()
+        return streakCalculator.findStreakMilestoneDate(activities, milestone)
     }
     
     /**
@@ -269,6 +263,25 @@ class AchievementManager(
             }
         } catch (e: Exception) {
             Log.e("AchievementManager", "Error updating achievement definitions", e)
+        }
+    }
+    
+    /**
+     * Reset all achievements for debugging purposes (debug builds only)
+     */
+    suspend fun resetAllAchievements() {
+        try {
+            Log.d("AchievementManager", "Resetting all achievements for debug")
+            
+            // Reset all achievement unlock states
+            achievementDao.resetAllAchievements()
+            
+            // Re-run retroactive detection to repopulate based on current data
+            detectRetroactiveAchievements()
+            
+            Log.d("AchievementManager", "Achievement reset completed")
+        } catch (e: Exception) {
+            Log.e("AchievementManager", "Error resetting achievements", e)
         }
     }
 }

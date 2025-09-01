@@ -17,6 +17,7 @@ import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.ConfigurationManager
 import com.pseddev.playstreak.utils.AchievementManager
 import android.app.AlertDialog
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
@@ -78,6 +79,12 @@ class MainFragment : Fragment() {
         }
         
         binding.buttonForceAnalyticsSync.visibility = if (BuildConfig.DEBUG) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        
+        binding.buttonResetAchievements.visibility = if (BuildConfig.DEBUG) {
             View.VISIBLE
         } else {
             View.GONE
@@ -184,6 +191,10 @@ class MainFragment : Fragment() {
         binding.buttonForceAnalyticsSync.setOnClickListener {
             analyticsManager.forceAnalyticsSyncForTesting()
         }
+        
+        binding.buttonResetAchievements.setOnClickListener {
+            showResetAchievementsDialog()
+        }
     }
     
     private fun updateAppTitle() {
@@ -234,6 +245,53 @@ class MainFragment : Fragment() {
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+    
+    private fun showResetAchievementsDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Reset Achievements (Debug)")
+            .setMessage("⚠️ WARNING: This will permanently reset all achievement unlock states and dates.\n\nAchievements will be recalculated based on your current practice data.\n\nThis action cannot be undone. Continue?")
+            .setPositiveButton("Reset") { _, _ ->
+                resetAchievements()
+            }
+            .setNegativeButton("Cancel", null)
+            .setCancelable(true)
+            .show()
+    }
+    
+    private fun resetAchievements() {
+        lifecycleScope.launch {
+            try {
+                // Show progress (simple approach - could add proper progress dialog)
+                binding.buttonResetAchievements.isEnabled = false
+                binding.buttonResetAchievements.text = "Resetting..."
+                
+                // Reset achievements
+                achievementManager.resetAllAchievements()
+                
+                // Update achievements display
+                updateAchievementsDisplay()
+                
+                // Show success message
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Reset Complete")
+                    .setMessage("Achievements have been reset and recalculated based on your practice data.")
+                    .setPositiveButton("OK", null)
+                    .show()
+                
+            } catch (e: Exception) {
+                // Show error message
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Reset Failed")
+                    .setMessage("Failed to reset achievements: ${e.message}")
+                    .setPositiveButton("OK", null)
+                    .show()
+            } finally {
+                // Restore button state
+                binding.buttonResetAchievements.isEnabled = true
+                binding.buttonResetAchievements.text = "Reset Achievements (Debug)"
+            }
+        }
     }
     
     override fun onResume() {

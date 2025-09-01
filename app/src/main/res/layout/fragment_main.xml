@@ -147,6 +147,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonTestCrash" />
 
+    <Button
+        android:id="@+id/buttonResetAchievements"
+        style="@style/RoundedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Reset Achievements (Debug)"
+        android:backgroundTint="@android:color/holo_purple"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonForceAnalyticsSync" />
+
     <TextView
         android:id="@+id/textAppTitle"
         android:layout_width="wrap_content"
@@ -158,7 +171,7 @@
         android:textColor="?android:attr/textColorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonForceAnalyticsSync" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonResetAchievements" />
 
     <TextView
         android:id="@+id/textSubtitle"
