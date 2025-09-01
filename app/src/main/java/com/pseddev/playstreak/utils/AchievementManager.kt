@@ -44,9 +44,9 @@ class AchievementManager(
                 detectRetroactiveAchievements()
                 Log.d("AchievementManager", "Retroactive achievement detection completed")
             } else {
-                // Update existing achievement definitions using REPLACE strategy  
-                Log.d("AchievementManager", "Updating existing achievement definitions")
-                achievementDao.insertAllAchievements(achievementDefinitions)
+                // Update existing achievement definitions while preserving unlock state
+                Log.d("AchievementManager", "Updating existing achievement definitions while preserving unlock state")
+                updateAchievementDefinitionsPreservingState(achievementDefinitions)
                 Log.d("AchievementManager", "Updated achievement definitions")
                 
                 // Run retroactive detection if no achievements are unlocked
@@ -241,6 +241,34 @@ class AchievementManager(
         } catch (e: Exception) {
             Log.e("AchievementManager", "Error getting achievement counts", e)
             Pair(0, 0)
+        }
+    }
+    
+    /**
+     * Update achievement definitions while preserving existing unlock state
+     */
+    private suspend fun updateAchievementDefinitionsPreservingState(newDefinitions: List<Achievement>) {
+        try {
+            for (newAchievement in newDefinitions) {
+                val existingAchievement = achievementDao.getAchievementByType(newAchievement.type)
+                
+                if (existingAchievement != null) {
+                    // Preserve unlock state and date from existing achievement
+                    val updatedAchievement = newAchievement.copy(
+                        isUnlocked = existingAchievement.isUnlocked,
+                        unlockedAt = existingAchievement.unlockedAt,
+                        dateCreated = existingAchievement.dateCreated
+                    )
+                    achievementDao.insertAchievement(updatedAchievement)
+                    Log.d("AchievementManager", "Updated existing achievement: ${newAchievement.type} (locked: ${!existingAchievement.isUnlocked})")
+                } else {
+                    // New achievement, insert as-is
+                    achievementDao.insertAchievement(newAchievement)
+                    Log.d("AchievementManager", "Inserted new achievement: ${newAchievement.type}")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("AchievementManager", "Error updating achievement definitions", e)
         }
     }
 }

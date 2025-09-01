@@ -13,6 +13,7 @@ class PlayStreakApplication : Application() {
         PianoRepository(
             database.pieceOrTechniqueDao(),
             database.activityDao(),
+            database.achievementDao(),
             this
         ) 
     }

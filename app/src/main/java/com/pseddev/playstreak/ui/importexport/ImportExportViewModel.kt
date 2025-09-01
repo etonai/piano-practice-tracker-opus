@@ -13,6 +13,7 @@ import com.pseddev.playstreak.analytics.AnalyticsManager
 import com.pseddev.playstreak.crashlytics.CrashlyticsManager
 import com.pseddev.playstreak.data.models.SyncOperationResult
 import com.pseddev.playstreak.data.repository.PianoRepository
+import com.pseddev.playstreak.utils.AchievementManager
 import com.pseddev.playstreak.utils.CsvHandler
 import com.pseddev.playstreak.utils.GoogleDriveHelper
 import com.pseddev.playstreak.utils.ProUserManager
@@ -234,6 +235,7 @@ class ImportExportViewModel(
                         isValid = false,
                         pieceCount = 0,
                         activityCount = 0,
+                        achievementCount = 0,
                         errors = listOf("Failed to validate JSON: ${e.message}"),
                         formatVersion = null
                     )
@@ -251,6 +253,11 @@ class ImportExportViewModel(
                 withContext(Dispatchers.IO) {
                     repository.deleteAllActivities()
                     repository.deleteAllPiecesAndTechniques()
+                    repository.deleteAllAchievements()
+                    
+                    // Reinitialize achievements after purging
+                    val achievementManager = AchievementManager(context, repository)
+                    achievementManager.initializeAchievements()
                 }
                 _purgeResult.value = Event(Result.success("All data has been purged successfully."))
             } catch (e: Exception) {

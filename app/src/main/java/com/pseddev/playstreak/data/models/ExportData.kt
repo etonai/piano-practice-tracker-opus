@@ -2,6 +2,7 @@ package com.pseddev.playstreak.data.models
 
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
+import com.pseddev.playstreak.data.entities.AchievementType
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -15,7 +16,10 @@ data class ExportData(
     val pieces: List<ExportPiece>,
     
     @SerializedName("activities") 
-    val activities: List<ExportActivity>
+    val activities: List<ExportActivity>,
+    
+    @SerializedName("achievements")
+    val achievements: List<ExportAchievement>? = null // Optional for backward compatibility
 )
 
 /**
@@ -129,12 +133,39 @@ data class ExportActivity(
 )
 
 /**
+ * Achievement data for JSON export
+ */
+data class ExportAchievement(
+    @SerializedName("type")
+    val type: AchievementType,
+    
+    @SerializedName("title")
+    val title: String,
+    
+    @SerializedName("description")
+    val description: String,
+    
+    @SerializedName("iconEmoji")
+    val iconEmoji: String,
+    
+    @SerializedName("isUnlocked")
+    val isUnlocked: Boolean,
+    
+    @SerializedName("unlockedAt")
+    val unlockedAt: String?, // ISO 8601 format or null
+    
+    @SerializedName("dateCreated")
+    val dateCreated: String // ISO 8601 format
+)
+
+/**
  * Result of JSON import operation
  */
 data class JsonImportResult(
     val success: Boolean,
     val piecesImported: Int,
     val activitiesImported: Int,
+    val achievementsImported: Int, // Added achievements count
     val errors: List<String>,
     val warnings: List<String>
 )
@@ -146,6 +177,7 @@ data class JsonValidationResult(
     val isValid: Boolean,
     val pieceCount: Int,
     val activityCount: Int,
+    val achievementCount: Int, // Added achievements count
     val errors: List<String>,
     val formatVersion: String?
 )

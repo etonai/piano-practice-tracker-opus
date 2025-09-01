@@ -2,7 +2,9 @@ package com.pseddev.playstreak.data.repository
 
 import android.util.Log
 import com.pseddev.playstreak.data.daos.ActivityDao
+import com.pseddev.playstreak.data.daos.AchievementDao
 import com.pseddev.playstreak.data.daos.PieceOrTechniqueDao
+import com.pseddev.playstreak.data.entities.Achievement
 import com.pseddev.playstreak.data.entities.Activity
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
@@ -25,6 +27,7 @@ import java.util.Calendar
 class PianoRepository(
     private val pieceOrTechniqueDao: PieceOrTechniqueDao,
     private val activityDao: ActivityDao,
+    private val achievementDao: AchievementDao,
     private val context: android.content.Context
 ) {
     
@@ -137,6 +140,9 @@ class PianoRepository(
     
     suspend fun deleteAllActivities() = 
         activityDao.deleteAll()
+        
+    suspend fun deleteAllAchievements() = 
+        achievementDao.deleteAllAchievements()
     
     suspend fun getStreakCount(startTime: Long): Int = 
         activityDao.getStreakCount(startTime)
@@ -213,6 +219,7 @@ class PianoRepository(
         // Always clear existing data to prevent duplicates, even if there are errors
         deleteAllActivities()
         deleteAllPiecesAndTechniques()
+        deleteAllAchievements()
         
         // Only proceed with import if we have activities to import
         if (result.activities.isNotEmpty()) {
@@ -274,15 +281,16 @@ class PianoRepository(
     suspend fun exportToJson(writer: Writer) {
         Log.d("JsonExport", "Repository.exportToJson called")
         try {
-            Log.d("JsonExport", "Getting pieces and activities from database...")
+            Log.d("JsonExport", "Getting pieces, activities, and achievements from database...")
             val pieces = getAllPiecesAndTechniques().first()
             val activities = getAllActivities().first().sortedBy { it.timestamp }
+            val achievements = achievementDao.getAllAchievementsList()
             val lifetimeCount = configurationManager.getLifetimeActivityCount()
             
-            Log.d("JsonExport", "Got ${pieces.size} pieces, ${activities.size} activities, lifetime count: $lifetimeCount")
+            Log.d("JsonExport", "Got ${pieces.size} pieces, ${activities.size} activities, ${achievements.size} achievements, lifetime count: $lifetimeCount")
             Log.d("JsonExport", "Calling JsonExporter.exportToJson")
             
-            JsonExporter.exportToJson(writer, pieces, activities, lifetimeCount)
+            JsonExporter.exportToJson(writer, pieces, activities, achievements, lifetimeCount)
             
             Log.d("JsonExport", "JsonExporter.exportToJson completed")
         } catch (e: Exception) {
@@ -291,8 +299,8 @@ class PianoRepository(
         }
     }
     
-    suspend fun validateJsonForImport(reader: java.io.Reader, pieceLimit: Int, activityLimit: Int): JsonValidationResult {
-        return JsonImporter.validateJson(reader, pieceLimit, activityLimit)
+    suspend fun validateJsonForImport(reader: java.io.Reader, pieceLimit: Int, activityLimit: Int, achievementLimit: Int = 20): JsonValidationResult {
+        return JsonImporter.validateJson(reader, pieceLimit, activityLimit, achievementLimit)
     }
     
     suspend fun importFromJson(reader: java.io.Reader): JsonImportResult {
@@ -315,6 +323,7 @@ class PianoRepository(
             // Clear existing data
             deleteAllActivities()
             deleteAllPiecesAndTechniques()
+            deleteAllAchievements()
             
             // Create piece name to new ID mapping
             val pieceNameToIdMap = mutableMapOf<String, Long>()
@@ -366,6 +375,7 @@ class PianoRepository(
                 success = true,
                 piecesImported = importedPieces.size,
                 activitiesImported = importedActivities.size,
+                achievementsImported = 0, // TODO: Implement achievements import in repository
                 errors = emptyList(),
                 warnings = emptyList()
             )
@@ -376,6 +386,7 @@ class PianoRepository(
                 success = false,
                 piecesImported = 0,
                 activitiesImported = 0,
+                achievementsImported = 0,
                 errors = listOf("Import failed: ${e.message}"),
                 warnings = emptyList()
             )

@@ -83,6 +83,17 @@ class AddActivityViewModel(
                     )
                 )
                 
+                // Check for first piece/technique achievements
+                val achievementType = if (type == ItemType.PIECE) {
+                    AchievementType.FIRST_PIECE
+                } else {
+                    AchievementType.FIRST_TECHNIQUE
+                }
+                
+                if (!achievementManager.isAchievementUnlocked(achievementType)) {
+                    achievementManager.unlockAchievement(achievementType)
+                }
+                
                 // Track analytics for piece addition during activity creation
                 val newPieceCount = repository.getAllPiecesAndTechniques().first().size
                 analyticsManager.trackPieceAdded(

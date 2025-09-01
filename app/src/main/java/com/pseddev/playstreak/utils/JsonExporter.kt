@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.pseddev.playstreak.BuildConfig
 import com.pseddev.playstreak.data.entities.Activity
+import com.pseddev.playstreak.data.entities.Achievement
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
 import com.pseddev.playstreak.data.models.*
 import java.io.Writer
@@ -25,18 +26,19 @@ object JsonExporter {
     }
     
     /**
-     * Exports pieces and activities to JSON format
+     * Exports pieces, activities, and achievements to JSON format
      */
     fun exportToJson(
         writer: Writer,
         pieces: List<PieceOrTechnique>,
         activities: List<Activity>,
+        achievements: List<Achievement>? = null,
         lifetimeActivityCount: Int? = null
     ) {
-        Log.d("JsonExporter", "Starting JSON export with ${pieces.size} pieces and ${activities.size} activities")
+        Log.d("JsonExporter", "Starting JSON export with ${pieces.size} pieces, ${activities.size} activities, and ${achievements?.size ?: 0} achievements")
         
         try {
-            val exportData = createExportData(pieces, activities, lifetimeActivityCount)
+            val exportData = createExportData(pieces, activities, achievements, lifetimeActivityCount)
             val jsonString = gson.toJson(exportData)
             
             writer.write(jsonString)
@@ -55,6 +57,7 @@ object JsonExporter {
     private fun createExportData(
         pieces: List<PieceOrTechnique>,
         activities: List<Activity>,
+        achievements: List<Achievement>? = null,
         lifetimeActivityCount: Int? = null
     ): ExportData {
         val exportInfo = ExportInfo(
@@ -73,10 +76,15 @@ object JsonExporter {
             convertActivityToExport(activity)
         }
         
+        val exportAchievements = achievements?.map { achievement ->
+            convertAchievementToExport(achievement)
+        }
+        
         return ExportData(
             exportInfo = exportInfo,
             pieces = exportPieces,
-            activities = exportActivities
+            activities = exportActivities,
+            achievements = exportAchievements
         )
     }
     
@@ -121,6 +129,21 @@ object JsonExporter {
             performanceType = activity.performanceType,
             minutes = activity.minutes,
             notes = activity.notes
+        )
+    }
+    
+    /**
+     * Converts an Achievement entity to export format
+     */
+    private fun convertAchievementToExport(achievement: Achievement): ExportAchievement {
+        return ExportAchievement(
+            type = achievement.type,
+            title = achievement.title,
+            description = achievement.description,
+            iconEmoji = achievement.iconEmoji,
+            isUnlocked = achievement.isUnlocked,
+            unlockedAt = formatTimestamp(achievement.unlockedAt),
+            dateCreated = formatTimestamp(achievement.dateCreated) ?: dateFormatter.format(Date())
         )
     }
     
@@ -173,6 +196,21 @@ object JsonExporter {
             
             if (activity.minutes < -1) {
                 errors.add("Activity with ID ${activity.id} has invalid minutes: ${activity.minutes}")
+            }
+        }
+        
+        // Validate achievements (optional section)
+        exportData.achievements?.forEach { achievement ->
+            if (achievement.title.isBlank()) {
+                errors.add("Achievement ${achievement.type} has blank title")
+            }
+            
+            if (achievement.description.isBlank()) {
+                errors.add("Achievement ${achievement.type} has blank description")
+            }
+            
+            if (achievement.isUnlocked && achievement.unlockedAt.isNullOrBlank()) {
+                errors.add("Achievement ${achievement.type} is marked as unlocked but has no unlock date")
             }
         }
         

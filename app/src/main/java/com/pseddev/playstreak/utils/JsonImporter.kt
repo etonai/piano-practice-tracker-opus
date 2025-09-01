@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.pseddev.playstreak.data.entities.Activity
+import com.pseddev.playstreak.data.entities.Achievement
 import com.pseddev.playstreak.data.entities.ActivityType
 import com.pseddev.playstreak.data.entities.ItemType
 import com.pseddev.playstreak.data.entities.PieceOrTechnique
@@ -30,7 +31,7 @@ object JsonImporter {
     /**
      * Validates JSON content before import
      */
-    fun validateJson(reader: Reader, pieceLimit: Int, activityLimit: Int): JsonValidationResult {
+    fun validateJson(reader: Reader, pieceLimit: Int, activityLimit: Int, achievementLimit: Int = 20): JsonValidationResult {
         Log.d("JsonImporter", "Starting JSON validation")
         
         try {
@@ -55,6 +56,12 @@ object JsonImporter {
             
             if (exportData.activities.size > activityLimit) {
                 errors.add("Export contains ${exportData.activities.size} activities, but limit is $activityLimit")
+            }
+            
+            // Validate achievements (optional section)
+            val achievementCount = exportData.achievements?.size ?: 0
+            if (achievementCount > achievementLimit) {
+                errors.add("Export contains $achievementCount achievements, but limit is $achievementLimit")
             }
             
             // Validate piece names for uniqueness and non-empty
@@ -95,10 +102,28 @@ object JsonImporter {
                 validateDateField(activity.timestamp, "timestamp for activity ${activity.id}", errors)
             }
             
+            // Validate achievements date fields
+            exportData.achievements?.forEach { achievement ->
+                validateDateField(achievement.unlockedAt, "unlockedAt for achievement ${achievement.type}", errors)
+                validateDateField(achievement.dateCreated, "dateCreated for achievement ${achievement.type}", errors)
+                
+                // Validate achievement data consistency
+                if (achievement.title.isBlank()) {
+                    errors.add("Achievement ${achievement.type} has blank title")
+                }
+                if (achievement.description.isBlank()) {
+                    errors.add("Achievement ${achievement.type} has blank description")
+                }
+                if (achievement.isUnlocked && achievement.unlockedAt.isNullOrBlank()) {
+                    errors.add("Achievement ${achievement.type} is marked unlocked but has no unlock date")
+                }
+            }
+            
             return JsonValidationResult(
                 isValid = errors.isEmpty(),
                 pieceCount = exportData.pieces.size,
                 activityCount = exportData.activities.size,
+                achievementCount = achievementCount,
                 errors = errors,
                 formatVersion = exportData.exportInfo.version
             )
@@ -109,6 +134,7 @@ object JsonImporter {
                 isValid = false,
                 pieceCount = 0,
                 activityCount = 0,
+                achievementCount = 0,
                 errors = listOf("Invalid JSON format: ${e.message}"),
                 formatVersion = null
             )
@@ -118,6 +144,7 @@ object JsonImporter {
                 isValid = false,
                 pieceCount = 0,
                 activityCount = 0,
+                achievementCount = 0,
                 errors = listOf("Validation error: ${e.message}"),
                 formatVersion = null
             )
@@ -136,6 +163,7 @@ object JsonImporter {
             
             val pieces = mutableListOf<PieceOrTechnique>()
             val activities = mutableListOf<Activity>()
+            val achievements = mutableListOf<Achievement>()
             val errors = mutableListOf<String>()
             val warnings = mutableListOf<String>()
             
@@ -161,18 +189,30 @@ object JsonImporter {
                 }
             }
             
-            Log.d("JsonImporter", "JSON import completed: ${pieces.size} pieces, ${activities.size} activities, ${errors.size} errors")
+            // Convert achievements (optional section)
+            exportData.achievements?.forEach { exportAchievement ->
+                try {
+                    val achievement = convertAchievementFromExport(exportAchievement)
+                    achievements.add(achievement)
+                } catch (e: Exception) {
+                    errors.add("Failed to convert achievement ${exportAchievement.type}: ${e.message}")
+                }
+            }
+            
+            Log.d("JsonImporter", "JSON import completed: ${pieces.size} pieces, ${activities.size} activities, ${achievements.size} achievements, ${errors.size} errors")
             
             return JsonImportResult(
                 success = errors.isEmpty(),
                 piecesImported = pieces.size,
                 activitiesImported = activities.size,
+                achievementsImported = achievements.size,
                 errors = errors,
                 warnings = warnings
             ).also {
                 // Store converted data for repository access
                 lastImportedPieces = pieces
                 lastImportedActivities = activities
+                lastImportedAchievements = achievements
                 lastOriginalPieceIds = originalPieceIds
                 lastImportedLifetimeCount = exportData.exportInfo.lifetimeActivityCount
             }
@@ -183,6 +223,7 @@ object JsonImporter {
                 success = false,
                 piecesImported = 0,
                 activitiesImported = 0,
+                achievementsImported = 0,
                 errors = listOf("Invalid JSON format: ${e.message}"),
                 warnings = emptyList()
             )
@@ -192,6 +233,7 @@ object JsonImporter {
                 success = false,
                 piecesImported = 0,
                 activitiesImported = 0,
+                achievementsImported = 0,
                 errors = listOf("Import error: ${e.message}"),
                 warnings = emptyList()
             )
@@ -201,6 +243,7 @@ object JsonImporter {
     // Store last imported data for repository access
     private var lastImportedPieces: List<PieceOrTechnique> = emptyList()
     private var lastImportedActivities: List<Activity> = emptyList()
+    private var lastImportedAchievements: List<Achievement> = emptyList()
     private var lastOriginalPieceIds: Map<String, Long> = emptyMap() // piece name -> original ID
     private var lastImportedLifetimeCount: Int? = null
     
@@ -213,6 +256,11 @@ object JsonImporter {
      * Gets the activities from the last successful import
      */
     fun getLastImportedActivities(): List<Activity> = lastImportedActivities
+    
+    /**
+     * Gets the achievements from the last successful import
+     */
+    fun getLastImportedAchievements(): List<Achievement> = lastImportedAchievements
     
     /**
      * Gets the mapping of piece names to their original IDs from the export
@@ -261,6 +309,21 @@ object JsonImporter {
             performanceType = exportActivity.performanceType,
             minutes = exportActivity.minutes,
             notes = exportActivity.notes
+        )
+    }
+    
+    /**
+     * Converts an ExportAchievement to an Achievement entity
+     */
+    private fun convertAchievementFromExport(exportAchievement: ExportAchievement): Achievement {
+        return Achievement(
+            type = exportAchievement.type,
+            title = exportAchievement.title,
+            description = exportAchievement.description,
+            iconEmoji = exportAchievement.iconEmoji,
+            isUnlocked = exportAchievement.isUnlocked,
+            unlockedAt = parseTimestamp(exportAchievement.unlockedAt),
+            dateCreated = parseTimestamp(exportAchievement.dateCreated) ?: System.currentTimeMillis()
         )
     }
     
