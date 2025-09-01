@@ -264,7 +264,7 @@ class AddActivityViewModel(
             14 -> AchievementType.STREAK_14_DAYS
             30 -> AchievementType.STREAK_30_DAYS
             61 -> AchievementType.STREAK_61_DAYS
-            91 -> AchievementType.STREAK_91_DAYS
+            100 -> AchievementType.STREAK_100_DAYS
             else -> null
         }
         

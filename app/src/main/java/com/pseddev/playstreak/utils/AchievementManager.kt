@@ -28,20 +28,36 @@ class AchievementManager(
         try {
             Log.d("AchievementManager", "Initializing achievements system")
             
-            // Check if achievements have already been initialized
             val existingCount = achievementDao.getTotalCount()
-            if (existingCount > 0) {
-                Log.d("AchievementManager", "Achievements already initialized ($existingCount achievements)")
-                return
-            }
-            
-            // Insert all achievement definitions
+            val unlockedCount = achievementDao.getUnlockedCount()
             val achievementDefinitions = AchievementDefinitions.getAllAchievementDefinitions()
-            achievementDao.insertAllAchievements(achievementDefinitions)
-            Log.d("AchievementManager", "Inserted ${achievementDefinitions.size} achievement definitions")
             
-            // Detect retroactive achievements
-            detectRetroactiveAchievements()
+            Log.d("AchievementManager", "Database state: $existingCount total achievements, $unlockedCount unlocked")
+            
+            if (existingCount == 0) {
+                // First time initialization - insert all achievement definitions
+                achievementDao.insertAllAchievements(achievementDefinitions)
+                Log.d("AchievementManager", "Inserted ${achievementDefinitions.size} achievement definitions")
+                
+                // Always detect retroactive achievements when table is empty
+                Log.d("AchievementManager", "Running retroactive achievement detection...")
+                detectRetroactiveAchievements()
+                Log.d("AchievementManager", "Retroactive achievement detection completed")
+            } else {
+                // Update existing achievement definitions using REPLACE strategy  
+                Log.d("AchievementManager", "Updating existing achievement definitions")
+                achievementDao.insertAllAchievements(achievementDefinitions)
+                Log.d("AchievementManager", "Updated achievement definitions")
+                
+                // Run retroactive detection if no achievements are unlocked
+                if (unlockedCount == 0) {
+                    Log.d("AchievementManager", "No achievements unlocked, running retroactive detection...")
+                    detectRetroactiveAchievements()
+                    Log.d("AchievementManager", "Retroactive achievement detection completed")
+                } else {
+                    Log.d("AchievementManager", "Found $unlockedCount unlocked achievements, skipping retroactive detection")
+                }
+            }
             
             Log.d("AchievementManager", "Achievement initialization completed")
         } catch (e: Exception) {
@@ -124,7 +140,7 @@ class AchievementManager(
             // Note: This assumes current streak represents the user's best achievement
             val useStreak = currentStreak
             
-            val streakMilestones = listOf(3, 5, 8, 14, 30, 61, 91)
+            val streakMilestones = listOf(3, 5, 8, 14, 30, 61, 100)
             val achievementTypes = listOf(
                 AchievementType.STREAK_3_DAYS,
                 AchievementType.STREAK_5_DAYS,
@@ -132,7 +148,7 @@ class AchievementManager(
                 AchievementType.STREAK_14_DAYS,
                 AchievementType.STREAK_30_DAYS,
                 AchievementType.STREAK_61_DAYS,
-                AchievementType.STREAK_91_DAYS
+                AchievementType.STREAK_100_DAYS
             )
             
             // Find the date when each milestone was first reached
@@ -192,7 +208,7 @@ class AchievementManager(
                     AchievementType.STREAK_14_DAYS,
                     AchievementType.STREAK_30_DAYS,
                     AchievementType.STREAK_61_DAYS,
-                    AchievementType.STREAK_91_DAYS -> "streak_milestone"
+                    AchievementType.STREAK_100_DAYS -> "streak_milestone"
                 }
                 
                 analyticsManager.trackAchievementUnlocked(type.name, category)

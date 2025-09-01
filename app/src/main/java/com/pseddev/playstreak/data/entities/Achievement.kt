@@ -29,5 +29,5 @@ enum class AchievementType {
     STREAK_14_DAYS,
     STREAK_30_DAYS,
     STREAK_61_DAYS,
-    STREAK_91_DAYS
+    STREAK_100_DAYS
 }

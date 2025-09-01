@@ -21,7 +21,7 @@ import com.pseddev.playstreak.data.entities.PieceOrTechnique
 
 @Database(
     entities = [PieceOrTechnique::class, Activity::class, Achievement::class], 
-    version = 4, 
+    version = 5, 
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -166,10 +166,9 @@ abstract class AppDatabase : RoomDatabase() {
                 Log.d("Migration", "Starting migration from version 3 to 4")
                 
                 try {
-                    // Recreate achievements table with type as primary key to prevent duplicates
-                    database.execSQL("DROP TABLE IF EXISTS achievements")
+                    // Create temporary table with new schema
                     database.execSQL("""
-                        CREATE TABLE IF NOT EXISTS achievements (
+                        CREATE TABLE achievements_new (
                             type TEXT PRIMARY KEY NOT NULL,
                             title TEXT NOT NULL,
                             description TEXT NOT NULL,
@@ -180,9 +179,64 @@ abstract class AppDatabase : RoomDatabase() {
                         )
                     """)
                     
+                    // Copy existing data, converting STREAK_91_DAYS to STREAK_100_DAYS
+                    database.execSQL("""
+                        INSERT INTO achievements_new (type, title, description, iconEmoji, isUnlocked, unlockedAt, dateCreated)
+                        SELECT 
+                            CASE 
+                                WHEN type = 'STREAK_91_DAYS' THEN 'STREAK_100_DAYS'
+                                ELSE type
+                            END as type,
+                            CASE 
+                                WHEN type = 'STREAK_91_DAYS' THEN 'Elite Performer'
+                                ELSE title
+                            END as title,
+                            CASE 
+                                WHEN type = 'STREAK_91_DAYS' THEN 'Maintained a 100-day practice streak'
+                                ELSE description
+                            END as description,
+                            iconEmoji,
+                            isUnlocked,
+                            unlockedAt,
+                            dateCreated
+                        FROM achievements
+                    """)
+                    
+                    // Drop old table and rename new table
+                    database.execSQL("DROP TABLE achievements")
+                    database.execSQL("ALTER TABLE achievements_new RENAME TO achievements")
+                    
                     Log.d("Migration", "Migration from version 3 to 4 completed successfully")
                 } catch (e: Exception) {
                     Log.e("Migration", "Error during migration from version 3 to 4", e)
+                    throw e
+                }
+            }
+        }
+        
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                Log.d("Migration", "Starting migration from version 4 to 5")
+                
+                try {
+                    // Clean up achievements table to fix duplicate issues and force fresh initialization
+                    // This will clear all achievement data to allow proper re-initialization
+                    database.execSQL("DROP TABLE IF EXISTS achievements")
+                    database.execSQL("""
+                        CREATE TABLE achievements (
+                            type TEXT PRIMARY KEY NOT NULL,
+                            title TEXT NOT NULL,
+                            description TEXT NOT NULL,
+                            iconEmoji TEXT NOT NULL,
+                            isUnlocked INTEGER NOT NULL DEFAULT 0,
+                            unlockedAt INTEGER,
+                            dateCreated INTEGER NOT NULL DEFAULT ${System.currentTimeMillis()}
+                        )
+                    """)
+                    
+                    Log.d("Migration", "Migration from version 4 to 5 completed successfully - achievements will be re-initialized")
+                } catch (e: Exception) {
+                    Log.e("Migration", "Error during migration from version 4 to 5", e)
                     throw e
                 }
             }
@@ -195,7 +249,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "playstreak_database"
                 )
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                 .build()
                 INSTANCE = instance
                 instance
@@ -221,5 +275,12 @@ class Converters {
     fun fromAchievementType(type: AchievementType): String = type.name
     
     @TypeConverter
-    fun toAchievementType(type: String): AchievementType = AchievementType.valueOf(type)
+    fun toAchievementType(type: String): AchievementType {
+        // Handle migration of old STREAK_91_DAYS enum to STREAK_100_DAYS
+        val migratedType = when (type) {
+            "STREAK_91_DAYS" -> "STREAK_100_DAYS"
+            else -> type
+        }
+        return AchievementType.valueOf(migratedType)
+    }
 }

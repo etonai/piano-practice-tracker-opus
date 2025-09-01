@@ -8,6 +8,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.pseddev.playstreak.data.AppDatabase
 import com.pseddev.playstreak.data.entities.Achievement
+import com.pseddev.playstreak.data.entities.AchievementType
 import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.AchievementManager
 import kotlinx.coroutines.flow.map
@@ -31,9 +32,26 @@ class AchievementsViewModel(
         achievementDao.getAllAchievements().map { achievements ->
             val firstActions = achievements.filter { 
                 it.type.name.startsWith("FIRST_") 
+            }.sortedBy { achievement ->
+                // Sort in the specified order: First Steps, Skill Builder, Practice Makes Perfect, 
+                // Debut Performance, Digital Debut, Stage Presence
+                when (achievement.type) {
+                    AchievementType.FIRST_PIECE -> 1          // First Steps
+                    AchievementType.FIRST_TECHNIQUE -> 2      // Skill Builder
+                    AchievementType.FIRST_PRACTICE -> 3       // Practice Makes Perfect
+                    AchievementType.FIRST_PERFORMANCE -> 4    // Debut Performance
+                    AchievementType.FIRST_ONLINE_PERFORMANCE -> 5  // Digital Debut
+                    AchievementType.FIRST_LIVE_PERFORMANCE -> 6    // Stage Presence
+                    else -> 999 // fallback for any unexpected types
+                }
             }
             val streakMilestones = achievements.filter { 
                 it.type.name.startsWith("STREAK_") 
+            }.sortedBy { achievement ->
+                // Extract the number of days from STREAK_X_DAYS format for proper sorting
+                val typeName = achievement.type.name
+                val daysString = typeName.removePrefix("STREAK_").removeSuffix("_DAYS")
+                daysString.toIntOrNull() ?: 0
             }
             
             listOf(

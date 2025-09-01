@@ -96,7 +96,12 @@ class AchievementsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         private val achievementStatus: TextView = itemView.findViewById(R.id.achievementStatus)
         
         fun bind(achievement: Achievement) {
-            achievementIcon.text = achievement.iconEmoji
+            // Show actual icon for unlocked achievements, question mark emoji for locked ones
+            achievementIcon.text = if (achievement.isUnlocked) {
+                achievement.iconEmoji
+            } else {
+                "❓"
+            }
             achievementTitle.text = achievement.title
             achievementDescription.text = achievement.description
             

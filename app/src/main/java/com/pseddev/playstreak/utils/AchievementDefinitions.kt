@@ -83,9 +83,9 @@ object AchievementDefinitions {
                 iconEmoji = "💎💎💎"
             ),
             Achievement(
-                type = AchievementType.STREAK_91_DAYS,
+                type = AchievementType.STREAK_100_DAYS,
                 title = "Elite Performer",
-                description = "Maintained a 91-day practice streak",
+                description = "Maintained a 100-day practice streak",
                 iconEmoji = "🚀🚀🚀"
             )
         )

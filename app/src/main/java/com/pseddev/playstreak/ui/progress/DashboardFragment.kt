@@ -87,7 +87,7 @@ class DashboardFragment : Fragment() {
         
         viewModel.currentStreak.observe(viewLifecycleOwner) { streak ->
             val emojiSuffix = when {
-                streak >= 91 -> " 🚀🚀🚀"
+                streak >= 100 -> " 🚀🚀🚀"
                 streak >= 61 -> " 💎💎💎"
                 streak >= 30 -> " ⭐⭐⭐"
                 streak >= 14 -> " 🔥🔥🔥"
