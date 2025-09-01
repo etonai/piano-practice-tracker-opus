@@ -79,6 +79,28 @@
         app:layout_constraintTop_toBottomOf="@+id/buttonPruneData" />
 
     <Button
+        android:id="@+id/buttonPrivacyPolicy"
+        style="@style/RoundedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Privacy Policy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonConfiguration" />
+
+    <Button
+        android:id="@+id/buttonTermsOfService"
+        style="@style/RoundedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Terms of Service"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonPrivacyPolicy" />
+
+    <Button
         android:id="@+id/buttonViewAchievements"
         style="@style/RoundedButton"
         android:layout_width="0dp"
@@ -87,7 +109,7 @@
         android:text="View Achievements"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonConfiguration" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonTermsOfService" />
 
     <Button
         android:id="@+id/buttonTogglePro"

@@ -159,6 +159,14 @@ class MainFragment : Fragment() {
             findNavController().navigate(R.id.action_mainFragment_to_configurationFragment)
         }
         
+        binding.buttonPrivacyPolicy.setOnClickListener {
+            findNavController().navigate(R.id.action_mainFragment_to_privacyPolicyFragment)
+        }
+        
+        binding.buttonTermsOfService.setOnClickListener {
+            findNavController().navigate(R.id.action_mainFragment_to_termsOfServiceFragment)
+        }
+        
         binding.buttonViewAchievements.setOnClickListener {
             findNavController().navigate(R.id.action_mainFragment_to_achievementsFragment)
         }
