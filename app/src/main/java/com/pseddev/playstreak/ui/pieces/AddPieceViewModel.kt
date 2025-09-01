@@ -9,7 +9,9 @@ import com.pseddev.playstreak.data.repository.PianoRepository
 import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.TextNormalizer
 import com.pseddev.playstreak.utils.AchievementManager
+import com.pseddev.playstreak.utils.AchievementCelebrationManager
 import com.pseddev.playstreak.data.entities.AchievementType
+import com.pseddev.playstreak.utils.AchievementDefinitions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 
@@ -28,11 +30,15 @@ class AddPieceViewModel(
     private val proUserManager = ProUserManager.getInstance(context)
     private val analyticsManager = AnalyticsManager(context)
     private val achievementManager = AchievementManager(context, repository)
+    private val achievementCelebrationManager = AchievementCelebrationManager(context)
     private val _saveResult = MutableLiveData<AddPieceResult>()
     val saveResult: LiveData<AddPieceResult> = _saveResult
     
     private val _canAddFavorites = MutableLiveData<Boolean>()
     val canAddFavorites: LiveData<Boolean> = _canAddFavorites
+    
+    private val _showCelebration = MutableLiveData<AchievementType?>()
+    val showCelebration: LiveData<AchievementType?> = _showCelebration
     
     init {
         checkFavoritesLimit()
@@ -96,6 +102,9 @@ class AddPieceViewModel(
                 
                 if (!achievementManager.isAchievementUnlocked(achievementType)) {
                     achievementManager.unlockAchievement(achievementType)
+                    
+                    // Trigger celebration for any achievement unlock
+                    _showCelebration.value = achievementType
                 }
                 
                 // Track analytics for piece addition
@@ -112,6 +121,20 @@ class AddPieceViewModel(
                 _saveResult.value = AddPieceResult.Error("Failed to save piece: ${e.message}")
             }
         }
+    }
+    
+    /**
+     * Get the celebration manager for showing achievement celebrations
+     */
+    fun getCelebrationManager(): AchievementCelebrationManager {
+        return achievementCelebrationManager
+    }
+    
+    /**
+     * Reset celebration event after it's been handled
+     */
+    fun onCelebrationHandled() {
+        _showCelebration.value = null
     }
 }
 

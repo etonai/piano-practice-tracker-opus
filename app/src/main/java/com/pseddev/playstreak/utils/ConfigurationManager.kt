@@ -31,6 +31,24 @@ class ConfigurationManager private constructor(context: Context) {
     }
     
     /**
+     * Check if achievement celebrations are enabled
+     * @return true if celebrations are enabled (default), false if disabled
+     */
+    fun isAchievementCelebrationEnabled(): Boolean {
+        return sharedPreferences.getBoolean(KEY_ACHIEVEMENT_CELEBRATIONS, true)
+    }
+    
+    /**
+     * Set whether achievement celebrations are enabled
+     * @param enabled true to show celebrations (default), false to disable
+     */
+    fun setAchievementCelebrationEnabled(enabled: Boolean) {
+        sharedPreferences.edit()
+            .putBoolean(KEY_ACHIEVEMENT_CELEBRATIONS, enabled)
+            .apply()
+    }
+    
+    /**
      * Get the lifetime activity count
      * @return total activities ever created across app lifetime
      */
@@ -83,6 +101,7 @@ class ConfigurationManager private constructor(context: Context) {
     companion object {
         private const val PREFS_NAME = "playstreak_configuration"
         private const val KEY_ALLOW_PRUNING = "allow_data_pruning"
+        private const val KEY_ACHIEVEMENT_CELEBRATIONS = "achievement_celebrations_enabled"
         private const val KEY_LIFETIME_ACTIVITIES = "lifetime_activities_count"
         private const val KEY_COUNTER_INITIALIZED = "lifetime_counter_initialized"
         

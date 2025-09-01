@@ -130,6 +130,18 @@ class SummaryFragment : Fragment() {
                 viewModel.clearErrorMessage()
             }
         }
+        
+        // Observe celebration events
+        viewModel.showCelebration.observe(viewLifecycleOwner) { achievementType ->
+            if (achievementType != null) {
+                val achievement = com.pseddev.playstreak.utils.AchievementDefinitions.getAllAchievementDefinitions()
+                    .find { it.type == achievementType }
+                if (achievement != null) {
+                    viewModel.getCelebrationManager().showCelebration(binding.root, achievement)
+                }
+                viewModel.onCelebrationHandled()
+            }
+        }
     }
     
     private fun setupSummary() {

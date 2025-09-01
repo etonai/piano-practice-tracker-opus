@@ -18,7 +18,9 @@ import com.pseddev.playstreak.ui.progress.EditActivityStorage
 import com.pseddev.playstreak.utils.ProUserManager
 import com.pseddev.playstreak.utils.TextNormalizer
 import com.pseddev.playstreak.utils.AchievementManager
+import com.pseddev.playstreak.utils.AchievementCelebrationManager
 import com.pseddev.playstreak.data.entities.AchievementType
+import com.pseddev.playstreak.utils.AchievementDefinitions
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -32,6 +34,7 @@ class AddActivityViewModel(
     private val crashlyticsManager = CrashlyticsManager(context)
     private val proUserManager = ProUserManager.getInstance(context)
     private val achievementManager = AchievementManager(context, repository)
+    private val achievementCelebrationManager = AchievementCelebrationManager(context)
     
     private val _navigateToMain = MutableLiveData<Boolean>()
     val navigateToMain: LiveData<Boolean> = _navigateToMain
@@ -44,6 +47,9 @@ class AddActivityViewModel(
     
     private val _editActivity = MutableLiveData<Activity?>()
     val editActivity: LiveData<Activity?> = _editActivity
+    
+    private val _showCelebration = MutableLiveData<AchievementType?>()
+    val showCelebration: LiveData<AchievementType?> = _showCelebration
     
     fun getPiecesAndTechniques(activityType: ActivityType): LiveData<List<PieceOrTechnique>> {
         return if (activityType == ActivityType.PERFORMANCE) {
@@ -92,6 +98,9 @@ class AddActivityViewModel(
                 
                 if (!achievementManager.isAchievementUnlocked(achievementType)) {
                     achievementManager.unlockAchievement(achievementType)
+                    
+                    // Trigger celebration for any achievement unlock
+                    _showCelebration.value = achievementType
                 }
                 
                 // Track analytics for piece addition during activity creation
@@ -239,11 +248,13 @@ class AddActivityViewModel(
             ActivityType.PRACTICE -> {
                 if (!achievementManager.isAchievementUnlocked(AchievementType.FIRST_PRACTICE)) {
                     achievementManager.unlockAchievement(AchievementType.FIRST_PRACTICE)
+                    _showCelebration.value = AchievementType.FIRST_PRACTICE
                 }
             }
             ActivityType.PERFORMANCE -> {
                 if (!achievementManager.isAchievementUnlocked(AchievementType.FIRST_PERFORMANCE)) {
                     achievementManager.unlockAchievement(AchievementType.FIRST_PERFORMANCE)
+                    _showCelebration.value = AchievementType.FIRST_PERFORMANCE
                 }
                 
                 // Check for specific performance type achievements
@@ -251,11 +262,13 @@ class AddActivityViewModel(
                     "online" -> {
                         if (!achievementManager.isAchievementUnlocked(AchievementType.FIRST_ONLINE_PERFORMANCE)) {
                             achievementManager.unlockAchievement(AchievementType.FIRST_ONLINE_PERFORMANCE)
+                            _showCelebration.value = AchievementType.FIRST_ONLINE_PERFORMANCE
                         }
                     }
                     "live" -> {
                         if (!achievementManager.isAchievementUnlocked(AchievementType.FIRST_LIVE_PERFORMANCE)) {
                             achievementManager.unlockAchievement(AchievementType.FIRST_LIVE_PERFORMANCE)
+                            _showCelebration.value = AchievementType.FIRST_LIVE_PERFORMANCE
                         }
                     }
                 }
@@ -283,12 +296,27 @@ class AddActivityViewModel(
         achievementType?.let { type ->
             if (!achievementManager.isAchievementUnlocked(type)) {
                 achievementManager.unlockAchievement(type)
+                _showCelebration.value = type
             }
         }
     }
     
     fun clearErrorMessage() {
         _errorMessage.value = null
+    }
+    
+    /**
+     * Get the celebration manager for showing achievement celebrations
+     */
+    fun getCelebrationManager(): AchievementCelebrationManager {
+        return achievementCelebrationManager
+    }
+    
+    /**
+     * Reset celebration event after it's been handled
+     */
+    fun onCelebrationHandled() {
+        _showCelebration.value = null
     }
 }
 

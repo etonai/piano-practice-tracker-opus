@@ -41,6 +41,7 @@ class ConfigurationFragment : Fragment() {
         setupObservers()
         setupClickListeners()
         setupPruningToggle()
+        setupAchievementCelebrationsToggle()
     }
     
     private fun setupObservers() {
@@ -67,6 +68,16 @@ class ConfigurationFragment : Fragment() {
         // Set up toggle listener
         binding.switchAllowPruning.setOnCheckedChangeListener { _, isChecked ->
             configurationManager.setPruningEnabled(isChecked)
+        }
+    }
+    
+    private fun setupAchievementCelebrationsToggle() {
+        // Set initial state from ConfigurationManager
+        binding.switchAchievementCelebrations.isChecked = configurationManager.isAchievementCelebrationEnabled()
+        
+        // Set up toggle listener
+        binding.switchAchievementCelebrations.setOnCheckedChangeListener { _, isChecked ->
+            configurationManager.setAchievementCelebrationEnabled(isChecked)
         }
     }
     

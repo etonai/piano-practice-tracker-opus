@@ -86,6 +86,17 @@ class AddPieceFragment : Fragment() {
         viewModel.canAddFavorites.observe(viewLifecycleOwner) { canAdd ->
             binding.favoriteSwitch.visibility = if (canAdd) View.VISIBLE else View.GONE
         }
+        
+        viewModel.showCelebration.observe(viewLifecycleOwner) { achievementType ->
+            if (achievementType != null) {
+                val achievement = com.pseddev.playstreak.utils.AchievementDefinitions.getAllAchievementDefinitions()
+                    .find { it.type == achievementType }
+                if (achievement != null) {
+                    viewModel.getCelebrationManager().showCelebration(binding.root, achievement)
+                }
+                viewModel.onCelebrationHandled()
+            }
+        }
     }
     
     private fun showPieceLimitDialog(currentCount: Int, limit: Int, isProUser: Boolean) {
