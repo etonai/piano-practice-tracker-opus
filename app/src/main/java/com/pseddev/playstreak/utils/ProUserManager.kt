@@ -101,13 +101,13 @@ class ProUserManager private constructor(context: Context) {
         private const val KEY_IS_PRO_USER = "is_pro_user"
         const val FREE_USER_FAVORITE_LIMIT = 4
         // Update activity and piece limits
-        private const val FREE_USER_ACTIVITY_LIMIT = 3000
+        private const val FREE_USER_ACTIVITY_LIMIT = 1825
         private const val PRO_USER_ACTIVITY_LIMIT = 4000
         private const val FREE_USER_PIECE_LIMIT = 500
         private const val PRO_USER_PIECE_LIMIT = 550
         
         // Practice Suggestions Limits
-        const val FREE_USER_PRACTICE_FAVORITE_SUGGESTIONS = 1
+        const val FREE_USER_PRACTICE_FAVORITE_SUGGESTIONS = 2
         const val PRO_USER_PRACTICE_FAVORITE_SUGGESTIONS = 4
         const val FREE_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS = 2
         const val PRO_USER_PRACTICE_NON_FAVORITE_SUGGESTIONS = 4

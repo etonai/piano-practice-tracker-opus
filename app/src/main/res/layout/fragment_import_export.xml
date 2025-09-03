@@ -52,6 +52,7 @@
 
     <Button
         android:id="@+id/exportToCsvButton"
+        style="@style/RoundedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -63,6 +64,7 @@
 
     <Button
         android:id="@+id/importFromCsvButton"
+        style="@style/RoundedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"

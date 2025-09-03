@@ -53,7 +53,7 @@
         android:text="Import/Export Data"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonManageFavorites" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonViewAchievements" />
 
     <Button
         android:id="@+id/buttonPruneData"
@@ -65,7 +65,7 @@
         android:contentDescription="Navigate to data pruning options and settings"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonImportExport" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonConfiguration" />
 
     <Button
         android:id="@+id/buttonConfiguration"
@@ -76,7 +76,7 @@
         android:text="Configuration"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonPruneData" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonImportExport" />
 
     <Button
         android:id="@+id/buttonPrivacyPolicy"
@@ -87,7 +87,7 @@
         android:text="Privacy Policy"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonConfiguration" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonPruneData" />
 
     <Button
         android:id="@+id/buttonTermsOfService"
@@ -109,7 +109,7 @@
         android:text="View Achievements"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonTermsOfService" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonManageFavorites" />
 
     <Button
         android:id="@+id/buttonTogglePro"
@@ -121,7 +121,7 @@
         android:backgroundTint="?attr/colorSecondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonViewAchievements" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonTermsOfService" />
 
     <Button
         android:id="@+id/buttonTestCrash"
